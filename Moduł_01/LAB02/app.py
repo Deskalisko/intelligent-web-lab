@@ -1,8 +1,11 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from recommender import recommend
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=".")
 
+@app.route("/")
+def index():
+    return send_from_directory(".", "index.html")
 @app.route("/api/recommend")
 def api_recommend():
     title = request.args.get("title", "").strip()

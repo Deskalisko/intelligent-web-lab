@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Movie Recommender</title>
+</head>
+<body>
+    <input type="text" id="title" placeholder="Tytuł filmu">
+    <input type="text" id="genre" placeholder="Gatunek (opcjonalnie)">
+    <input type="number" id="top_n" value="5" min="1" max="10">
+    <button onclick="getRecommendations()">Szukaj</button>
+
+    <div id="results"></div>
+
+    <script>
+        async function getRecommendations() {
+            const title = document.getElementById('title').value;
+            const genre = document.getElementById('genre').value;
+            const topN = document.getElementById('top_n').value;
+            const resultsDiv = document.getElementById('results');
+
+            let url = `/api/recommend?title=${encodeURIComponent(title)}&top_n=${topN}`;
+            if (genre) {
+                url += `&genre=${encodeURIComponent(genre)}`;
+            }
+
+            const res = await fetch(url);
+            const data = await res.json();
+
+            if (!res.ok) {
+                if (data.suggestions && data.suggestions.length > 0) {
+                    resultsDiv.innerHTML = `<p>${data.error}. Czy chodziło Ci o: ${data.suggestions.join(', ')}?</p>`;
+                } else {
+                    resultsDiv.innerHTML = `<p>Błąd: ${data.error}</p>`;
+                }
+                return;
+            }
+
+            let html = `<h3>Wyniki dla: ${data.title}</h3><ul>`;
+            data.recommendations.forEach(item => {
+                html += `<li><strong>${item.title}</strong> (${item.genres}) - Ocena: ${item.rating}, Podobieństwo: ${item.score}</li>`;
+            });
+            html += '</ul>';
+            resultsDiv.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
