@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
 #request - do odczytu danych z zewnątrz
+import math #math do maxprice'a
 
 app = Flask(__name__)
 
@@ -22,6 +23,21 @@ def health():
 
 @app.route("/api/products")
 def products():
+    if "max_price" in request.args:
+        max_price = request.args.get("max_price", type=float)
+
+        if (max_price is None or
+            max_price < 0 or
+            math.isnan(max_price) or #nan not a number
+            math.isinf(max_price)): #infinity
+            return jsonify({"error": "invalid max_price"}), 400
+
+        filtracja = []
+        for produkt in PRODUCTS:
+            if produkt["cena"] <= max_price:
+                filtracja.append(produkt)
+        return jsonify(filtracja)
+
     return jsonify(PRODUCTS)
 
 @app.route("/api/products/<int:id>")
