@@ -1,11 +1,11 @@
 from unittest import result
-
 import pandas as pd
 from pyexpat import features
 from sklearn.feature_extraction.text import TfidfVectorizer #słówka wypełniacze
 from sklearn.metrics.pairwise import cosine_similarity # macierz prawdopodobienstwa
 from scipy.sparse import hstack
 from sklearn.preprocessing import MultiLabelBinarizer
+from difflib import get_close_matches
 
 # TF (Term Frequency): Im częściej słowo występuje w opisie jednego filmu, tym jest ważniejsze dla tego filmu.
 # IDF (Inverse Document Frequency): Im rzadziej słowo występuje w całej bazie innych filmów, tym lepszym jest "wyróżnikiem".
@@ -36,8 +36,11 @@ sim_matrix = cosine_similarity(features_matrix) #macierze podobiestwa na podstaw
 
 def recommend(title, top_n=5, genre=None):#funkcja zwraca 5 najbardziej podobnych filmow do tytułowego
     match = df[df["title"].str.lower() == title.lower()] #szukanie filmu (nie zależnie od wielkości liter)
-    if match.empty:
-        return None
+
+    #literowki #from difflib import get_close_matches
+    if match.empty: # jesli nei ma doklanie takiego tutulu to szukamy podobnych
+        suggestions = get_close_matches(title, df["title"], n=3, cutoff=0.5)
+        return {"suggestions": suggestions} #sugestywne tytuly jesli znajdzie
 
     idx = match.index[0] #id znalezionego matcha
 
@@ -72,4 +75,4 @@ def recommend(title, top_n=5, genre=None):#funkcja zwraca 5 najbardziej podobnyc
         if len(results) == top_n:
             break
 
-    return results
+    return {"recommendations":results}

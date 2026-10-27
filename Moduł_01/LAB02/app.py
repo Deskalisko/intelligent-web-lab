@@ -13,9 +13,21 @@ def api_recommend():
         return jsonify({"error": "top_n musi byc z zakresu 1-10"}), 400
     genre = request.args.get("genre", "").strip() or None
 
-    recs = recommend(title, top_n=n, genre=genre)
-    if recs is None:
-        return jsonify({"error": "nie znam takiego filmu"}), 404
+    data = recommend(title, top_n=n, genre=genre)
+    if "suggestions" in data:
+        return jsonify({
+            "error": "nie ma takiego filmu",
+            "suggestions": data["suggestions"]
+        }), 404
+
+    recs = data["recommendations"]
+    return jsonify({
+        "title": title,
+        "genre": genre,
+        "count": len(recs),
+        "recommendations": recs
+    })
+
     return jsonify({"title": title,"genre_filter": genre, "count": len(recs), "recommendations": recs})
 
 if __name__ == "__main__":
@@ -30,3 +42,17 @@ if __name__ == "__main__":
 
 #nie pasujace
 # http://127.0.0.1:5000/api/recommend?title=Inception&top_n=3&genre=Comedy
+
+
+#testy zadanie a
+# curl.exe -i "http://127.0.0.1:5000/api/recommend?title=Inception&top_n=1"
+# curl.exe -i "http://127.0.0.1:5000/api/recommend?title=Inception&top_n=10"
+# curl.exe -i "http://127.0.0.1:5000/api/recommend?title=Inception&top_n=11"
+# curl.exe -i "http://127.0.0.1:5000/api/recommend?title=Inception&top_n=0"
+# curl.exe -i "http://127.0.0.1:5000/api/recommend?title=Inception&top_n=abc"
+
+#testy zadanie b
+# test literówki (404 NOT FOUNDT oraz sugestia Inception)
+#curl.exe -i "http://127.0.0.1:5000/api/recommend?title=Incpetion"
+# inna literówka
+# curl.exe -i "http://127.0.0.1:5000/api/recommend?title=Interstel"
