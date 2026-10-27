@@ -1,4 +1,5 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
+#request - do odczytu danych z zewnątrz
 
 app = Flask(__name__)
 
@@ -29,6 +30,30 @@ def pobierz_produkt(id):
         if produkt["id"] == id:
             return jsonify(produkt)
     return jsonify({"error": "not found"}), 404 #jak nie będzie, zwróci że nie znaleziono
+
+#nowe produkty
+@app.route("/api/products", methods=["POST"])
+def dodaj_produkt():
+    dane = request.get_json()
+
+    if PRODUCTS:
+        nowe_id = len(PRODUCTS) + 1
+    else:
+        nowe_id = 1
+
+    nowy_produkt = {
+        "id": nowe_id,
+        "nazwa": dane.get("nazwa"),
+        "kategoria": dane.get("kategoria"),
+        "cena": dane.get("cena"),
+        "opis": dane.get("opis")
+    }
+
+    PRODUCTS.append(nowy_produkt)
+    return jsonify(nowy_produkt), 201
+
+#aby dodać coś do testu
+#Invoke-RestMethod -Uri "http://127.0.0.1:5000/api/products" -Method Post -ContentType "application/json" -Body '{"nazwa": "Podkładka pod mysz", "kategoria": "akcesoria", "cena": 49.99, "opis": "Rozmiar XL"}'
 
 if __name__ == "__main__":
     app.run(debug=True)
