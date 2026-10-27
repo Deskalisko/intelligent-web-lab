@@ -11,13 +11,22 @@ def api_recommend():
     n = request.args.get("top_n", type=int) if "top_n" in request.args else 5
     if n is None or not 1 <= n <= 10:
         return jsonify({"error": "top_n musi byc z zakresu 1-10"}), 400
-    recs = recommend(title, top_n=n)
+    genre = request.args.get("genre", "").strip() or None
+
+    recs = recommend(title, top_n=n, genre=genre)
     if recs is None:
         return jsonify({"error": "nie znam takiego filmu"}), 404
-    return jsonify({"title": title, "count": len(recs), "recommendations": recs})
+    return jsonify({"title": title,"genre_filter": genre, "count": len(recs), "recommendations": recs})
 
 if __name__ == "__main__":
     app.run(debug=True)
 
 #testy
 # curl.exe "http://127.0.0.1:5000/api/recommend?title=Inception&top_n=2"
+
+#pasujace
+# http://127.0.0.1:5000/api/recommend?title=Inception&top_n=3&genre=Drama
+#http://127.0.0.1:5000/api/recommend?title=Inception&top_n=2&genre=Sci-Fi
+
+#nie pasujace
+# http://127.0.0.1:5000/api/recommend?title=Inception&top_n=3&genre=Comedy
