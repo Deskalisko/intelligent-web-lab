@@ -3,6 +3,10 @@ from recommender import matrix, recommend
 
 app = Flask(__name__)
 
+@app.route("/api/users")
+def api_users():
+    users_list = sorted(matrix.index.tolist())
+    return jsonify({"count": len(users_list), "users": users_list})
 
 @app.route("/api/recommend")
 def api_recommend():
