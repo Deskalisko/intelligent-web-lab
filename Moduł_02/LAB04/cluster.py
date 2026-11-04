@@ -1,9 +1,9 @@
 """Lab 4: polskie artykuły -> TF-IDF -> K-Means. Uruchom: python cluster.py."""
 import csv
 from pathlib import Path
-
 from sklearn.cluster import KMeans
 from sklearn.feature_extraction.text import TfidfVectorizer
+import matplotlib.pyplot as plt # do wykresow
 
 DATA = Path(__file__).with_name("articles.csv")
 STOP = ["i", "w", "na", "do", "z", "o", "po", "dla", "oraz", "nad", "przed", "że", "się", "jest", "ma", "są"]
@@ -50,3 +50,44 @@ if __name__ == "__main__":
     for group in clusters(articles, vectorizer, model):
         print(group["cluster_id"], group["count"], ", ".join(group["keywords"][:4]))
     print("Elbow:", elbow(matrix))
+
+    # wykresy
+
+    # test dla różnych wartości k
+    print("\nTEST RÓŻNYCH k\n")
+
+    for k in range(2, 9):
+        articles, vectorizer, matrix, model = fit_articles(
+            k=k,
+            max_features=300,
+            min_df=2
+        )
+
+        print(f"\n===== k={k} =====")
+
+        for group in clusters(articles, vectorizer, model):
+            print(
+                group["cluster_id"],
+                group["count"],
+                ", ".join(group["keywords"][:4])
+            )
+
+    # wykres łokcia
+    articles, vectorizer, matrix, model = fit_articles(
+        k=6,
+        max_features=300,
+        min_df=2
+    )
+
+    elbow_data = elbow(matrix)
+
+    k_values = [item["k"] for item in elbow_data]
+    inertia_values = [item["inertia"] for item in elbow_data]
+
+    plt.figure(figsize=(8, 5))
+    plt.plot(k_values, inertia_values, marker="o")
+    plt.xlabel("Liczba klastrów (k)")
+    plt.ylabel("Inercja")
+    plt.title("Wykres 'łokcia'")
+    plt.grid(True)
+    plt.show()
