@@ -187,3 +187,114 @@ Serwer poprawnie odrzuca puste dane wejściowe i zwraca kod błędu 400.
 # Podsumowanie dotychczasowych obserwacji
 
 Najwyższą wartość współczynnika silhouette uzyskał DBSCAN. Algorytm ten najlepiej rozdzielał grupy artykułów, ale jednocześnie potrafił oznaczać część tekstów jako szum. K-Means i Agglomerative przypisywały każdy artykuł do jakiegoś klastra, jednak uzyskiwały gorsze wyniki silhouette.
+
+<br>
+
+# Zadanie A - Porównanie wartości `EPS` przy `MIN_SAMPLES = 3`
+
+W celu sprawdzenia wpływu parametru `EPS` na działanie algorytmu DBSCAN wykonaliśmy trzy pomiary dla wartości:
+
+```text
+EPS = 0.70
+EPS = 0.74
+EPS = 0.79
+```
+
+przy stałej wartości:
+
+```text
+MIN_SAMPLES = 3
+```
+
+## Wyniki
+
+| EPS  | Liczba grup | Liczba artykułów oznaczonych jako szum | Ocenione artykuły | Silhouette |
+| ---- | ----------- | -------------------------------------- | ----------------- | ---------- |
+| 0.70 | 7           | 8                                      | 44                | 0.241      |
+| 0.74 | 7           | 4                                      | 48                | 0.220      |
+| 0.79 | 4           | 2                                      | 50                | 0.140      |
+
+---
+
+## Artykuły oznaczone jako szum
+
+### EPS = 0.70
+
+```text
+Koncert orkiestry w teatrze
+Muzyczny debiut zespołu
+Las wraca po pożarze
+Retencja wody w miastach
+Odpady trafiają do recyklingu
+Temperatura jezior rośnie
+Nowa odmiana pszenicy odporna na suszę
+Badania nad odpornością kukurydzy na upały
+```
+
+Przy najmniejszym promieniu algorytm miał największe problemy z odnalezieniem odpowiedniej liczby sąsiadów, dlatego aż 8 artykułów zostało oznaczonych jako szum.
+
+---
+
+### EPS = 0.74
+
+```text
+Retencja wody w miastach
+Temperatura jezior rośnie
+Nowa odmiana pszenicy odporna na suszę
+Badania nad odpornością kukurydzy na upały
+```
+
+Po zwiększeniu promienia liczba artykułów oznaczonych jako szum zmniejszyła się z 8 do 4. Część artykułów uzyskała wystarczającą liczbę sąsiadów, aby zostać przypisana do istniejących grup.
+
+---
+
+### EPS = 0.79
+
+```text
+Retencja wody w miastach
+Temperatura jezior rośnie
+```
+
+Przy największym promieniu tylko 2 artykuły pozostały szumem. Jednocześnie liczba grup spadła do 4, ponieważ część wcześniej oddzielnych klastrów została połączona.
+
+---
+
+<br>
+
+# Zadanie B - Wybór metody dla redakcji
+
+### Porównanie metod
+
+| Algorytm      | Grupy | Szum | Silhouette cosine | Ocenione artykuły |
+| ------------- | ----- | ---- | ----------------- | ----------------- |
+| K-Means       | 5     | 0    | 0.156             | 52                |
+| DBSCAN        | 7     | 4    | 0.220             | 48                |
+| Agglomerative | 5     | 0    | 0.165             | 52                |
+
+---
+
+### Wniosek
+
+Wybraliśmy **DBSCAN**.
+
+Osiągnął najwyższą wartość współczynnika silhouette (`0.220`), co oznacza lepsze rozdzielenie grup niż w przypadku K-Means (`0.156`) oraz Agglomerative (`0.165`).
+
+Dodatkowo DBSCAN potrafi wykrywać artykuły, które nie pasują do żadnej grupy i oznaczać je jako szum. Przykładem jest artykuł:
+
+```text
+Temperatura jezior rośnie
+```
+
+Artykuł ten został oznaczony jako szum (`-1`), ponieważ nie miał wystarczającej liczby podobnych sąsiadów. Dzięki temu redakcja może łatwo zauważyć nietypowe lub trudne do zaklasyfikowania teksty zamiast przypisywać je na siłę do jednej z istniejących kategorii.
+
+Współczynnik silhouette został obliczony dla:
+
+```text
+48 artykułów
+```
+
+ponieważ 4 artykuły zostały oznaczone przez DBSCAN jako szum i nie zostały uwzględnione w obliczeniach.
+
+---
+
+<br>
