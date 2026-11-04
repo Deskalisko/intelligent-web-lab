@@ -120,3 +120,43 @@ ale też mniej zgodne z rzeczywistymi kategoriami artykułów.
 
 
 ================================================================================
+ZADANIE 3
+
+Wygenerowaliśmy wykres w pythonie - plik: cluster.py
+Wybraliśmy k = 6, ale sam wykres nie daje jednoznacznej odpowiedzi. 
+Inercja zmniejsza się stopniowo dla każdej kolejnej wartości k 
+i nie widać jednego wyraźnego miejsca załamania.
+
+Dlatego oprócz wykresu trzeba przeanalizować również zawartość klastrów-co opisaliśmy poniżej (co znajduje się w danych klastrach).
+Najbardziej sensowny i czytelny podział otrzymaliśmy dla k = 6, ponieważ każda główna tematyka utworzyła osobny klaster.
+
+
+Dla k = 5 - technologia i rolnictwo zostały połączone w jeden duży klaster liczący 18 artykułów
+
+52 artykułów, 159 cech
+0 9 firmy, koszty, rynek, rynku
+1 18 urządzenia, technologii, rozwój, rolnicy
+2 9 trening, wynik, zawodników, zawodnicy
+3 9 przyrody, zmian, klimat, środowiska
+4 7 artyści, publicznością, nowych, szerokiej
+
+Dla k = 6 powstały osobne grupy dla technologii, środowiska, sportu, biznesu, rolnictwa i kultury.
+
+52 artykułów, 159 cech
+0 11 urządzenia, technologii, technologia, użytkowników
+1 8 zmian, klimat, przyrodnicy, przyrody
+2 9 trening, wynik, zawodników, zawodnicy
+3 9 firmy, koszty, rynek, rynku
+4 8 rolnicy, badacze, stan, upraw
+5 7 artystów, publiczność, podczas, szerokiej
+
+Dla k = 7 klaster technologiczny został rozdzielony na dwie mniejsze grupy.
+
+52 artykułów, 159 cech
+0 7 wynik, trening, zawodników, trener
+1 9 firmy, koszty, rynek, rynku
+2 8 zmian, klimatu, przyrodnicy, ochrona
+3 6 technologii, urządzenia, rozwój, aplikacje
+4 9 artyści, artystów, publicznością, publiczność
+5 5 użytkowników, technologia, pracę, trafia
+6 8 środowiska, analizują, stan, przyrody

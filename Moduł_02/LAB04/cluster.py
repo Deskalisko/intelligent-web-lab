@@ -51,29 +51,13 @@ if __name__ == "__main__":
         print(group["cluster_id"], group["count"], ", ".join(group["keywords"][:4]))
     print("Elbow:", elbow(matrix))
 
-    #wykresy
-    for k in range(2, 9):
-        articles, vectorizer, matrix, model = fit_articles(
-            k=k,
-            max_features=300,
-            min_df=2
-        )
-        print(f"\n===== k={k} =====")
-
-        for group in clusters(articles, vectorizer, model):
-            print(
-                group["cluster_id"],
-                group["count"],
-                ", ".join(group["keywords"][:4])
-            )
-        elbow_data = elbow(matrix)#wykres dla aktualnego k
-        k_values = [item["k"] for item in elbow_data]
-        inertia_values = [item["inertia"] for item in elbow_data]
-
-        plt.figure(figsize=(8, 5))
-        plt.plot(k_values, inertia_values, marker="o")
-        plt.xlabel("Liczba klastrów (k)")
-        plt.ylabel("Inercja")
-        plt.title(f"Wykres 'łokcia' (k={k})")
-        plt.grid(True)
-        plt.show()
+    #wykres
+    elbow_data = elbow(matrix)
+    k_values = [item["k"] for item in elbow_data]
+    inertia_values = [item["inertia"] for item in elbow_data]
+    plt.figure(figsize=(8, 5))
+    plt.plot(k_values, inertia_values, marker="o")
+    plt.xlabel("Liczba klastrów (k)")
+    plt.ylabel("Inercja")
+    plt.grid(True)
+    plt.show()
