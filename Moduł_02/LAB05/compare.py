@@ -9,12 +9,14 @@ from sklearn.metrics.pairwise import cosine_distances
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from LAB04.cluster import fit_articles  # noqa: E402
-
+#artykuly| tf-idf | artykuly na liczby | kmeans wytrenowy
 articles, vectorizer, matrix, kmeans = fit_articles()
-EPS = 0.74
-MIN_SAMPLES = 3
+EPS = 0.74 #parametr dbscan - okresla max odleglosc miedzy punktami, by uznac ich za sasiadow, im wiekszy
+#tym latwiej utworzyc grupe, jest mniej szuku i wieksze klastry
+MIN_SAMPLES = 3 #min liczba punktow potrzebna do utworzenia rdzenia
 dbscan = DBSCAN(eps=EPS, min_samples=MIN_SAMPLES, metric="cosine").fit(matrix)
-agglomerative = AgglomerativeClustering(n_clusters=5, metric="cosine", linkage="average").fit(matrix.toarray())
+agglomerative = AgglomerativeClustering(n_clusters=5, metric="cosine", linkage="average").fit(matrix.toarray())#klasteryzacja hierarchiczna
+#zaczyna od pojedynczych punktow, stopniowo laczy najbardziej podobne grupy i konczy gdy zostanie (5) klastrow
 
 
 def summary(name, labels, elapsed=None):
