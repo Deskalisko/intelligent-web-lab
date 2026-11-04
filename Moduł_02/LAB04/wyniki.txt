@@ -44,3 +44,52 @@ Przy k=5 grupy były bardziej jednorodne i odpowiadały głównym kategoriom art
 
 
 ================================================================================
+Dodaliśmy kilka artykułów do CSV w tym nowy source - rolnictwo
+
+ustawiłem k=6 
+max_features = 100
+
+52 artykułów, 100 cech
+0 9 trening, wynik, zawodników, zawodnicy
+1 9 firmy, koszty, rynek, rynku
+2 10 urządzenia, użytkowników, technologia, technologii
+3 9 artystów, publicznością, artyści, publiczność
+4 11 rolnicy, przyrody, upraw, badacze
+5 4 przyrodnicy, klimat, zmian, środowisko
+
+Klastry:
+0 - sport (9)
+1 - biznes (9)
+2 - technologia (10)
+3 - kultura (9)
+4 - rolnictwo + środowisko (11)
+5 - środowisko (4)
+
+
+NASTĘPNIE ustawiłem
+max_features = 300
+
+52 artykułów, 159 cech
+0 11 urządzenia, technologii, technologia, użytkowników
+1 8 zmian, klimat, przyrodnicy, przyrody
+2 9 trening, wynik, zawodników, zawodnicy
+3 9 firmy, koszty, rynek, rynku
+4 8 rolnicy, badacze, stan, upraw
+5 7 artystów, publiczność, podczas, szerokiej
+
+0 - technologia (11)
+1 - środowisko (8)
+2 - sport (9)
+3 - biznes (9)
+4 - rolnictwo (8)
+5 - kultura (7)
+
+
+Podsumowując
+max_features = 100
+100 cech -> rolnictwo i środowisko częściowo się mieszały
+max_features = 300
+159 cech -> rolnictwo i środowisko utworzyły osobne klastry
+================================================================================
+
+

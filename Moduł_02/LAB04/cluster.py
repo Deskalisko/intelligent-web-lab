@@ -14,7 +14,7 @@ def load_articles():
         return list(csv.DictReader(file))
 
 
-def fit_articles(k=6, max_features=130, min_df=2):
+def fit_articles(k=6, max_features=300, min_df=2):
     articles = load_articles()
     vectorizer = TfidfVectorizer(#tworzenie obiektu TF-IDF
         stop_words=STOP, #Usuwa mało znaczące słowa
