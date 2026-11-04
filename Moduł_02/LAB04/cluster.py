@@ -14,11 +14,11 @@ def load_articles():
         return list(csv.DictReader(file))
 
 
-def fit_articles(k=4, max_features=110, min_df=2):
+def fit_articles(k=6, max_features=130, min_df=2):
     articles = load_articles()
     vectorizer = TfidfVectorizer(#tworzenie obiektu TF-IDF
         stop_words=STOP, #Usuwa mało znaczące słowa
-        max_features=max_features, #wybiera max 100- tak jest wpisane w tym momencie- najważniejszych słów z całego zbioru, czyli z kilku tysięcy różnych słów zostaje 100 najistotniejszych
+        max_features=max_features, #wybiera max n np.100- tak jest wpisane w tym momencie- najważniejszych słów z całego zbioru, czyli z kilku tysięcy różnych słów zostaje 100 najistotniejszych
         min_df=min_df #teraz 2, czyli słowo musi wystąpić przynajmniej w 2 dokumentach
     )
     matrix = vectorizer.fit_transform( #(było to już w poprzednim labie) fit analizuje wszystkie artykuły i buduje słownik słów, natomiast transform zamienia tekst na liczby
