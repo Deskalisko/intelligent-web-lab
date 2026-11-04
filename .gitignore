@@ -1,6 +1,17 @@
+# Wirtualne srodowiska
 venv/
+.venv/
+
+# Cache Pythona
 __pycache__/
+
+# Srodowisko i IDE
 .env
 .idea/
-Moduł_01/LAB03_moj
+
+# Projekty wlasne
+Moduł_01/LAB03_moj/
+
+# Instrukcje laboratoryjne (lokalne)
+INSTRUKCJA_LAB/
 **/INSTRUKCJA_LAB/
