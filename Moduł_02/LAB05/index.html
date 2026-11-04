@@ -1,0 +1,641 @@
+<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Laboratorium 5: DBSCAN, punkty rdzeniowe i szum, porównanie z K-Means i klastrowaniem hierarchicznym."><title>Lab 05 · Grupowanie tekstów · ISI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=optional" rel="stylesheet">
+<style>
+:root{--bg:#0b1010;--panel:#151e1c;--panel2:#1d2926;--lime:#d8ff62;--mint:#79e3bd;--rust:#fe674b;--text:#f4f6e9;--muted:#b0c0b6;--line:#3b4e45;--head:'Archivo Black',sans-serif;--mono:'IBM Plex Mono',monospace;--body:'Manrope',sans-serif}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font:20px/1.7 var(--body)}a{color:var(--lime)}button,textarea,input{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible,textarea:focus-visible,input:focus-visible,canvas:focus-visible{outline:2px solid var(--lime);outline-offset:3px}::selection{background:var(--lime);color:var(--bg)}
+.gridbg{background-image:linear-gradient(rgba(216,255,98,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(216,255,98,.055) 1px,transparent 1px);background-size:36px 36px}
+.bar{position:sticky;top:0;z-index:30;background:rgba(11,16,16,.94);border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}.bar .row{max-width:1240px;margin:auto;min-height:58px;padding:0 22px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{font:600 15px var(--mono);letter-spacing:.1em;text-decoration:none;color:var(--lime)}.bar nav{display:flex;gap:18px}.bar nav a{font:500 15px var(--mono);text-transform:uppercase;text-decoration:none;color:var(--text)}.bar nav a:hover{color:var(--lime)}
+.hero{min-height:560px;border-bottom:1px solid var(--line);position:relative;overflow:hidden}.hero .wrap{padding:84px 22px 72px}.wrap{max-width:1180px;margin:auto}.signal{font:500 15px var(--mono);letter-spacing:.17em;text-transform:uppercase;color:var(--mint)}.hero h1{font:clamp(54px,10vw,135px)/.91 var(--head);text-transform:uppercase;letter-spacing:-.08em;max-width:1010px;margin:27px 0 26px}.hero h1 span{color:var(--lime)}.hero p{max-width:650px;font-size:21px}.hero .status{display:flex;gap:25px;flex-wrap:wrap;margin-top:48px;font:15px var(--mono);text-transform:uppercase}.status span{border:1px solid var(--line);padding:10px 13px;background:var(--bg)}.status b{color:var(--lime)}
+.blink{display:inline-block;width:9px;height:9px;background:var(--lime);border-radius:50%;margin-right:7px;box-shadow:0 0 16px var(--lime);animation:pulse 1.8s infinite}@keyframes pulse{50%{opacity:.35}}
+section{padding:85px 22px;border-bottom:1px solid var(--line)}.tag{font:600 15px var(--mono);letter-spacing:.2em;color:var(--lime);text-transform:uppercase;margin:0 0 15px}.title{font:clamp(34px,5vw,64px)/1.05 var(--head);letter-spacing:-.055em;text-transform:uppercase;margin:0 0 25px;max-width:900px}.lead{font-size:19px;color:var(--muted);max-width:840px;margin:0 0 30px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card{border:1px solid var(--line);background:var(--panel);padding:25px}.card h3{font:20px/1.2 var(--head);margin:0 0 12px;text-transform:uppercase}.card p{margin:0;color:var(--muted)}.card .glyph{font:36px var(--mono);color:var(--lime);display:block;margin-bottom:20px}.card.alert .glyph{color:var(--rust)}
+.demo{background:var(--panel)}.demo-layout{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(290px,.7fr);gap:20px}.scope{background:#0c1714;border:1px solid var(--line);padding:10px}.scope-tag{display:block;text-align:right;margin:0 4px 6px;font:14px var(--mono);letter-spacing:.14em;color:var(--mint)}.scope canvas{display:block;width:100%;height:auto;border-radius:6px}
+.readout{border:1px solid var(--lime);padding:24px;background:var(--bg);align-self:start}.readout h3{font:24px var(--head);text-transform:uppercase;margin:0 0 16px}.readout p{color:var(--muted);margin:12px 0;line-height:1.7}
+.readout-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding-top:12px;margin-top:14px;font:16px var(--mono);color:var(--muted)}.readout-row b{font:30px var(--head);color:var(--lime);line-height:1;display:inline-block}
+.readout input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:26px;margin:4px 0 0;background:transparent;accent-color:var(--lime)}
+.readout input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:#2c3d36}
+.readout input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;margin-top:-7px;border-radius:50%;background:var(--lime);border:2px solid var(--bg);box-shadow:0 0 10px rgba(216,255,98,.5)}
+.readout input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:#2c3d36}
+.readout input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--lime);border:2px solid var(--bg)}
+.readout .pick{font:15px/1.6 var(--mono);color:var(--mint);margin:18px 0 0;padding-top:14px;border-top:1px solid var(--line)}
+.legend{display:flex;flex-wrap:wrap;gap:10px 22px;margin:14px 0 0;padding:0;list-style:none;font:15px var(--mono);color:var(--muted)}.legend li{display:inline-flex;align-items:center;white-space:nowrap}.legend i{display:inline-block;width:13px;height:13px;border-radius:50%;margin-right:8px;flex:0 0 auto}.legend .core{background:var(--lime)}.legend .edge{border:3px solid var(--mint)}.legend .noise-badge::after{content:"×";color:var(--rust);font:bold 20px/13px var(--mono)}
+.work{background:var(--bg)}.step{display:grid;grid-template-columns:75px 1fr;gap:22px;margin:25px 0 40px}.step .no{font:30px var(--head);color:var(--lime)}.step .body{border-top:1px solid var(--line);padding-top:17px}.step h3{font:22px var(--head);text-transform:uppercase;margin:0 0 8px}.step p{color:var(--muted);max-width:850px;margin:0 0 14px}.step details{background:var(--panel);padding:13px 17px;margin-top:15px;border-left:3px solid var(--lime)}.step summary{cursor:pointer;color:var(--lime);font-weight:700}
+.codebar{display:flex;justify-content:space-between;align-items:center;background:#26352f;color:var(--mint);padding:8px 14px;font:15px var(--mono)}.codebar button{background:none;color:var(--lime);border:1px solid var(--line);padding:2px 8px;font:inherit}.code{background:#080d0c;color:#f0f3dc;border:1px solid var(--line);padding:18px;overflow:auto;margin:0;font:16px/1.7 var(--mono);tab-size:4}code{font-family:var(--mono)}.tip{border-left:3px solid var(--rust);padding:12px 16px;background:rgba(254,103,75,.08);margin:15px 0}.tip p{margin:0}
+.compare{background:#17241d}.table-wrap{overflow:auto;border:1px solid var(--line)}table{width:100%;border-collapse:collapse;min-width:650px;font:16px var(--mono)}th,td{text-align:left;border-bottom:1px solid var(--line);padding:15px}th{color:var(--lime);background:#111b17;text-transform:uppercase;font-size:15px}td{background:#1a2a21}.compare .small{font:15px var(--mono);color:var(--muted);margin-top:18px}
+.api-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.field{border:1px solid var(--line);background:var(--panel);padding:22px}.field textarea{width:100%;min-height:120px;background:var(--bg);border:1px solid var(--line);color:var(--text);padding:12px;resize:vertical}.action{border:1px solid var(--lime);background:var(--lime);color:var(--bg);padding:10px 16px;font:600 15px var(--mono);text-transform:uppercase;margin-top:12px}.action:hover{background:var(--mint)}.response{background:#070c0a;border:1px solid var(--line);padding:20px;font:16px/1.6 var(--mono);min-height:160px;white-space:pre-wrap;overflow-wrap:anywhere}
+.links{display:grid;grid-template-columns:1fr 1fr;gap:12px}.links a{border:1px solid var(--line);padding:18px;text-decoration:none;background:var(--panel);display:block}.links a:hover{border-color:var(--lime)}.links b{display:block;color:var(--text);font:17px var(--head);text-transform:uppercase}.links span{display:block;color:var(--muted);font-size:16px;margin-top:6px}
+.checks label{display:block;border-bottom:1px solid var(--line);padding:13px 0;cursor:pointer}.checks input[type=checkbox]{-webkit-appearance:none;appearance:none;position:relative;width:19px;height:19px;margin:0 10px 0 0;vertical-align:-4px;border:2px solid var(--line);border-radius:4px;background:var(--bg);cursor:pointer;transition:background .15s,border-color .15s}.checks input[type=checkbox]:checked{background:var(--lime);border-color:var(--lime)}.checks input[type=checkbox]:checked::after{content:'✓';position:absolute;left:1px;top:-3px;font-size:15px;font-weight:700;color:var(--bg)}
+.meter{height:11px;background:var(--panel2);margin:17px 0 26px}.meter div{height:100%;width:0;background:var(--lime);transition:width .25s}
+.question{border-top:1px solid var(--line);padding:18px 0 2px}.question h3{font:17px var(--head);margin:0 0 12px}.options{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}.options button{background:var(--panel);border:1px solid var(--line);color:var(--text);padding:11px 13px;text-align:left}.options button:hover{border-color:var(--lime)}.options button.good{background:var(--lime);color:var(--bg)}.options button.bad{background:var(--rust);color:var(--bg)}.feedback{color:var(--mint);margin:10px 0 0;font-size:16px;min-height:1.4em}.notes{width:100%;min-height:150px;background:var(--panel);border:1px solid var(--line);color:var(--text);padding:16px;resize:vertical}
+footer{padding:30px 22px;background:var(--lime);color:var(--bg);font:15px var(--mono)}footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px}footer a{color:var(--bg)}
+@media(max-width:800px){.bar nav{display:none}.cards,.demo-layout,.api-grid,.links{grid-template-columns:1fr}.hero h1{font-size:clamp(50px,14vw,84px)}.step{grid-template-columns:1fr;gap:0}section{padding:60px 20px}}
+@media print{.bar,.demo,.codebar button,.action{display:none}.hero{min-height:0}section{padding:18px 0;break-inside:avoid}}
+.role-map{display:block;width:100%;height:132px;background-color:var(--bg);border:1px solid var(--line);border-radius:8px;margin-bottom:8px}
+.role-map .radius{stroke:currentColor;fill:currentColor;fill-opacity:.08;stroke-dasharray:5 4}
+.role-map text{font:600 12px var(--mono);fill:var(--text)}
+.role-count{display:block;font:600 13px var(--mono);color:var(--muted);margin-bottom:16px}
+</style><style data-ill="1">
+/* ---------- rytm pionowy i typografia ---------- */
+.wrap > * + *{margin-top:0}
+.tag + .title{margin-top:14px}
+.title + .lead{margin-top:18px}
+.lead + *{margin-top:26px}
+.cards,.demo-layout,.api-grid,.table-wrap,.step-fig{margin-top:28px}
+.step + .step{margin-top:26px}
+.question + .question{margin-top:16px}
+strong{color:var(--lime);font-weight:700}
+em{color:var(--mint);font-style:italic}
+code{font-family:var(--mono);font-size:.9em;background:rgba(216,255,98,.13);color:var(--lime);padding:.1em .4em;border-radius:5px}
+.lead{font-size:1.08rem;line-height:1.75}
+p + p{margin-top:14px}
+.card p,.readout p{line-height:1.7}
+h3.sub-title{font:600 17px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--lime);margin:0 0 14px}
+
+/* ---------- blok wyjaśnienia ---------- */
+.explain{border:1px solid rgba(216,255,98,.28);border-left:3px solid var(--lime);border-radius:0 14px 14px 0;background:linear-gradient(160deg,rgba(216,255,98,.06),rgba(121,227,189,.03));padding:24px 26px;margin-top:30px;font-size:18.5px;line-height:1.72}
+.explain p + p{margin-top:15px}
+.explain code{background:rgba(216,255,98,.12)}
+.faq{border:1px solid var(--line);border-left:3px solid var(--mint);background:var(--panel);padding:14px 18px;margin-top:22px}
+.faq summary{cursor:pointer;color:var(--mint);font-weight:700}
+.faq p{color:var(--muted);margin:12px 0 0}
+.faq p + p{margin-top:12px}
+
+
+.step .body,.demo-layout>*{min-width:0}.step .body{overflow-wrap:anywhere}.example{max-width:640px;margin:2rem 0;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.example svg{display:block;width:100%;background:#0c1714}.example text{fill:var(--text);font:14px var(--mono)}
+.example figcaption{padding:1rem}.example p{margin:.8rem 0 0}.choices{display:flex;gap:.5rem;flex-wrap:wrap}
+.choices button{border:1px solid var(--line);border-radius:5px;padding:.55rem .8rem;background:var(--bg);color:var(--text);font:inherit;cursor:pointer}
+.choices button[aria-pressed=true]{background:var(--lime);color:var(--bg)}
+#lens{transition:transform .35s ease}.scope svg{display:block;width:100%;height:auto}.scope svg:focus-visible{outline:2px solid var(--lime)}
+@media(prefers-reduced-motion:reduce){#lens{transition:none}}
+@media(max-width:600px){#scope path,#scope circle{vector-effect:non-scaling-stroke;stroke-width:1.5px}.scope-tag{text-align:left;letter-spacing:.04em}.scope{padding:8px}.readout{padding:16px}}
+#radar .experiment{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg)}
+.experiment h3{font:600 20px var(--mono);margin:0 0 12px}.zoom-pane,.controls-pane{padding:clamp(16px,3vw,32px)}
+.zoom-pane{background:#0c1714}.zoom-pane svg{width:100%;max-height:330px;display:block}.zoom-pane p{border-top:1px solid var(--line);padding-top:12px}.controls-pane label{display:block;margin-top:16px}.controls-pane output{color:var(--lime);font-weight:bold;margin-left:.4em}.controls-pane input{display:block;width:100%;accent-color:var(--lime);margin:8px 0;height:26px}.controls-pane button{padding:8px 12px;border:1px solid var(--line);background:var(--panel);color:var(--text);font:inherit;cursor:pointer}.controls-pane button+h3{margin-top:24px}.map-details{margin-top:20px}.map-details summary{cursor:pointer;color:var(--mint);padding:10px 0}.map-details .scope{max-width:760px}
+@media(max-width:720px){#radar .experiment{grid-template-columns:1fr}.zoom-pane svg{max-height:220px}}
+.start-tasks li::marker{color:var(--lime);font-weight:700}.start-tasks li a{color:var(--mint);font-weight:600;text-underline-offset:.2em}.start-note{border-top:1px solid var(--line);padding-top:.65em}
+#zasada .card h3{color:var(--lime)}#zasada .card:nth-child(2) h3{color:var(--mint)}#zasada .alert h3{color:var(--rust)}[id]{scroll-margin-top:70px}
+/* ---------- karta własnej próby ---------- */
+#own-trial .trial-card{border:1px solid rgba(216,255,98,.35);border-radius:14px;background:linear-gradient(160deg,rgba(216,255,98,.07),rgba(121,227,189,.05));padding:30px 32px}
+#own-trial .trial-card h2{font:30px var(--head);text-transform:uppercase;margin:0 0 14px}
+#own-trial .trial-card p{color:var(--muted);margin:0}
+#own-trial .trial-card p + p{margin-top:12px}
+#own-trial .trial-card code{background:rgba(216,255,98,.12)}
+
+@media (prefers-reduced-motion: reduce){
+  .blink{animation:none!important;transition:none!important}
+}
+@media(max-width:1040px){.bar nav a{font-size:14px}}
+</style>
+<link rel="icon" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/responsive.css">
+<link rel="stylesheet" href="../assets/code.css">
+<script src="../assets/highlight.min.js" defer></script>
+<script src="../assets/code.js" defer></script>
+
+</head>
+<body>
+<header class="bar"><div class="row"><a class="brand" href="../index.html">[ ISI / 05 ] &nbsp; GRUPOWANIE TEKSTÓW</a><nav aria-label="Na tej stronie"><a href="#zasada">Zasada</a><a href="#radar">Radar</a><a href="#kod">Kod</a><a href="#porownanie">Raport</a><a href="#sprawdz">Test</a></nav></div></header>
+<div class="hero gridbg"><div class="wrap"><p class="signal"><span class="blink"></span> B.2 / EK_03 + EK_04 / drugi model</p><h1>Jak DBSCAN<br><span>grupuje teksty</span></h1><p>W zbiorze jest 40 artykułów. K-Means przydzieli każdy z nich do jednego z pięciu działów. Czy artykuł o jakości powietrza ma dość podobnych tekstów, żeby utworzyć z nimi grupę? Sprawdzisz to za pomocą DBSCAN.</p>
+<div class="status"><span>40 artykułów</span><span><b>3</b> algorytmy</span><span><b>-1</b> oznacza szum</span></div>
+</div></div>
+<main>
+
+<aside class="course-start" aria-label="Jak pracować z laboratorium">
+<h2>Lab 05: od czego zacząć</h2>
+<p>Porównasz trzy metody grupowania i sprawdzisz, które teksty DBSCAN uzna za szum.</p>
+<div class="first-try" style="--term-accent:#b0ce53"><h3>Co dzieje się z punktem, gdy zwiększasz promień?</h3><p>W DBSCAN punkt jest <dfn>rdzeniem</dfn>, gdy w jego sąsiedztwie znajduje się co najmniej <code>min_samples</code> punktów, łącznie z nim samym. Zasięg sąsiedztwa wyznacza parametr <code>eps</code>.</p><p class="try-question">W kole są badany punkt i jeden sąsiad. Czy to już rdzeń przy progu 3?</p><details><summary>Sprawdź odpowiedź</summary><p>W kole są dwa punkty, więc brakuje jednego do wymaganego minimum. Jeśli koło innego rdzenia obejmuje ten punkt, zostanie punktem brzegowym. W przeciwnym razie będzie szumem. <a href="#radar">Sprawdź na punkcie 28</a>.</p></details></div>
+<div class="start-tasks">
+<h3>Zadania do wykonania</h3>
+<ol>
+<li><a href="#radar">Zbadaj punkt 28.</a> Zapisz, ile punktów mieści się w kole przy promieniu 44, a ile przy 60. Określ rolę punktu w obu przypadkach.</li>
+<li><a href="#kod">Uruchom porównanie.</a> Dla każdej z trzech metod zapisz liczbę grup, liczbę tekstów oznaczonych jako szum i liczbę artykułów uwzględnionych w ocenie.</li>
+<li><a href="#progi">Zmień promień dla artykułów.</a> W pliku <code>compare.py</code> sprawdź kolejno <code>EPS = 0.70</code>, <code>0.74</code> i <code>0.79</code>. Zachowaj <code>MIN_SAMPLES = 3</code>. Po każdej zmianie uruchom skrypt. Zapisz liczbę grup i porównaj listy tytułów wypisane pod wynikami.</li>
+<li><a href="#serwer">Sprawdź API.</a> Przywróć <code>EPS = 0.74</code> i uruchom serwer. Odczytaj porównanie metod i tytuły artykułów oznaczonych jako szum. Wyślij do formularza przykładowy tekst, a potem pusty. Zapisz etykietę dla pierwszej próby i kod HTTP dla drugiej.</li>
+<li><a href="#decyzja">Wybierz metodę dla redakcji.</a> Uzasadnij decyzję jednym tytułem ze zbioru i wynikiem pomiaru.</li>
+</ol>
+<p class="start-note">Do oddania przygotuj <code>compare.py</code>, <code>app.py</code>, tabelę porównawczą i krótką notatkę z decyzją.</p>
+</div>
+<p>Pobierz cały kurs i rozpakuj archiwum. Skrypt korzysta z danych w katalogu sąsiedniego laboratorium. Zacznij od rysunku poniżej, potem sprawdź tę samą regułę na wykresie i uruchom porównanie dla artykułów. Polecenia znajdziesz w sekcji z kodem.</p>
+<div class="files"><a href="../lab4/articles.csv" download>articles.csv</a> <a href="compare.py" download>compare.py</a> <a href="app.py" download>app.py</a> <a href="../kurs.zip" download>Pobierz cały kurs (ZIP)</a> <a href="../requirements.txt" download>Zależności podstawowe</a> <a href="../index.html#laby">Wszystkie laboratoria</a></div>
+</aside>
+
+<section id="zasada"><div class="wrap">
+<p class="tag">01 / zgłoszenie z redakcji</p>
+<h2 class="title">Kiedy punkt należy do grupy?</h2>
+<p class="lead">Wyobraź sobie, że każdy artykuł to punkt. Wokół wybranego punktu zakreśl koło o promieniu <code>eps</code>. Policz punkty w środku i na obwodzie, uwzględniając wybrany punkt. Parametr <code>min_samples</code> określa, ile ich potrzeba, żeby ten punkt był rdzeniem.</p>
+<div class="cards">
+<article class="card"><svg class="role-map gridbg" viewBox="0 0 264 120" role="img" aria-label="Rdzeń. B · 4 punkty w kole. Próg wynosi 3." style="color:var(--mint)">
+<circle class="radius" cx="85" cy="60" r="48"/>
+<g fill="var(--mint)"><circle cx="52" cy="47" r="5"/><circle cx="85" cy="60" r="7"/><circle cx="56" cy="77" r="5"/></g>
+<circle cx="129" cy="60" r="6" stroke="#ffd56e" stroke-width="3" fill="var(--bg)"/>
+<path d="m202 55 10 10m0 -10 -10 10" stroke="var(--rust)" stroke-width="3"/>
+<text x="81" y="45">B</text><text x="125" y="45">D</text><text x="203" y="45">E</text></svg>
+<span class="role-count">B · 4 punkty w kole</span><h3>Rdzeń</h3><p>W kole o promieniu <code>eps</code> ma co najmniej <code>min_samples</code> punktów, licząc siebie. Przy <code>min_samples=3</code> wystarczą dwa inne punkty w sąsiedztwie.</p></article>
+<article class="card"><svg class="role-map gridbg" viewBox="0 0 264 120" role="img" aria-label="Brzeg. D · 2 punkty w kole. Próg wynosi 3." style="color:#ffd56e">
+<circle class="radius" cx="129" cy="60" r="48"/>
+<g fill="var(--mint)"><circle cx="52" cy="47" r="5"/><circle cx="85" cy="60" r="7"/><circle cx="56" cy="77" r="5"/></g>
+<circle cx="129" cy="60" r="6" stroke="#ffd56e" stroke-width="3" fill="var(--bg)"/>
+<path d="m202 55 10 10m0 -10 -10 10" stroke="var(--rust)" stroke-width="3"/>
+<text x="81" y="45">B</text><text x="125" y="45">D</text><text x="203" y="45">E</text></svg>
+<span class="role-count">D · 2 punkty w kole</span><h3>Brzeg</h3><p>Nie jest rdzeniem, ale leży w kole jakiegoś rdzenia. Dostaje etykietę tego rdzenia, choć sam nie rozszerza grupy.</p></article>
+<article class="card alert"><svg class="role-map gridbg" viewBox="0 0 264 120" role="img" aria-label="Szum. E · 1 punkt w kole. Próg wynosi 3." style="color:var(--rust)">
+<circle class="radius" cx="207" cy="60" r="48"/>
+<g fill="var(--mint)"><circle cx="52" cy="47" r="5"/><circle cx="85" cy="60" r="7"/><circle cx="56" cy="77" r="5"/></g>
+<circle cx="129" cy="60" r="6" stroke="#ffd56e" stroke-width="3" fill="var(--bg)"/>
+<path d="m202 55 10 10m0 -10 -10 10" stroke="var(--rust)" stroke-width="3"/>
+<text x="81" y="45">B</text><text x="125" y="45">D</text><text x="203" y="45">E</text></svg>
+<span class="role-count">E · 1 punkt w kole</span><h3>Szum</h3><p>Nie jest rdzeniem i nie leży w kole żadnego rdzenia. DBSCAN daje mu etykietę <code>-1</code>, czyli brak grupy.</p></article>
+</div>
+
+<figure class="example">
+<svg viewBox="0 0 360 150" role="img" aria-label="Pięć punktów A, B, C, D i E. Koło wskazuje sąsiedztwo wybranego punktu.">
+<g id="lens" style="transform:translate(103px,75px)"><circle r="48" fill="#d8ff6215" stroke="#d8ff62" stroke-width="2" stroke-dasharray="5 4"/></g>
+<g fill="#79e3bd"><circle cx="70" cy="62" r="6"/><circle cx="103" cy="75" r="6"/><circle cx="74" cy="92" r="6"/></g>
+<circle cx="147" cy="75" r="6" fill="none" stroke="#79e3bd" stroke-width="3"/><path d="m268 69 12 12m0 -12 -12 12" stroke="#fe674b" stroke-width="3"/>
+<text x="54" y="56">A</text><text x="100" y="60">B</text><text x="63" y="113">C</text><text x="145" y="60">D</text><text x="270" y="60">E</text></svg>
+<figcaption><div class="choices" aria-label="Wybór punktu"><button type="button" data-point="B" aria-pressed="true">B · rdzeń</button><button type="button" data-point="D" aria-pressed="false">D · brzeg</button><button type="button" data-point="E" aria-pressed="false">E · szum</button></div>
+<p id="example-note" aria-live="polite">W kole B mieszczą się A, B, C i D. Próg wynosi trzy punkty. B spełnia ten warunek i jest rdzeniem.</p></figcaption></figure>
+<div class="explain"><p>Wybierz D i policz punkty w jego kole. D ma za mało sąsiadów, żeby zostać rdzeniem. Należy jednak do grupy, bo sięga do niego koło rdzenia B. Teraz wybierz E i sprawdź, dlaczego dostaje inną etykietę.</p>
+<p>Grupa może być szersza niż jedno koło. Jeśli w zasięgu rdzenia znajdzie się kolejny rdzeń, jego sąsiedztwo też dołącza do grupy. Punkt brzegowy kończy taki łańcuch.</p></div>
+</div></section>
+
+<section id="radar" class="demo"><div class="wrap">
+<p class="tag">02 / eksperyment z DBSCAN</p>
+<h2 class="title">Kiedy brzeg staje się rdzeniem?</h2>
+<p class="lead">Zacznij od punktu 28. Przy promieniu 44 ma tylko jednego sąsiada. Przesuń suwak do <strong>60</strong> i obserwuj, które punkty znajdą się w kole. Do utworzenia rdzenia wystarczą trzy punkty, łącznie z badanym.</p>
+<div class="experiment">
+<div class="zoom-pane">
+<h3 id="point-title">Punkt 28</h3>
+<svg id="zoom" viewBox="-120 -102 240 204" role="img" aria-labelledby="point-title" aria-describedby="pick-info"></svg>
+<p id="pick-info" aria-live="polite"></p>
+</div>
+<div class="controls-pane">
+<h3>Ustawienia</h3>
+<label for="eps">Promień koła <output id="eps-value" for="eps">44</output></label>
+<input id="eps" type="range" min="24" max="85" value="44" step="1">
+<label for="mins">Punkty potrzebne do utworzenia rdzenia <output id="mins-value" for="mins">3</output></label>
+<input id="mins" type="range" min="2" max="8" value="3" step="1">
+<button id="restore" type="button">Punkt 28 · eps 44 (początek)</button>
+<button id="expand-demo" type="button">Punkt 28 · eps 60</button>
+<h3>Cały zbiór</h3>
+<p>Grupy: <b id="group-count"></b><br>Punkty szumu: <b id="noise-count"></b> z 43</p>
+<p id="comparison"></p>
+</div></div>
+<details class="map-details"><summary>Obejrzyj wszystkie punkty i wybierz inny</summary>
+<p>Kliknij punkt lub przejdź na mapę klawiszem Tab i użyj strzałek. Kolor oznacza grupę.</p>
+<div class="scope"><svg id="scope" viewBox="0 0 760 460" tabindex="0" role="img" aria-label="Mapa wszystkich punktów"></svg></div>
+<ul class="legend"><li><i class="core"></i>rdzeń</li><li><i class="edge"></i>brzeg</li><li><i class="noise-badge"></i>szum</li></ul></details>
+</div></section>
+<section id="kod" class="work"><div class="wrap">
+<p class="tag">03 / uruchom i zmień</p>
+<h2 class="title">Trzy metody na tych samych danych</h2>
+<p class="lead">Otwórz terminal w katalogu lab5. Wszystkie trzy metody skorzystają z artykułów przygotowanych w poprzednim ćwiczeniu.</p>
+
+<article class="step"><div class="no">01</div><div class="body"><h3>Uruchom porównanie</h3>
+<p>Uruchom <a href="compare.py" download>compare.py</a>. Skrypt pobiera <a href="../lab4/articles.csv" download>40 artykułów z poprzedniego laboratorium</a> i opisuje każdy artykuł za pomocą 100 cech TF-IDF.</p>
+<p>Na początku pliku znajdziesz stałe <code>EPS</code> i <code>MIN_SAMPLES</code>. Zmieniaj po jednej wartości i ponownie uruchamiaj skrypt. Dzięki temu ustalisz, która zmiana wpłynęła na liczbę grup.</p>
+<div class="codebar"><span>terminal, katalog lab5</span><button data-copy="code1" type="button">Kopiuj</button></div>
+<pre class="code" id="code1" data-language="bash">py -m pip install flask scikit-learn
+py compare.py</pre>
+<details><summary>Jak odczytać wynik</summary><p>K-Means tworzy 5 grup bez szumu. DBSCAN przy <code>eps=0.74</code> i <code>min_samples=3</code> daje na dostarczonym zbiorze 6 grup i 2 teksty z etykietą <code>-1</code>: "Monitoring jakości powietrza" i "Czysta energia na osiedlu". Czasy wykonania różnią się między komputerami, więc ich nie porównuj.</p></details>
+</div></article>
+
+<article class="step"><div class="no">02</div><div class="body"><h3 id="progi">Porównaj trzy wartości eps</h3>
+<p><code>metric="cosine"</code> znaczy, że <code>eps</code> jest progiem odległości kosinusowej. Na wykresie promień mierzyliśmy w jednostkach płaszczyzny. Dla artykułów liczymy odległość jako jeden minus podobieństwo kosinusowe ich wektorów TF-IDF. Im więcej wspólnych cech o dużej wadze, tym mniejsza odległość. Zmieniaj <code>EPS</code> małymi krokami i zapisuj liczbę grup oraz punktów szumu.</p>
+<p>Porównaj wyniki dla trzech wartości <code>eps</code> przy stałym progu trzech punktów.</p>
+<div class="table-wrap" style="margin-top:14px"><table><thead><tr><th>eps</th><th>grupy</th><th>szum</th><th>co się dzieje</th></tr></thead><tbody><tr><td>0,70</td><td>5</td><td>12</td><td>Osiem artykułów o środowisku i cztery o kulturze ma etykietę szumu.</td></tr><tr><td>0,74</td><td>6</td><td>2</td><td>Na liście szumu zostały dwa artykuły o środowisku.</td></tr><tr><td>0,79</td><td>5</td><td>0</td><td>Artykuły o technologii i środowisku trafiają do wspólnej grupy.</td></tr></tbody></table></div>
+<p>Między 0,70 a 0,74 liczba grup rośnie z pięciu do sześciu, chociaż zwiększamy promień. Wyjaśnienie znajdziesz w kolumnie „szum”. Część wcześniej odrzuconych artykułów ma teraz dość sąsiadów, żeby utworzyć grupę. Przy 0,79 istniejące grupy mogą się połączyć. Porównaj tytuły artykułów przy każdym ustawieniu.</p>
+<div class="codebar"><span>fragment compare.py</span><button data-copy="code2" type="button">Kopiuj</button></div>
+<pre class="code" id="code2" data-language="python">EPS = 0.74
+MIN_SAMPLES = 3
+dbscan = DBSCAN(
+    eps=EPS, min_samples=MIN_SAMPLES, metric="cosine"
+).fit(matrix)
+print((dbscan.labels_ == -1).sum())</pre>
+
+</div></article>
+
+<article class="step"><div class="no">03</div><div class="body"><h3>DBSCAN nie ma <code>predict()</code></h3>
+<p>Nowy artykuł może zmienić gęstość sąsiedztwa. Gdybyśmy ponownie uruchomili DBSCAN z tym artykułem w zbiorze, dotychczasowy punkt brzegowy mógłby zostać rdzeniem. W tym ćwiczeniu zachowujemy wyuczone grupy i stosujemy prostą regułę przydziału.</p><p>Najpierw zamień tekst na wektor za pomocą słownika z treningu. Oblicz odległości do zapisanych rdzeni i wybierz najmniejszą. Jeśli mieści się w progu <code>eps</code>, zwróć grupę tego rdzenia. W przeciwnym razie zwróć <code>-1</code>.</p>
+<div class="codebar"><span>fragment compare.py</span><button data-copy="code3" type="button">Kopiuj</button></div>
+<pre class="code" id="code3" data-language="python">sample = vectorizer.transform([text])
+if sample.nnz == 0 or len(dbscan.core_sample_indices_) == 0:
+    return {"cluster_id": -1, "noise": True, "distance_to_core": None,
+            "rule": "nearest_core_within_eps",
+            "reason": "out_of_vocabulary" if sample.nnz == 0 else "no_core_points"}
+distances = cosine_distances(sample, dbscan.components_)[0]
+nearest = int(distances.argmin())
+distance = float(distances[nearest])
+cluster_id = (
+    int(dbscan.labels_[dbscan.core_sample_indices_[nearest]])
+    if distance &lt;= EPS else -1
+)
+return {"cluster_id": cluster_id, "noise": cluster_id == -1,
+        "distance_to_core": round(distance, 3), "rule": "nearest_core_within_eps"}</pre>
+<details><summary>Pusty tekst, brak cech i brak rdzeni</summary>
+<p>Wyślij pusty tekst. Serwer powinien zwrócić kod HTTP 400. Następnie wpisz słowo spoza słownika. Serwer przyjmie je, lecz zwróci etykietę <code>-1</code> z powodem <code>out_of_vocabulary</code>. Pole <code>distance_to_core</code> ma wtedy wartość <code>null</code>, ponieważ nie obliczono odległości.</p>
+<p>Możesz też sprawdzić, co się stanie bez rdzeni. Przy 40 artykułach próg <code>min_samples=41</code> jest nieosiągalny. Uruchom ponownie serwer i wyślij tekst zawierający znane słowa. Oczekiwany powód to <code>no_core_points</code>. Po próbie przywróć próg 3.</p>
+</details>
+</div></article>
+
+<article class="step"><div class="no">04</div><div class="body"><h3 id="serwer">Sprawdź odpowiedzi serwera</h3>
+<p>W katalogu <code>lab5</code> uruchom <a href="app.py" download>app.py</a>. Zostaw terminal otwarty. W przeglądarce otwórz <code>http://127.0.0.1:5005/</code>. W sekcji raportu kliknij „Przypisz artykuł” i odczytaj pole <code>cluster_id</code>. Następnie wyczyść pole tekstowe i wyślij formularz ponownie. Oczekiwany kod to <strong>HTTP 400</strong>. Dla tekstu dłuższego niż 4000 znaków serwer zwraca HTTP 413.</p>
+<div class="codebar"><span>terminal</span><button data-copy="code4" type="button">Kopiuj</button></div>
+<pre class="code" id="code4" data-language="bash">py app.py
+# w drugim terminalu:
+curl.exe http://127.0.0.1:5005/api/compare
+curl.exe http://127.0.0.1:5005/api/noise</pre>
+</div></article>
+</div></section>
+
+<section id="porownanie" class="compare"><div class="wrap">
+<p class="tag">04 / pomiar na dostarczonym zbiorze</p>
+<h2 class="title">Raport z 40 artykułów</h2>
+<p class="lead">Wartości poniżej pochodzą z <a href="compare.py" download><code>compare.py</code></a> dla 40 artykułów i 100 cech. Uruchom kod u siebie, bo inna wersja biblioteki albo zmiana CSV da inny wynik. Porównaj swój wynik z tabelą.</p>
+<div class="table-wrap"><table><thead><tr><th>Algorytm</th><th>Grupy</th><th>Szum</th><th>Silhouette cosine</th><th>Ocenione teksty</th></tr></thead><tbody><tr><td>K-Means</td><td>5</td><td>0</td><td>0,218</td><td>40</td></tr><tr><td>DBSCAN</td><td>6</td><td>2</td><td>0,262</td><td>38</td></tr><tr><td>Agglomerative</td><td>5</td><td>0</td><td>0,218</td><td>40</td></tr></tbody></table></div>
+<p class="small">Czasów nie ma w tabeli, bo pojedynczy <code>fit</code> na 40 wierszach trwa zbyt krótko, żeby wyciągać wnioski o skalowaniu. Jeśli chcesz porównywać wydajność, zmierz serię powtórzeń na większym zbiorze. Pojedynczy pomiar zależy od chwilowego obciążenia komputera.</p>
+<div class="explain">
+<p>Współczynnik silhouette opisuje, o ile bliżej artykułowi do tekstów z własnej grupy niż do tekstów z najbliższej innej grupy. Wyższa wartość oznacza wyraźniejsze rozdzielenie grup. Sprawdź też ostatnią kolumnę. Dla DBSCAN średnia obejmuje 38 artykułów, bo dwa teksty z etykietą <code>-1</code> pominięto.</p>
+<p>Jeśli ocenimy K-Means na tych samych 38 tekstach, wynik wyniesie 0,222. Żeby zdecydować, który podział przyda się redakcji, przeczytaj oba pominięte artykuły. Czy redaktor powinien dostać je osobno do przejrzenia, czy znaleźć je w jednym z pięciu działów?</p>
+</div>
+<div class="api-grid">
+<div class="field"><h3 class="sub-title">Wyślij nowy artykuł</h3><label for="article">Tekst artykułu</label><textarea id="article">Nowa technologia urządzenia i aplikacja dla użytkowników</textarea><button class="action" id="assign" type="button">Przypisz artykuł</button></div>
+<div class="field"><h3 class="sub-title">Odpowiedź API</h3><div id="api-result" data-code-output class="response" role="status">Uruchom Flask i otwórz tę stronę przez http://127.0.0.1:5005/.</div><button class="action" id="noise-btn" type="button">Pokaż artykuły oznaczone jako szum</button>
+<div id="noise-list" style="margin-top:12px"></div>
+<p class="small">Odpowiedź pochodzi z API pod tym samym adresem, więc nie trzeba nic kopiować ręcznie.</p></div>
+</div>
+</div></section>
+
+<section><div class="wrap">
+<p class="tag">05 / wyzwanie</p>
+<h2 class="title" id="decyzja">Wyjątek czy nowa kategoria?</h2>
+<p class="lead">Do notatki wpisz ustawienia, liczbę grup i liczbę artykułów oznaczonych jako szum. Wybierz jeden z tych artykułów i uzasadnij, gdzie powinien go znaleźć redaktor.</p>
+<div class="cards">
+<div class="card"><span class="glyph">A</span><h3>Próg</h3><p>Sprawdź <code>eps=0.70</code>, <code>0.74</code> i <code>0.79</code>. Zapisz, jak zmieniają się liczba grup i liczba tekstów oznaczonych jako szum. Wskaż jeden artykuł, którego status się zmienił.</p></div>
+<div class="card"><span class="glyph">B</span><h3>Wniosek</h3><p>Wybierz metodę dla redakcji i uzasadnij ją konkretnym tekstem oraz metryką. Podaj, dla ilu artykułów skrypt obliczył współczynnik silhouette.</p></div>
+<div class="card"><span class="glyph">C</span><h3>Dla chętnych</h3><p>Zamień tytuły na liście szumu w przyciski. Kliknięcie tytułu ma wstawić go do pola nowego artykułu. Wstawiaj tekst przez <code>textContent</code>, bo dane z API nigdy nie są kodem.</p></div>
+</div>
+</div></section>
+
+<section><div class="wrap">
+<p class="tag">06 / oficjalne punkty odniesienia</p>
+<h2 class="title">Dalsza lektura</h2>
+<div class="links"><a href="https://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html" target="_blank" rel="noopener"><b>DBSCAN API</b><span>Znaczenie eps, min_samples i core_sample_indices_.</span></a><a href="https://scikit-learn.org/stable/auto_examples/cluster/plot_dbscan.html" target="_blank" rel="noopener"><b>Przykład DBSCAN</b><span>Oficjalna wizualizacja rdzeni, brzegów i szumu.</span></a><a href="https://scikit-learn.org/stable/modules/generated/sklearn.metrics.silhouette_score.html" target="_blank" rel="noopener"><b>Silhouette score</b><span>Kiedy metryka ma sens i jakie ma ograniczenia.</span></a><a href="https://scikit-learn.org/stable/modules/generated/sklearn.cluster.AgglomerativeClustering.html" target="_blank" rel="noopener"><b>AgglomerativeClustering</b><span>Trzeci model w tabeli porównawczej.</span></a></div>
+</div></section>
+
+<section id="own-trial"><div class="wrap"><div class="trial-card"><h2>Własna próba</h2><p>Przy <code>EPS = 0.74</code> artykuł „Monitoring jakości powietrza” jest na liście szumu. Zapisz, czy spodziewasz się zobaczyć go tam również przy <code>EPS = 0.76</code>. Uruchom <code>py compare.py</code> z nowym progiem i sprawdź listę tytułów. Do notatki wpisz przewidywanie i wynik. Po próbie przywróć <code>EPS = 0.74</code>.</p></div></div></section>
+
+<section id="sprawdz"><div class="wrap">
+<p class="tag">07 / kontrola pracy</p>
+<h2 class="title">Przed oddaniem</h2>
+<div class="checks" id="checks"><label><input type="checkbox">Potrafimy wyjaśnić zmianę roli punktu 28 po zwiększeniu promienia.</label><label><input type="checkbox">Tabela zawiera wyniki dla wszystkich trzech wartości eps.</label><label><input type="checkbox">Porównaliśmy trzy algorytmy na tej samej macierzy tekstów.</label><label><input type="checkbox">Endpoint odrzuca pusty tekst i zwraca -1 dla tekstu spoza grup.</label><label><input type="checkbox">Umiemy wyjaśnić, dlaczego DBSCAN nie ma predict().</label></div>
+<p id="progress" class="signal">0 / 5</p>
+<div class="meter"><div id="fill"></div></div>
+<div class="question"><h3>1. Co oznacza etykieta -1?</h3><div class="options" data-answer="1" data-note="Punkt nie należy do żadnej gęstej grupy przy obecnych eps i min_samples."><button type="button">Pierwszy klaster</button><button type="button">Szum</button><button type="button">Błąd parsera CSV</button></div><p class="feedback" aria-live="polite"></p></div>
+<div class="question"><h3>2. Czy wyniki 0,262 i 0,218 wystarczą do wyboru metody?</h3><div class="options" data-answer="2" data-note="Nie. Wynik DBSCAN dotyczy 38 tekstów, a pozostałe wyniki 40. Po wyrównaniu zbioru różnica maleje do 0,04 i nadal nie rozstrzyga o jakości grup."><button type="button">Tak, zawsze</button><button type="button">Tak, bo ma więcej grup</button><button type="button">Nie, oceniono różne zbiory punktów</button></div><p class="feedback" aria-live="polite"></p></div>
+<div class="question"><h3>3. Co robi reguła przydziału nowego tekstu?</h3><div class="options" data-answer="0" data-note="Szukamy najbliższego rdzenia i sprawdzamy próg eps. Grupy wyznaczone podczas treningu pozostają bez zmian."><button type="button">Szuka rdzenia w eps lub zwraca szum</button><button type="button">Wywołuje DBSCAN.predict()</button><button type="button">Zawsze tworzy nową grupę</button></div><p class="feedback" aria-live="polite"></p></div>
+<p id="score" class="signal">Wynik: 0 / 3</p>
+<details class="faq"><summary>Kiedy DBSCAN wypada gorzej niż K-Means</summary><p>Gdy grupy mają różną gęstość albo łączy je łańcuch punktów rdzeniowych. Wtedy jeden <code>eps</code> ich nie rozdzieli: DBSCAN zrobi jedną dużą grupę albo za dużo szumu. Jeśli przy wybranych parametrach wszystkie punkty są rdzeniami połączonymi łańcuchem, algorytm zwróci jeden klaster bez szumu, niezależnie od rozmiaru zbioru. Grupy zagnieżdżone rozdzieli tylko wtedy, gdy między nimi jest przerwa w gęstości.</p><p>K-Means wygrywa wtedy, gdy potrzebna jest stała liczba grup i przypisanie każdego punktu do którejś z nich, bez listy wyjątków. Jeśli redakcja musi dostać wszystkie teksty w szufladach, szum jest problemem procesu, a nie wadą metody.</p></details>
+<label class="signal" for="notes">Notatka do raportu</label>
+<textarea class="notes" id="notes" placeholder="Wybrana metoda, tytuł artykułu, wynik pomiaru i uzasadnienie"></textarea>
+<p class="signal" id="saved" aria-live="polite"></p>
+</div></section>
+</main>
+<footer><div class="wrap"><span>ISI / AW / LAB 05 / B.2</span><span><a href="../index.html">↑ Hub kursu</a> &nbsp; <a href="../lab4/index.html">← Lab 4</a> &nbsp; <a href="../lab6/index.html">Lab 6: indeks i ranking →</a></span></div></footer>
+<script>
+/* ---------- radar: symulator DBSCAN ---------- */
+(function(){
+  const canvas=document.getElementById('scope');
+  const W=760,H=460;
+  var epsInput=document.getElementById('eps'),minsInput=document.getElementById('mins');
+  var out={eps:document.getElementById('eps-value'),mins:document.getElementById('mins-value'),
+           groups:document.getElementById('group-count'),noise:document.getElementById('noise-count'),
+           pick:document.getElementById('pick-info')};
+  if(!epsInput||!minsInput||!out.eps){return;}
+  var PALETTE=['#d8ff62','#79e3bd','#ffb369','#4fbfa8','#f4f6e9','#c9a4ff'];
+
+  /* Trzy bloki 3x3 z roznym rozrzutem, po cztery satelity na blok i cztery
+     punkty odlegle. Satelita lezy okolo 66 px od srodka bloku i ma jednego
+     sasiada w promieniu 44, wiec przy ustawieniach startowych jest brzegiem.
+     Cala tablica jest sprawdzona w .zwork/audit/radar_pick.py. */
+  var pts=[[122,94],[148,95],[179,93],[125,120],[147,123],[173,118],[126,148],[147,148],[177,144],
+    [127,303],[153,303],[179,304],[124,329],[149,331],[175,333],[127,354],[153,357],[178,354],
+    [402,197],[428,201],[457,198],[404,225],[433,223],[457,224],[402,254],[431,250],[459,255],
+    [215,121],[82,123],[152,58],[147,187],[217,329],[83,329],[147,261],[150,392],
+    [495,223],[367,227],[434,159],[429,293],
+    [704,60],[58,400],[704,404],[672,244]];
+
+  var state={labels:[],core:[],neighbors:[],eps:+epsInput.value,ms:+minsInput.value};
+  var selected=27;
+
+  function gap(a,b){
+    var dx=a[0]-b[0],dy=a[1]-b[1];
+    return Math.sqrt(dx*dx+dy*dy);
+  }
+
+  function clusterize(eps,ms){
+    var n=pts.length,i,j,neighbors=[],core=[];
+    for(i=0;i<n;i++){
+      neighbors[i]=[];
+      for(j=0;j<n;j++){
+        if(gap(pts[i],pts[j])<=eps){neighbors[i].push(j);}
+      }
+      core[i]=neighbors[i].length>=ms;
+    }
+    var labels=new Array(n).fill(-1);
+    var seen=new Array(n).fill(false);
+    var count=0;
+    for(i=0;i<n;i++){
+      if(seen[i]){continue;}
+      seen[i]=true;
+      if(!core[i]){continue;}
+      labels[i]=count;
+      var queue=neighbors[i].slice();
+      var queued=new Set(queue);
+      for(var h=0;h<queue.length;h++){
+        var k=queue[h];
+        if(!seen[k]){
+          seen[k]=true;
+          if(core[k]){
+            neighbors[k].forEach(function(v){
+              if(!queued.has(v)){queued.add(v);queue.push(v);}
+            });
+          }
+        }
+        if(labels[k]===-1){labels[k]=count;}
+      }
+      count++;
+    }
+    return {labels:labels,core:core,neighbors:neighbors,count:count};
+  }
+
+  function draw(){
+    const [x,y]=pts[selected];
+    const links=state.neighbors[selected].filter(i=>i!==selected).map(i=>
+      '<line x1="'+x+'" y1="'+y+'" x2="'+pts[i][0]+'" y2="'+pts[i][1]+'" stroke="#718a77"/>');
+    const marks=pts.map(([px,py],i)=>{
+      const label=state.labels[i];
+      if(label===-1) return '<path d="M-5 -5L5 5M5 -5L-5 5" transform="translate('+px+' '+py+')" stroke="#fe674b" stroke-width="3"/>';
+      const color=PALETTE[label%PALETTE.length];
+      return '<circle cx="'+px+'" cy="'+py+'" r="7" stroke="'+color+'" stroke-width="3" fill="'+(state.core[i]?color:'#0c1714')+'"/>';
+    });
+    canvas.innerHTML='<circle cx="'+x+'" cy="'+y+'" r="'+state.eps+'" fill="#d8ff6215" stroke="#d8ff62" stroke-width="2" stroke-dasharray="6 4"/>'+links.join('')+marks.join('')+'<circle cx="'+x+'" cy="'+y+'" r="13" fill="none" stroke="white" stroke-width="2"/>';
+    const localMarks=pts.map(([px,py],i)=>{
+      const dx=px-x,dy=py-y;
+      if(Math.abs(dx)>115 || Math.abs(dy)>98) return '';
+      const inside=state.neighbors[selected].includes(i);
+      return '<circle cx="'+dx+'" cy="'+dy+'" r="'+(i===selected?5:3.5)+'" fill="'+(i===selected?'white':inside?'#d8ff62':'#75877f')+'"/>';
+    });
+    document.getElementById('zoom').innerHTML='<circle r="'+state.eps+'" fill="#d8ff6212" stroke="#d8ff62" stroke-width="1.5"/>'+localMarks.join('');
+    document.getElementById('point-title').textContent='Punkt '+(selected+1)+' · '+(state.core[selected]?'rdzeń':state.labels[selected]===-1?'szum':'brzeg');
+  }
+
+  function describe(i){
+    const n=state.neighbors[i].length;
+    const count='Liczba punktów w kole (razem z białym punktem): '+n+'. ';
+    if(state.core[i]) return count+'Próg wynosi '+state.ms+', więc ten punkt jest rdzeniem.';
+    if(state.labels[i]===-1) return count+'To mniej niż wymagane '+state.ms+'. Żaden rdzeń nie sięga do tego punktu, więc punkt jest szumem.';
+    return count+'To mniej niż wymagane '+state.ms+'. Punkt należy do grupy, bo leży w zasięgu innego punktu, który jest rdzeniem.';
+  }
+
+  function run(){
+    var eps=+epsInput.value,ms=+minsInput.value;
+    var result=clusterize(eps,ms);
+    state={labels:result.labels,core:result.core,neighbors:result.neighbors,eps:eps,ms:ms};
+    draw();
+    out.eps.textContent=String(eps);
+    out.mins.textContent=String(ms);
+    out.groups.textContent=String(result.count);
+    out.noise.textContent=String(result.labels.filter(function(v){return v===-1;}).length);
+    out.pick.textContent=describe(selected);
+    if(selected===27 && state.core[selected] && eps!==44 && ms===3) out.pick.textContent+=' Przy promieniu 44 ten punkt był brzegiem.';
+    const same=result.count===3 && out.noise.textContent==='4';
+    const baseline=eps===44 && ms===3;
+    document.getElementById('comparison').textContent=baseline
+      ? 'To wynik początkowy. Porównaj go z wynikiem przy promieniu 60.'
+      : same ? 'Liczba grup i punktów szumu pozostała taka sama jak na początku.'
+      : 'Dla porównania, przy promieniu 44 i progu 3 były trzy grupy i cztery punkty szumu.';
+  }
+
+  function pickFromEvent(clientX,clientY){
+    var box=canvas.getBoundingClientRect();
+    var x=(clientX-box.left)*(W/box.width);
+    var y=(clientY-box.top)*(H/box.height);
+    var best=-1,dist=22;
+    pts.forEach(function(p,i){
+      var d=gap(p,[x,y]);
+      if(d<dist){dist=d;best=i;}
+    });
+    return best;
+  }
+
+  epsInput.addEventListener('input',run);
+  minsInput.addEventListener('input',run);
+  canvas.addEventListener('click',function(event){
+    var best=pickFromEvent(event.clientX,event.clientY);
+    if(best<0){return;}
+    selected=best;
+    run();
+  });
+  canvas.addEventListener('keydown',function(event){
+    var step=event.key==='ArrowRight'||event.key==='ArrowDown'?1:
+             event.key==='ArrowLeft'||event.key==='ArrowUp'?-1:0;
+    if(!step){return;}
+    event.preventDefault();
+    selected=(selected+step+pts.length)%pts.length;
+    run();
+  });
+
+  function showPoint28(radius){
+    selected=27;
+    epsInput.value=radius;
+    minsInput.value=3;
+    run();
+  }
+  document.getElementById('restore').addEventListener('click',()=>showPoint28(44));
+  document.getElementById('expand-demo').addEventListener('click',()=>showPoint28(60));
+  run();
+})();
+</script>
+<script>
+const examples = {
+  B: [103, 'W kole B mieszczą się A, B, C i D. Próg wynosi trzy punkty. B spełnia ten warunek i jest rdzeniem.'],
+  D: [147, 'W kole D są tylko D i B. To za mało na rdzeń. B jest jednak rdzeniem, więc D należy do jego grupy jako punkt brzegowy.'],
+  E: [274, 'W kole E jest tylko E. Żaden rdzeń do niego nie sięga. DBSCAN oznacza E jako szum i przypisuje mu etykietę -1.']
+};
+document.querySelectorAll('[data-point]').forEach(button => {
+  button.addEventListener('click', () => {
+    const [x, note] = examples[button.dataset.point];
+    document.getElementById('lens').style.transform = 'translate(' + x + 'px,75px)';
+    document.getElementById('example-note').textContent = note;
+    document.querySelectorAll('[data-point]').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+  });
+});
+</script>
+<script>
+/* ---------- kopiowanie kodu ---------- */
+(function(){
+  Array.prototype.forEach.call(document.querySelectorAll('[data-copy]'),function(button){
+    button.addEventListener('click',async function(){
+      var source=document.getElementById(button.dataset.copy);
+      if(!source){return;}
+      try{
+        await navigator.clipboard.writeText(source.textContent);
+        button.textContent='Skopiowano';
+      }catch(error){
+        button.textContent='Zaznacz ręcznie';
+      }
+      setTimeout(function(){button.textContent='Kopiuj';},1800);
+    });
+  });
+})();
+</script>
+<script>
+/* ---------- API: przypisanie tekstu i lista szumu ---------- */
+(function(){
+  var output=document.getElementById('api-result');
+  var assign=document.getElementById('assign');
+  var noise=document.getElementById('noise-btn');
+  if(!output){return;}
+  function offline(){
+    output.textContent='Uruchom py app.py i otwórz http://127.0.0.1:5005/. To pole potrzebuje serwera.';
+  }
+  if(assign){
+    assign.addEventListener('click',async function(){
+      if(location.protocol==='file:'){offline();return;}
+      var field=document.getElementById('article');
+      try{
+        var response=await fetch('api/cluster/assign',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({text:field?field.value:''})
+        });
+        var body=await response.json();
+        output.textContent='HTTP '+response.status+'\n'+JSON.stringify(body,null,2);
+      }catch(error){
+        output.textContent='Nie mogę połączyć się z API: '+error.message;
+      }
+    });
+  }
+  if(noise){
+  noise.addEventListener('click',async function(){
+
+    if(location.protocol==='file:'){
+      offline();
+      return;
+    }
+
+    output.textContent='Pobieram GET /api/noise ...';
+
+    try{
+
+      var response=await fetch('api/noise');
+      var rows=await response.json();
+
+      if(!Array.isArray(rows)){
+        throw new Error('nieoczekiwany format odpowiedzi');
+      }
+
+      var list=document.getElementById('noise-list');
+
+      list.innerHTML='';
+
+      if(!rows.length){
+        output.textContent='Brak szumu przy obecnych eps i min_samples.';
+        return;
+      }
+
+      output.textContent='Szum: '+rows.length;
+
+      rows.forEach(function(row){
+
+        var btn=document.createElement('button');
+
+        btn.type='button';
+        btn.className='action';
+
+        // zgodnie z poleceniem
+        btn.textContent=row.title;
+
+        btn.addEventListener('click',function(){
+
+          var textarea=document.getElementById('article');
+
+          textarea.value=row.title;
+
+        });
+
+        list.appendChild(btn);
+
+      });
+
+    }catch(error){
+
+      output.textContent=
+        'Nie mogę pobrać listy szumu: '
+        + error.message;
+    }
+  });
+}
+})();
+</script>
+<script>
+/* ---------- lista kontrolna i notatka ---------- */
+(function(){
+  var boxes=Array.prototype.slice.call(document.querySelectorAll('#checks input'));
+  var bar=document.getElementById('fill');
+  var label=document.getElementById('progress');
+  if(!boxes.length||!bar||!label){return;}
+  try{
+    var saved=JSON.parse(localStorage.getItem('isi-lab5-checks')||'[]');
+    boxes.forEach(function(box,i){box.checked=Boolean(saved[i]);});
+  }catch(error){}
+  function update(){
+    var done=boxes.filter(function(box){return box.checked;}).length;
+    label.textContent=done+' / '+boxes.length;
+    bar.style.width=(done/boxes.length*100)+'%';
+    try{localStorage.setItem('isi-lab5-checks',JSON.stringify(boxes.map(function(box){return box.checked;})));}catch(error){}
+  }
+  boxes.forEach(function(box){box.addEventListener('change',update);});
+  update();
+
+  var notes=document.getElementById('notes');
+  var status=document.getElementById('saved');
+  if(!notes||!status){return;}
+  try{notes.value=localStorage.getItem('isi-lab5-notes')||'';}catch(error){}
+  notes.addEventListener('input',function(){
+    try{
+      localStorage.setItem('isi-lab5-notes',notes.value);
+      status.textContent='Zapisano lokalnie';
+    }catch(error){
+      status.textContent='Zapis lokalny niedostępny';
+    }
+  });
+})();
+</script>
+<script>
+/* ---------- quiz ---------- */
+(function(){
+  var total=document.querySelectorAll('.options').length;
+  if(!total){return;}
+  var score=0;
+  var readout=document.getElementById('score');
+  Array.prototype.forEach.call(document.querySelectorAll('.options'),function(group){
+    Array.prototype.forEach.call(group.querySelectorAll('button'),function(button,index){
+      button.addEventListener('click',function(){
+        if(group.dataset.done==='1'){return;}
+        group.dataset.done='1';
+        var correct=Number(group.dataset.answer);
+        if(index===correct){score++;}
+        button.classList.add(index===correct?'good':'bad');
+        group.querySelectorAll('button')[correct].classList.add('good');
+        var feedback=group.nextElementSibling;
+        if(feedback){feedback.textContent=group.dataset.note||'';}
+        if(readout){readout.textContent='Wynik: '+score+' / '+total;}
+      });
+    });
+  });
+})();
+</script>
+</body></html>

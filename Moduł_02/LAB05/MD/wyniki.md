@@ -298,3 +298,29 @@ ponieważ 4 artykuły zostały oznaczone przez DBSCAN jako szum i nie zostały u
 ---
 
 <br>
+
+## Zadanie C
+
+### Modyfikacja interfejsu
+
+Po kliknięciu przycisku **„Pokaż artykuły oznaczone jako szum”** lista artykułów jest pobierana z endpointu:
+
+```text
+GET /api/noise
+```
+
+Zamiast wyświetlania zwykłego tekstu tytuły artykułów są dynamicznie zamieniane na przyciski.
+
+Kliknięcie przycisku powoduje automatyczne wpisanie tytułu artykułu do pola:
+
+```html
+<textarea id="article">
+```
+
+Dzięki temu użytkownik może od razu sprawdzić, jak API sklasyfikuje wybrany artykuł oznaczony wcześniej jako szum.
+
+### Efekt działania
+
+![Lista artykułów oznaczonych jako szum i dynamiczne przyciski](image.png)
+
+Po kliknięciu jednego z przycisków jego tytuł zostaje automatycznie wstawiony do formularza i może zostać ponownie wysłany do endpointu klasyfikującego artykuły.
