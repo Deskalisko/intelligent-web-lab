@@ -1,0 +1,46 @@
+uruchomienie cluster.py - bez żadnych zmian
+
+40 artykułów, 100 cech
+0 8 urządzenia, technologii, użytkowników, technologia
+1 8 wynik, trening, zawodników, zawodnicy
+2 8 artystów, publicznością, podczas, artyści
+3 8 koszty, rynek, firmy, rynku
+4 8 przyrody, klimat, środowiska, zmian
+
+czyli 5 klastrów po 8 artykułów 
+klaster 0 ->tech
+klaster 1 ->sport
+klaster 2 ->kultura
+klaster 3 ->biznes
+klaster 4->środowisko
+
+source ma 5 różnych wartości ? Te wymienione powyżej po ->. 
+
+Elbow: [
+{'k': 2, 'inertia': 34.352},
+{'k': 3, 'inertia': 31.841},
+{'k': 4, 'inertia': 29.585}, 
+{'k': 5, 'inertia': 27.031}, 
+{'k': 6, 'inertia': 24.884}, 
+{'k': 7, 'inertia': 23.217}, 
+{'k': 8, 'inertia': 21.117}
+]
+
+
+================================================================================
+W ramach eksperymentu zmienione zostały parametry funkcji na 
+def fit_articles(k=4, max_features=110, min_df=2):
+
+Otrzymaliśmy wyniki:
+40 artykułów, 110 cech
+
+0 8 wynik, trening, zawodników, zawodnicy
+1 16 artystów, koszty, publicznością, rynek
+2 8 urządzenia, technologii, użytkowników, technologia
+3 8 przyrody, klimat, środowiska, zmian
+
+czyli tylko 4 klastry. Przy k=4 algorytm połączył dwie wcześniejsze grupy (kultura + biznes) w jeden klaster 16 elementowy, czyli zmieszał tematyke. 
+Przy k=5 grupy były bardziej jednorodne i odpowiadały głównym kategoriom artykułów.
+
+
+================================================================================
