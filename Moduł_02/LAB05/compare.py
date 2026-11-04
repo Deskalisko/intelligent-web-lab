@@ -8,7 +8,7 @@ from sklearn.metrics import silhouette_score
 from sklearn.metrics.pairwise import cosine_distances
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from lab4.cluster import fit_articles  # noqa: E402
+from LAB04.cluster import fit_articles  # noqa: E402
 
 articles, vectorizer, matrix, kmeans = fit_articles()
 EPS = 0.74
