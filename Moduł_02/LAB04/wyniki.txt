@@ -44,6 +44,7 @@ Przy k=5 grupy były bardziej jednorodne i odpowiadały głównym kategoriom art
 
 
 ================================================================================
+ZADANIE 1
 Dodaliśmy kilka artykułów do CSV w tym nowy source - rolnictwo
 
 ustawiłem k=6 
@@ -84,12 +85,38 @@ max_features = 300
 4 - rolnictwo (8)
 5 - kultura (7)
 
-
 Podsumowując
 max_features = 100
 100 cech -> rolnictwo i środowisko częściowo się mieszały
 max_features = 300
 159 cech -> rolnictwo i środowisko utworzyły osobne klastry
+
+
 ================================================================================
+Zadanie 2
+max_features=100, min_df=2, 
+shape=(52, 100), 
+ARI=0.814, 
+inertia=34.667
+
+max_features=300, min_df=2, 
+shape=(52, 159), 
+ARI=0.787, 
+inertia=36.678
+
+max_features=300, min_df=1, 
+shape=(52, 300), 
+ARI=0.695, 
+inertia=40.816
+
+PODSUMOWANIE:
+Porównaliśmy kategorie z source z klastrami K-Means za pomocą wskaźnika ARI
+Najlepszy wynik uzyskaliśmy dla ustawienia max_features=100 i min_df=2, 
+gdzie ARI=0.814 Po zwiększeniu liczby max_features do 300 wynik spadł do 0.787, a po ustawieniu min_df=1 do 0.695.
+
+Co oznacza, że w tym przypadku większa liczba cech nie przełożyła się na lepsze grupowanie. 
+Było więcej rzadkich słów, przez co klastry były bardziej szczegółowe, 
+ale też mniej zgodne z rzeczywistymi kategoriami artykułów. 
 
 
+================================================================================
