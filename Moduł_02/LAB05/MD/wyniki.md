@@ -2,191 +2,65 @@
 
 > Wykorzystaliśmy rozszerzony zbiór `articles.csv` z poprzedniego zadania, ktory zawiera 52 artykuły (dodatkowe teksty związane między innymi z rolnictwem).
 
----
+# Zadanie 1 - Analiza punktu 28
 
-# Wyniki dla EPS = 0.74 i MIN_SAMPLES = 3
-
-```text
-{'algorithm': 'K-Means', 'clusters': 5, 'noise': 0, 'scored_articles': 52, 'silhouette_cosine': 0.156}
-{'algorithm': 'DBSCAN', 'clusters': 7, 'noise': 4, 'scored_articles': 48, 'silhouette_cosine': 0.220}
-{'algorithm': 'Agglomerative', 'clusters': 5, 'noise': 0, 'scored_articles': 52, 'silhouette_cosine': 0.165}
-```
-
-Artykuły oznaczone jako szum:
+Sprawdziliśmy punkt 28 dla trzech różnych wartości promienia przy stałym progu:
 
 ```text
-Retencja wody w miastach
-Temperatura jezior rośnie
-Nowa odmiana pszenicy odporna na suszę
-Badania nad odpornością kukurydzy na upały
+MIN_SAMPLES = 3
 ```
 
-### Komentarz
+## Wyniki
 
-Przy tych ustawieniach DBSCAN utworzył 7 grup oraz oznaczył 4 artykuły jako szum. Były to głównie artykuły związane ze środowiskiem i rolnictwem, które okazały się zbyt odległe od pozostałych tekstów. Współczynnik silhouette był najwyższy właśnie dla DBSCAN, co oznacza najlepsze rozdzielenie grup.
+| Promień (eps) | Liczba punktów w kole | Rola punktu |
+| ------------- | --------------------- | ----------- |
+| 44            | 2                     | Brzeg       |
+| 60            | 4                     | Rdzeń       |
+| 85            | 7                     | Rdzeń       |
 
 ---
 
-# Wyniki dla EPS = 0.70 i MIN_SAMPLES = 4
+## EPS = 44
+
+![Punkt 28 dla EPS=44](image-2.png)
+
+Przy promieniu 44 w kole znajdowały się tylko 2 punkty (łącznie z badanym punktem). Jest to mniej niż wymagane 3 punkty, dlatego punkt 28 nie mógł zostać rdzeniem. Punkt należał jednak do istniejącej grupy, ponieważ znajdował się w zasięgu innego punktu będącego rdzeniem.
+
+**Rola punktu:** brzeg.
+
+---
+
+## EPS = 60
+
+![Punkt 28 dla EPS=60](image-1.png)
+
+Po zwiększeniu promienia do 60 w kole znalazły się 4 punkty. Próg wynosił 3 punkty, dlatego warunek utworzenia rdzenia został spełniony.
+
+**Rola punktu:** rdzeń.
+
+---
+
+## EPS = 85
+
+![Punkt 28 dla EPS=85](image-3.png)
+
+Przy promieniu 85 liczba punktów w sąsiedztwie wzrosła do 7. Punkt nadal spełniał warunek utworzenia rdzenia, ponieważ liczba punktów znacząco przekraczała wymagany próg.
+
+**Rola punktu:** rdzeń.
+
+---
+
+Wraz ze zwiększaniem promienia (`eps`) liczba punktów znajdujących się w sąsiedztwie punktu 28 rosła:
 
 ```text
-{'algorithm': 'DBSCAN', 'clusters': 5, 'noise': 23, 'scored_articles': 29, 'silhouette_cosine': 0.256}
+EPS = 44 -> 2 punkty -> brzeg
+EPS = 60 -> 4 punkty -> rdzeń
+EPS = 85 -> 7 punktów -> rdzeń
 ```
 
-Liczba artykułów oznaczonych jako szum: `23`
-
-### Komentarz
-
-Zmniejszenie wartości `EPS` oraz zwiększenie `MIN_SAMPLES` spowodowało bardzo restrykcyjne warunki tworzenia klastrów. W efekcie aż 23 artykuły zostały uznane za szum. Mimo wysokiej wartości silhouette taki wynik nie jest praktyczny, ponieważ prawie połowa zbioru została odrzucona.
+Oznacza to, że zwiększenie promienia może zmienić punkt brzegowy w punkt rdzeniowy, ponieważ obejmuje on większą liczbę sąsiadó
 
 ---
-
-# Wyniki dla EPS = 0.75 i MIN_SAMPLES = 1
-
-```text
-{'algorithm': 'DBSCAN', 'clusters': 9, 'noise': 0, 'scored_articles': 52, 'silhouette_cosine': 0.227}
-```
-
-### Komentarz
-
-Przy `MIN_SAMPLES = 1` każdy punkt może samodzielnie stać się rdzeniem. W praktyce powoduje to całkowite zniknięcie szumu i powstanie bardzo dużej liczby małych grup.
-
----
-
-# Początkowe wyniki dla DBSCAN
-
-| EPS  | MIN_SAMPLES | Grupy | Szum | Ocenione artykuły |
-| ---- | ----------- | ----- | ---- | ----------------- |
-| 0.70 | 4           | 5     | 23   | 29                |
-| 0.74 | 3           | 7     | 4    | 48                |
-| 0.74 | 2           | 9     | 0    | 52                |
-| 0.75 | 1           | 9     | 0    | 52                |
-| 0.75 | 3           | 7     | 4    | 48                |
-
----
-
-# Działanie parametrów
-
-### Wpływ EPS
-
-- mniejszy EPS → więcej szumu
-- większy EPS → mniej szumu
-- zbyt duży EPS → klastry zaczynają się łączyć
-
-### Wpływ MIN_SAMPLES
-
-- mniejszy MIN_SAMPLES → łatwiej tworzyć grupy
-- większy MIN_SAMPLES → trudniej tworzyć grupy
-- zbyt duży MIN_SAMPLES → dużo punktów zostaje oznaczonych jako szum
-
----
-
-# Przykłady odpowiedzi API
-
-## GET /api/compare
-
-Odpowiedź:
-
-```json
-{
-  "eps": 0.74,
-  "min_samples": 3,
-  "results": [
-    {
-      "algorithm": "K-Means",
-      "clusters": 5,
-      "noise": 0,
-      "scored_articles": 52,
-      "silhouette_cosine": 0.156
-    },
-    {
-      "algorithm": "DBSCAN",
-      "clusters": 7,
-      "noise": 4,
-      "scored_articles": 48,
-      "silhouette_cosine": 0.22
-    },
-    {
-      "algorithm": "Agglomerative",
-      "clusters": 5,
-      "noise": 0,
-      "scored_articles": 52,
-      "silhouette_cosine": 0.165
-    }
-  ]
-}
-```
-
-Endpoint zwraca porównanie wszystkich trzech metod grupowania wraz z liczbą klastrów, liczbą artykułów oznaczonych jako szum oraz wartością współczynnika silhouette.
-
----
-
-## GET /api/noise
-
-Odpowiedź:
-
-```json
-[
-  {
-    "id": 36,
-    "title": "Retencja wody w miastach"
-  },
-  {
-    "id": 40,
-    "title": "Temperatura jezior rośnie"
-  },
-  {
-    "id": 47,
-    "title": "Nowa odmiana pszenicy odporna na suszę"
-  },
-  {
-    "id": 52,
-    "title": "Badania nad odpornością kukurydzy na upały"
-  }
-]
-```
-
-Endpoint zwraca listę artykułów, które DBSCAN uznał za szum przy aktualnych ustawieniach.
-
----
-
-## POST /api/cluster/assign
-
-Podczas testów próba wysłania tekstu przez curl zakończyła się błędem składni polecenia PowerShell, dlatego serwer odczytał pustą wartość pola `text`.
-
-Otrzymana odpowiedź:
-
-```json
-{
-  "error": "podaj niepusty tekst w polu text"
-}
-```
-
----
-
-## Pusty tekst
-
-Kod odpowiedzi:
-
-```text
-HTTP 400 BAD REQUEST
-```
-
-Treść odpowiedzi:
-
-```json
-{
-  "error": "podaj niepusty tekst w polu text"
-}
-```
-
-Serwer poprawnie odrzuca puste dane wejściowe i zwraca kod błędu 400.
-
----
-
-# Podsumowanie dotychczasowych obserwacji
-
-Najwyższą wartość współczynnika silhouette uzyskał DBSCAN. Algorytm ten najlepiej rozdzielał grupy artykułów, ale jednocześnie potrafił oznaczać część tekstów jako szum. K-Means i Agglomerative przypisywały każdy artykuł do jakiegoś klastra, jednak uzyskiwały gorsze wyniki silhouette.
 
 <br>
 
