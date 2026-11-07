@@ -167,7 +167,6 @@ System przewidujący preferencje bazujący na gustach społeczności.
 #### Co działa:
 System analizujący teksty polskojęzyczne i dzielący je na grupy tematyczne za pomocą algorytmu **K-Means** bazującego na macierzy **TF-IDF**.
 - API udostępnia endpoint pokazujący dopasowane grupy (klastry), zwracając dla każdego z nich jego wielkość, najlepiej dopasowane słowa kluczowe (wyznaczone po parametrach centroidu) oraz listę przypisanych artykułów.
-- Dodatkowy endpoint `/api/elbow` zwraca analizę **metody łokcia** dla wartości $k$ od 2 do 8, co ułatwia decyzję o docelowej liczbie klastrów.
 
 > [!TIP]
 > **Uwaga badawcza:** Optymalny podział danych uzyskano dla **`k=6`** oraz ograniczeniu do 100 najistotniejszych cech (`max_features=100`), co potwierdzono wskaźnikiem **ARI** (*Adjusted Rand Index*) wynoszącym **`0.814`**, idealnie separując artykuły m.in. o rolnictwie i technologii.
