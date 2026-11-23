@@ -2,7 +2,7 @@
 
 Repozytorium zawiera realizację laboratoriów z przedmiotu **Inteligentne Systemy Internetowe**, podzielonych na dwa moduły tematyczne:
 - **Moduł 1 (Laboratoria 1–3)**: Projektowanie API oraz systemy rekomendacji (Content-Based i Collaborative Filtering).
-- **Moduł 2 (Laboratoria 4–5)**: Uczenie nienadzorowane i analiza tekstu w języku polskim (K-Means, DBSCAN, detekcja szumu).
+- **Moduł 2 (Laboratoria 4–7)**: Analiza tekstu, nienadzorowane grupowanie (K-Means, DBSCAN), indeksowanie odwrócone (BM25) oraz wyszukiwanie semantyczne (MiniLM, Elasticsearch).
 
 ---
 
@@ -158,7 +158,7 @@ System przewidujący preferencje bazujący na gustach społeczności.
 
 ---
 
-# 🧠 Moduł 2 (Laboratoria 4–5)
+# 🧠 Moduł 2 (Laboratoria 4–7)
 
 ---
 
@@ -279,5 +279,102 @@ Rozwinięcie metod analizy tekstu z użyciem algorytmu **DBSCAN** opartego na ma
     "distance_to_core": 0.812,
     "noise": true,
     "rule": "nearest_core_within_eps"
+  }
+  ```
+
+---
+
+### 🔹 Lab 06: Odwrócony indeks i algorytm BM25
+
+#### Co działa:
+Własny silnik wyszukiwania leksykalnego oparty na indeksie odwróconym (**inverted index**) oraz formule **Lucene BM25** ($k_1=1.2, b=0.75$) dla 40 artykułów w języku polskim.
+- **Indeks odwrócony:** tokenizacja z usuwaniem polskich *stop words*, budowanie posting list `słowo -> {doc_id: tf}`, obliczanie średniej długości artykułów (`AVGDL = 18.85`).
+- **Ranking BM25:** cząstkowa waga słowa zależna od wskaźnika rzadkości **IDF** oraz nasycenia **TF** z uwzględnieniem kary za długość dokumentu ($norm$).
+- **API i interfejs:** wyszukiwanie z opcjonalnym filtrem kategorii (`category`), sortowanie wyników z łamaniem remisów rosnąco po ID (`-score, id`), podgląd wpisów indeksu (`/api/index/<term>`), podpowiedzi przy literówkach (`suggest` z biblioteki `difflib`). Bezpieczne wyróżnianie trafień za pomocą węzłów DOM `<mark>`.
+
+#### Przykładowe żądania i odpowiedzi:
+
+**1. Wyszukiwanie z rankingiem BM25**
+- **Żądanie:**  
+  `GET /api/search?q=procesor&top_k=1`
+- **Odpowiedź (`200 OK`):**
+  ```json
+  {
+    "count": 1,
+    "query": "procesor",
+    "results": [
+      {
+        "category": "Tech",
+        "id": 1,
+        "score": 4.4073,
+        "snippet": "Nowe procesory i ich zastosowanie w serwerach...",
+        "title": "Nowe procesory i ich zastosowanie w serwerach"
+      }
+    ],
+    "suggestions": {}
+  }
+  ```
+
+**2. Podgląd wpisu w odwróconym indeksie**
+- **Żądanie:**  
+  `GET /api/index/technologia`
+- **Odpowiedź (`200 OK`):**
+  ```json
+  {
+    "document_frequency": 4,
+    "postings": {
+      "1": 1,
+      "4": 1,
+      "5": 1,
+      "8": 1
+    },
+    "term": "technologia"
+  }
+  ```
+
+---
+
+### 🔹 Lab 07: Wyszukiwanie semantyczne i Elasticsearch
+
+#### Co działa:
+Zestawienie trzech odmiennych podejść do wyszukiwania informacji w jednym interfejsie i API:
+1. **BM25 (Leksykalne):** silnik z Lab 6 operujący na dokładnych tokenach.
+2. **MiniLM (Semantyczne):** wielojęzyczny model wektorowy (`sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`) działający na procesorze (CPU). Generuje 384-wymiarowe embeddingi zdań, a podobieństwo mierzy iloczynem skalarnym wektorów znormalizowanych (**cosine similarity**).
+3. **Elasticsearch:** rozproszony silnik wyszukiwania uruchamiany w Dockerze, z zapytaniem `multi_match` na polach `title^2` i `text` oraz obsługą literówek `fuzziness: "AUTO"`.
+
+- **API:** endpoint `/api/status` weryfikujący dostępność usług oraz `/api/compare` zwracający równoległe zestawienie trafień dla każdego z silników.
+- **Ewaluacja (Recall@3):** na zbiorze 5 zapytań parafrazowanych (np. *„komputer przenośny do pracy”* zamiast *„laptop”*) wyszukiwanie semantyczne osiągnęło **`Recall@3 = 1.00`** (5/5 trafień), podczas gdy leksykalny BM25 uzyskał jedynie **`0.40`** (2/5).
+
+#### Przykładowe żądania i odpowiedzi:
+
+**1. Sprawdzenie statusu usług**
+- **Żądanie:**  
+  `GET /api/status`
+- **Odpowiedź (`200 OK`):**
+  ```json
+  {
+    "elastic": false,
+    "semantic": "model załadowany w pamięci (MiniLM-L12-v2)"
+  }
+  ```
+
+**2. Porównanie wyników dla parafrazy**
+- **Żądanie:**  
+  `GET /api/compare?q=komputer+przenośny&top_k=1`
+- **Odpowiedź (`200 OK`):**
+  ```json
+  {
+    "bm25": [],
+    "elastic": null,
+    "query": "komputer przenośny",
+    "semantic": [
+      {
+        "category": "Tech",
+        "id": 1,
+        "score": 0.4847,
+        "snippet": "Nowe procesory i ich zastosowanie w serwerach...",
+        "title": "Nowe procesory i ich zastosowanie w serwerach"
+      }
+    ]
   }
   ```

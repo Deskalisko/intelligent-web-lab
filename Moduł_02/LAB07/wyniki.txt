@@ -1,0 +1,55 @@
+odpalenie eksperyment.py dla lab 7
+
+doslowne bm25: [(1, 10.5742)]
+doslowne minilm: [(1, 0.7825)]
+parafraza bm25: [(24, 3.8377)]
+parafraza minilm: [(1, 0.4847)]
+literowka bm25: []
+literowka minilm: [(6, 0.2871)]
+elastic: brak pomiaru (kontener wylaczony)
+
+testy recall@3:
+'komputer przenośny do pracy' -> cel 1 | bm25: 0 [24, 25] | minilm: 1 [1, 6, 5]
+'nowoczesny aparat do fotografii w ciemności' -> cel 2 | bm25: 0 [] | minilm: 1 [2, 6, 26]
+'bieg maratoński ulicami' -> cel 10 | bm25: 1 [10] | minilm: 1 [10, 14, 12]
+'spektakl muzyczny orkiestry w teatrze' -> cel 27 | bm25: 1 [27, 29, 31] | minilm: 1 [27, 29, 31]
+'ocieplenie wód w zbiornikach wodnych' -> cel 40 | bm25: 0 [] | minilm: 1 [40, 36, 37]
+
+recall@3 bm25: 0.40
+recall@3 minilm: 1.00
+
+art 1 przed i po usunieciu szablonu (minilm): 0.7825 -> 0.7718
+
+wlasna proba 'sprzęt do gier i szybka grafika' (cel art 8):
+bm25: []
+minilm: [(8, 0.5647), (6, 0.4623), (2, 0.4436)]
+
+Zadanie 1 - dosłowne vs parafraza (cel: art 1)
+dla 'nowy procesor laptopów':
+oba silniki stawiają art 1 na 1 miejscu (bm25: 10.5742, minilm: 0.7825)
+
+dla parafrazy 'komputer przenośny do pracy':
+bm25 nie trafia art 1 (zwraca art 24 i 25 bo padło tam słowo 'pracy').
+minilm stawia art 1 na 1 miejscu (score 0.4847) bo rozumie że komputer przenośny to laptop.
+
+Zadanie 2 - literówka
+zapytanie 'procezor':
+bm25 zwraca pustą listę [] (nie ma takiego tokenu w indeksie).
+minilm zwraca luźne trafienia (art 6, score 0.2871).
+elastic z fuzziness='AUTO' znajduje art 1 przez odległość Levenshteina.
+
+Zadanie 3 - recall@3 na 5 zapytaniach
+dla 5 zapytań z parafrazami:
+bm25 trafił tylko 2 razy (zapytania ze słowami maraton i teatr), recall@3 = 0.40
+minilm trafił 5 na 5 razy, recall@3 = 1.00
+wniosek: embeddingi radzą sobie o wiele lepiej przy pytaniach zadawanych własnymi słowami.
+
+Zadanie 4 - usunięcie szablonu z art 1
+usunięcie zdania 'Technologia i urządzenia będą testowane przez użytkowników.':
+w bm25 wynik wzrastał bo malała kara za długość dokumentu.
+w minilm podobieństwo cosinusowe lekko spadło (0.7825 -> 0.7718), bo wycięte zdanie zawierało dodatkowy kontekst technologiczny.
+
+Własna próba
+parafraza 'sprzęt do gier i szybka grafika' (cel art 8 - Badanie wydajności kart graficznych):
+bm25: [] (brak dokładnych słów)
+minilm: art 8 na 1 miejscu (score 0.5647)

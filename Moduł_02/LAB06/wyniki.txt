@@ -1,0 +1,61 @@
+odpalenie eksperyment.py dla lab 6
+
+technologia w mini: [1, 4, 5] | w calym: [1, 4, 5, 8] | brakowalo: {8}
+procesor: 1 4.4073
+procesor laptopow: 1 8.8145
+kalkulator: tf=2, idf=3.308, norm=1.303, score=4.407
+Sport bez filtra: [(13, 'Sport'), (16, 'Sport')]
+Sport z filtrem: [(13, 'Sport'), (16, 'Sport')]
+procezor: [] | sugestia: {'procezor': 'procesor'}
+IDF: procesor=3.308 vs technologia=2.209
+art 1 po usunieciu szablonu: dl=15 (bylo 21), wynik wzrasta: 4.407 -> 4.826
+smartfon: []
+baterii: [(1, 3.1606)]
+akumulator: [] {}
+
+baza: 40 artykułów
+słownik: 516 haseł
+średnia długość artykułu: 18.85 tokenów
+
+Zadanie 1 - indeks
+w miniindeksie z 4 artykułów (1, 2, 4, 5) dla 'technologia' mamy [1, 4, 5]
+w pełnym indeksie 40 artykułów dochodzi jeszcze art 8 (Badanie wydajności kart graficznych)
+df=4 bo dokładnie w tylu artykułach występuje to słowo
+
+Zadanie 2 - procesor vs procesor laptopów
+'procesor': art 1, score 4.4073
+'procesor laptopów': art 1, score 8.8145
+wynik rośnie dwukrotnie bo art 1 zawiera oba słowa i oba są rzadkie (df=1)
+
+Zadanie 3 - kalkulator bm25 ręcznie dla art 1
+hasło: procesor, tf=2, df=1, N=40, |D|=21, avgdl=18.85, k1=1.2, b=0.75
+idf = ln(1 + (40 - 1 + 0.5) / (1 + 0.5)) = ln(27.333) = 3.308
+norm = 1.2 * (1 - 0.75 + 0.75 * 21 / 18.85) = 1.303
+score = 3.308 * (2 * 2.2) / (2 + 1.303) = 4.407
+gdy wydłużamy dokument to rośnie norm (kara za długość) i wynik spada
+
+Zadanie 4 - filtr kategorii i literówki
+dla zapytania 'trening' bez filtra zwraca sport (13, 16)
+z filtrem category='Sport' ucina inne kategorie
+literówka 'procezor' -> pusta lista [] i sugestia {'procezor': 'procesor'}
+puste zapytanie q='' zwraca kod 400
+
+Zadanie 5 - gdzie ranking kłamie
+1. idf:
+'procesor' df=1, idf=3.308
+'technologia' df=4, idf=2.209
+rzadsze słowo w korpusie ma wyższy wskaźnik idf i silniej podbija wynik
+
+2. usunięcie szablonu redakcyjnego:
+zdanie 'Technologia i urządzenia będą testowane przez użytkowników.' usunięte z art 1
+długość spada z 21 do 15 tokenów
+kara za długość (norm) maleje i bm25 rośnie: 4.407 -> 4.826
+
+3. brak synonimów (leksykalność):
+szukamy 'smartfon' -> zwraca pustą listę []
+mimo że artykuł 2 opisuje telefon z aparatem nocnym
+bm25 operuje na samych tokenach i nie rozumie znaczenia słów
+
+Własna próba
+słowo z korpusu: 'baterii' -> art 1, score 3.1606
+słowo spoza bazy: 'akumulator' -> brak wyników [], brak sugestii bo za duże edit distance
