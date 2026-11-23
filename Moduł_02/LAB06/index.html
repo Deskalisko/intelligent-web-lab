@@ -1,0 +1,572 @@
+<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Laboratorium 6: własny indeks odwrócony i ranking BM25 dla archiwum artykułów."><title>Lab 06 · Archiwum znajduje odpowiedź · ISI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,600;6..72,700&display=optional" rel="stylesheet">
+<style>
+:root{--paper:#f2eedf;--ink:#171b18;--red:#9a3222;--practice-accent:#a23a29;--line:#b7b1a1;--card:#fffdf4;--grey:#565e58;--mono:'DM Mono',monospace;--serif:'Newsreader',Georgia,serif;--sans:'DM Sans',sans-serif}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:19px/1.65 var(--sans)}a{color:var(--red)}button,input,textarea{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--red);outline-offset:3px}::selection{background:var(--red);color:white}
+.header{border-bottom:3px solid var(--ink);background:var(--paper)}.header .wrap{max-width:1260px;margin:auto;padding:13px 25px;display:flex;align-items:center;justify-content:space-between;gap:20px}.mark{font:700 15px var(--mono);text-transform:uppercase;color:var(--ink);text-decoration:none;letter-spacing:.08em}.header nav{display:flex;gap:20px}.header nav a{color:var(--ink);font:500 14.5px var(--mono);text-decoration:none;text-transform:uppercase}.header nav a:hover{text-decoration:underline}.folio{font:14.5px var(--mono);color:var(--grey);text-transform:uppercase}
+.hero{border-bottom:3px solid var(--ink);min-height:640px;position:relative;overflow:hidden}.hero::after{content:'INDEX / 001-040';position:absolute;right:-90px;top:215px;transform:rotate(90deg);font:14.5px var(--mono);letter-spacing:.2em;color:var(--red)}.hero .wrap{max-width:1260px;margin:auto;padding:78px 25px 100px;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(260px,.55fr);gap:48px}.hero .issue{font:14.5px var(--mono);color:var(--red);text-transform:uppercase;letter-spacing:.15em;border-top:2px solid var(--red);padding-top:9px}.hero h1{font:700 clamp(65px,9vw,133px)/.91 var(--serif);letter-spacing:-.075em;margin:28px 0 26px;text-wrap:balance}.hero h1 i{font-weight:400;color:var(--red)}.hero p{font-size:22px;max-width:660px}.ticket{margin-top:55px;border:2px solid var(--ink);background:var(--card);box-shadow:12px 12px 0 var(--red);padding:20px;transform:rotate(2deg);align-self:center}.ticket .small{font:14.5px var(--mono);text-transform:uppercase}.ticket .term{font:600 35px var(--serif);margin:22px 0;border-bottom:1px dashed var(--ink);padding-bottom:15px}.ticket .row{display:flex;justify-content:space-between;font:15px var(--mono);border-bottom:1px solid var(--line);padding:8px 0}.ticket b{color:var(--red)}.ribbon{background:var(--ink);color:var(--paper);padding:12px 25px;font:14.5px var(--mono);text-align:center;text-transform:uppercase;letter-spacing:.16em}
+section{padding:80px 25px;border-bottom:2px solid var(--ink)}.wrap{max-width:1180px;margin:auto}.eyebrow{font:500 14.5px var(--mono);text-transform:uppercase;color:var(--red);letter-spacing:.13em}.title{font:700 clamp(42px,6vw,81px)/.95 var(--serif);letter-spacing:-.06em;max-width:850px;margin:17px 0 24px}.lede{font-size:20px;max-width:830px;color:#363c37}.columns{display:grid;grid-template-columns:1fr 1fr;gap:35px}.note{background:var(--card);padding:27px;border-left:5px solid var(--red)}.note h3{font:600 27px var(--serif);margin:0 0 8px}.note p{margin:0}.diagram{display:flex;align-items:stretch;gap:12px;overflow:auto;padding:16px 0}.diagram>div{flex:1;min-width:180px;border:2px solid var(--ink);background:var(--card);padding:20px;box-shadow:5px 5px 0 var(--line)}.diagram b{font:600 15px var(--mono);color:var(--red);text-transform:uppercase}.diagram p{font:25px var(--serif);line-height:1.1}.diagram .arrow{flex:0;min-width:25px;border:0;background:none;box-shadow:none;align-self:center;font:25px var(--mono);padding:0}.searchlab{background:#e7e0cc}.searchbox{display:flex;gap:0;border:2px solid var(--ink);background:var(--card);max-width:900px}.searchbox input{border:0;background:none;flex:1;min-width:0;padding:17px 19px;font:24px var(--serif);color:var(--ink)}.searchbox button{background:var(--red);color:white;border:0;border-left:2px solid var(--ink);padding:0 24px;font:500 14.5px var(--mono);text-transform:uppercase}.filters{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:16px 0 22px;font:15px var(--mono)}.filters select{padding:7px;border:1px solid var(--ink);background:var(--card);font:inherit}.results{display:grid;grid-template-columns:repeat(2,1fr);gap:13px;min-height:160px}.result{background:var(--card);border:1px solid var(--ink);padding:20px;box-shadow:4px 4px 0 var(--line)}.result .meta{font:14px var(--mono);color:var(--red);text-transform:uppercase}.result h3{font:600 26px/1.05 var(--serif);margin:8px 0}.result p{margin:0;font-size:17px}.result mark{background:#f8d77b;color:var(--ink);padding:0 2px}.hint{font:15px var(--mono)}
+.steps{display:grid;gap:33px}.step{display:grid;grid-template-columns:70px 1fr;gap:17px}.step>span{font:700 40px var(--serif);color:var(--red)}.step .body{border-top:2px solid var(--ink);padding-top:15px}.step h3{font:600 32px var(--serif);margin:0 0 9px}.step p{margin:0 0 15px;max-width:850px}.codebar{background:var(--ink);color:var(--paper);font:14.5px var(--mono);padding:7px 12px;display:flex;justify-content:space-between}.codebar button{background:none;border:1px solid var(--paper);color:var(--paper);font:inherit;padding:2px 7px}.code{margin:0;padding:18px;background:#222924;color:#f5efe0;font:15px/1.7 var(--mono);overflow:auto}.step details{padding:13px;border-left:4px solid var(--red);background:#e4d9c7;margin-top:14px}.step summary{cursor:pointer;font-weight:700}.formula{font:600 clamp(18px,2.5vw,30px) var(--serif);padding:24px;border:2px solid var(--ink);background:var(--card);overflow:auto}
+.assignment{background:var(--ink);color:var(--paper)}.assignment .eyebrow{color:#ff937c}.assignment .columns>div{border:1px solid #6f756e;padding:25px}.assignment h3{font:600 30px var(--serif);margin:0 0 12px}.assignment li{margin:10px 0}.assignment a{color:#ffae94}.resources{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}.resources a{display:block;background:var(--card);border:1px solid var(--ink);padding:20px;text-decoration:none;color:var(--ink)}.resources a:hover{background:#f2dcc7}.resources b{display:block;font:600 23px var(--serif)}.resources span{font-size:16px;color:var(--grey)}.checklist label{display:block;padding:12px 0;border-bottom:1px solid var(--line)}.checklist input{accent-color:var(--red);margin-right:10px}.meter{height:12px;background:#d4ccbb;margin:18px 0}.meter div{height:100%;width:0;background:var(--red)}.q{padding:20px 0;border-top:1px solid var(--ink)}.q h3{font:600 23px var(--serif);margin:0 0 10px}.answers{display:flex;gap:8px;flex-wrap:wrap}.answers button{border:1px solid var(--ink);background:var(--card);padding:9px 11px}.answers button.good{background:#b8dbb1}.answers button.bad{background:#f8b4a0}.feedback{font-size:16px;min-height:25px}.exit textarea{display:block;width:100%;min-height:160px;background:var(--card);border:2px solid var(--ink);padding:17px;resize:vertical}.small{font:14.5px var(--mono)}footer{background:var(--red);color:white;padding:25px}footer .wrap{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;font:15px var(--mono)}footer a{color:white}
+@media(max-width:780px){.header nav{display:none}.hero .wrap,.columns,.results,.resources{grid-template-columns:1fr}.hero .wrap{gap:0;padding-top:52px}.hero h1{font-size:clamp(55px,15vw,90px)}.ticket{max-width:400px;margin-top:20px}.step{grid-template-columns:1fr;gap:0}section{padding:58px 20px}.searchbox input{font-size:19px}.searchbox button{padding:0 12px}}@media print{.header,.searchlab,.codebar button{display:none}section{padding:20px 0;break-inside:avoid}.hero{min-height:0}}
+.searchlab .eyebrow{color:#9c2d1f}
+</style><style data-ill="1">
+/* ---------- rytm pionowy · czytelne odstępy (wzorzec lab2) ---------- */
+section > * + * { margin-top: 0; }
+.wrap > * + * { margin-top: 0; }
+.eyebrow + .title { margin-top: 17px; }
+.title + .lede { margin-top: 18px; }
+.lede + * { margin-top: 8px; }
+.columns, .steps, .resources, .searchbox { margin-top: 28px; }
+.step + .step, .q + .q { margin-top: 22px; }
+h3.sub-title { font: 600 21px var(--serif); letter-spacing: -.02em; color: var(--red); margin: 28px 0 14px; }
+.assignment h3.sub-title { color:#ffab96; }
+h3.sub-title:first-child { margin-top: 8px; }
+/* ilustracja hero */
+.fig-ill { margin: 40px 0 12px; max-width: 960px; }
+.fig-ill img { display: block; width: 100%; height: auto; border-radius: 22px; border: 2px solid var(--ink); box-shadow: 8px 8px 0 var(--line); }
+.ill-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 6px; }
+.ill-tab { font-family: var(--mono); font-size: .92rem; font-weight: 700; letter-spacing: .06em; padding: 9px 16px; border-radius: 999px; border: 2px solid var(--ink); background: var(--card); color: var(--ink); cursor: pointer; transition: all .2s; }
+.ill-tab:hover { border-color: var(--red); color: var(--red); }
+.ill-tab[aria-pressed="true"] { border-color: var(--ink); color: #fff; background: var(--red); }
+.ill-note { margin: 10px 0 4px; padding: 14px 18px; border-left: 5px solid var(--red); background: var(--card); border-radius: 0 12px 12px 0; color: var(--grey); font-size: 1.02rem; min-height: 3.2em; }
+.ill-note strong { color: var(--ink); }
+/* własna próba: spójna karta zamiast gołej sekcji */
+#own-trial .trial-card { border: 2px solid var(--ink); border-radius: 14px; background: var(--card); box-shadow: 8px 8px 0 var(--red); padding: 30px 32px; margin-top: 8px; }
+#own-trial .trial-card h2 { font: 600 30px var(--serif); letter-spacing: -.02em; margin: 0 0 16px; }
+#own-trial .trial-card p { color: var(--grey); }
+#own-trial .trial-card p + p { margin-top: 14px; }
+#own-trial .trial-card strong { color: var(--ink); }
+#own-trial .trial-card code { font-family: var(--mono); color: var(--red); }
+.reveal { opacity: 0; transform: translateY(30px); transition: opacity .7s ease, transform .7s ease; }
+.reveal.in { opacity: 1; transform: none; }
+</style><link rel="icon" href="../assets/favicon.svg">
+<style data-typo="1">:root{--acc:#9a3222;--acc2:#704700}
+strong{color:var(--acc);font-weight:700}
+em{color:var(--acc2);font-style:italic}
+code{font-family:var(--mono);background:#f7e7e2;color:#a5301e;padding:.1em .45em;border-radius:6px}
+.lead{font-size:1.1rem;line-height:1.8}
+p+p{margin-top:16px}
+.columns p,.result p{line-height:1.75}
+.challenge li{margin-bottom:16px;line-height:1.8}</style><style data-fx="6">
+/* ---------- Lab 6: wyjasnienia, widgety, animacje ---------- */
+#own-trial .trial-card strong{color:var(--acc)}
+.prose{max-width:1000px;margin:30px 0 0}
+.prose h3.sub-title{margin-top:38px}
+.prose h3.sub-title:first-child{margin-top:0}
+.diagram{margin-top:26px}
+/* --- schemat indeksu odwroconego (inv-fig) --- */
+.inv-fig{margin:30px 0 14px;border:2px solid var(--ink);background:var(--card);padding:22px;box-shadow:6px 6px 0 var(--line)}
+.inv-row{display:grid;grid-template-columns:minmax(90px,auto) auto minmax(0,1fr);gap:16px;align-items:center}
+.inv-docs{display:grid;gap:6px}
+.inv-docs i{font-style:normal;border:1px dashed var(--line);background:var(--paper);padding:5px 9px;font:14.5px var(--mono);animation:docIn .55s cubic-bezier(.2,.9,.2,1) backwards}
+.inv-docs i:nth-child(2){animation-delay:.18s}
+.inv-docs i:nth-child(3){animation-delay:.36s}
+.inv-arrow{font:24px var(--mono);color:var(--red);animation:arrowFlow 1.6s ease-in-out infinite}
+.inv-term{border:2px solid var(--ink);background:var(--paper);padding:14px 16px;animation:termPulse 3.6s ease-in-out infinite}
+.inv-term b{display:block;font:600 15px var(--mono);text-transform:uppercase;color:var(--red)}
+.inv-term small{display:block;font:13px var(--mono);color:var(--grey);margin:2px 0 9px}
+.inv-term ul{margin:0;padding:0;list-style:none;display:grid;gap:5px}
+.inv-term li{font:15px var(--mono);border-left:4px solid var(--red);background:var(--card);padding:4px 9px;animation:postIn .5s cubic-bezier(.2,.9,.2,1) backwards}
+.inv-term li:nth-child(2){animation-delay:.45s}
+.inv-term li:nth-child(3){animation-delay:.9s}
+.inv-fig figcaption{margin-top:16px;font-size:17px;color:#363c37;max-width:900px;line-height:1.75}
+/* --- widget: wyszukiwanie hasla --- */
+.lookup{margin:34px 0 0;border:2px solid var(--ink);background:var(--card);padding:24px;box-shadow:8px 8px 0 var(--line)}
+.lookup h3.sub-title{margin:0 0 10px}
+.lookup>.sub{margin:0 0 18px}
+.lookup-form{display:flex;flex-wrap:wrap;border:2px solid var(--ink);background:var(--paper)}
+.lookup-form input{flex:1 1 220px;min-width:0;border:0;background:none;padding:13px 15px;font:22px var(--serif);color:var(--ink)}
+.lookup-form button{background:var(--red);color:#fff;border:0;border-left:2px solid var(--ink);padding:0 18px;font:500 14px var(--mono);text-transform:uppercase}
+.lookup-form button:hover{background:#9c2d1f}
+.lookup-form button+button{border-top:0}
+.lookup-status{margin:12px 0 0;font:15px var(--mono);color:var(--grey);min-height:1.6em}
+.lookup-status b{color:var(--red)}
+.lookup-out{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.55fr);gap:16px;margin-top:16px}
+.lookup-box{border:2px dashed var(--line);background:var(--paper);padding:16px;min-height:160px}
+.lookup-box h4{margin:0 0 10px;font:600 14.5px var(--mono);text-transform:uppercase;color:var(--red);letter-spacing:.06em}
+.lookup-box p{margin:0;font:15px var(--mono);color:var(--grey);line-height:1.7}
+.lp-row{display:flex;justify-content:space-between;gap:10px;font:15px var(--mono);border-bottom:1px solid var(--line);padding:6px 0;animation:postIn .45s cubic-bezier(.2,.9,.2,1) backwards}
+.lp-row b{color:var(--red)}
+.lookup-doc{border-left:5px solid var(--red);background:var(--card);padding:12px 14px;margin-bottom:10px;animation:cardIn .5s cubic-bezier(.2,.9,.2,1) backwards}
+.lookup-doc .meta{font:13.5px var(--mono);color:var(--grey);text-transform:uppercase;letter-spacing:.04em}
+.lookup-doc h5{margin:4px 0 6px;font:600 21px/1.1 var(--serif)}
+.lookup-doc p{margin:0;font-size:16px;line-height:1.7}
+mark{background:#f4cdb8;color:#7d2415;border-radius:3px;padding:0 3px;box-shadow:inset 0 -2px 0 var(--red)}
+.lookup-hint{margin:16px 0 0;font:15px var(--mono);color:var(--grey);max-width:none}
+/* --- widget: kalkulator wkładu słowa --- */
+.calc{margin:26px 0 0;border:2px solid var(--ink);background:var(--card);padding:22px;box-shadow:8px 8px 0 var(--line)}
+.calc h4{margin:0 0 4px;font:600 26px var(--serif)}
+.calc .calc-sub{margin:0 0 18px;font-size:17px}
+.calc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.calc label{display:block;font:14px var(--mono);text-transform:uppercase;color:var(--grey);letter-spacing:.05em}
+.calc select{border:1px solid var(--ink);background:var(--paper);padding:7px;font:inherit;width:100%}
+.calc input[type=range]{width:100%;accent-color:var(--red);margin:6px 0 0}
+.calc-out{display:grid;grid-template-columns:minmax(0,220px) minmax(0,1fr);gap:20px;margin-top:20px;align-items:center}
+.calc-num{border:2px solid var(--ink);background:var(--paper);padding:14px 16px;text-align:center}
+.calc-num b{display:block;font:700 46px/1 var(--serif);color:var(--red);animation:numPop .5s cubic-bezier(.2,1.4,.3,1) backwards}
+.calc-num small{display:block;font:13px var(--mono);color:var(--grey);margin-top:6px}
+.calc-rows{font:15px var(--mono);color:#363c37;line-height:2}
+.calc-rows b{color:var(--red)}
+.calc-flat{margin-top:14px;padding:11px 14px;border-left:5px solid var(--ink);background:#e7e0cc;font-size:16.5px;max-width:none}
+.calc-bars{display:grid;gap:9px;margin-top:18px}
+.calc-bar{position:relative;min-height:34px;background:#e7e0cc;border:1px solid var(--line)}
+.calc-bar i{position:absolute;left:0;bottom:0;height:4px;background:var(--red);transform-origin:left center;animation:barGrow .8s cubic-bezier(.2,.9,.2,1) both}
+.calc-bar span{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 9px 8px;font:14px/1.4 var(--mono);color:var(--ink)}
+.calc-bar.top i{background:var(--acc2,#8a5a00)}
+.calc-legend{margin:12px 0 0;font:14px var(--mono);color:var(--grey)}
+.calc-legend b{color:var(--red)}
+.calc-bar.top i{background:#8f2a19}
+/* --- animacje --- */
+@keyframes ruleScan{from{background-position:0 0}to{background-position:52px 0}}
+@keyframes docIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+@keyframes arrowFlow{0%,100%{opacity:.45;transform:translateX(-4px)}50%{opacity:1;transform:translateX(5px)}}
+@keyframes termPulse{0%,100%{box-shadow:0 0 0 0 rgba(187,62,42,0)}50%{box-shadow:0 0 0 7px rgba(187,62,42,.12)}}
+@keyframes postIn{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
+@keyframes cardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes barGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes numPop{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+@keyframes boxIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes stampBreathe{0%,100%{opacity:.5}50%{opacity:.72}}
+/* --- animacje wystepujace na stronie --- */
+.rule-line{animation:ruleScan 2.6s linear infinite}
+.diagram>div{animation:boxIn .6s cubic-bezier(.2,.9,.2,1) backwards}
+.diagram>div:nth-child(1){animation-delay:.05s}
+.diagram>div:nth-child(2){animation-delay:.25s}
+.diagram>div:nth-child(3){animation-delay:.45s}
+.diagram>div:nth-child(4){animation-delay:.65s}
+.diagram>div:nth-child(5){animation-delay:.85s}
+.stamp-fx{animation:stampFx 1s cubic-bezier(.2,1.5,.3,1) .4s backwards,stampBreathe 4.5s ease-in-out 1.6s infinite}
+.results .result{animation:cardIn .5s cubic-bezier(.2,.9,.2,1) backwards}
+.step .body h3{animation:boxIn .5s cubic-bezier(.2,.9,.2,1) backwards}
+@media(max-width:780px){
+.diagram{flex-direction:column;overflow:visible}
+.diagram>div{min-width:0}
+.diagram .arrow{align-self:center;transform:rotate(90deg)}
+.lookup,.calc{padding:18px}
+.lookup-out,.calc-out{grid-template-columns:1fr}
+.calc-num b{font-size:40px}
+.inv-row{grid-template-columns:1fr}
+.inv-arrow{justify-self:start;transform:rotate(90deg)}
+}
+</style>
+<link rel="stylesheet" href="../assets/responsive.css">
+<link rel="stylesheet" href="../assets/code.css">
+<link rel="stylesheet" href="../assets/tab-icons.css">
+<script src="../assets/highlight.min.js" defer></script>
+<script src="../assets/code.js" defer></script>
+<style>.start-tasks a{font-weight:700;text-decoration:underline;text-underline-offset:.18em}.start-tasks li+li{margin-top:.6em}.start-note{border-top:1px solid currentColor;padding-top:.7em}section[id]{scroll-margin-top:64px}</style>
+
+<link rel="stylesheet" href="../assets/praktyka.css">
+</head><body>
+<header class="header"><div class="wrap"><a class="mark" href="../index.html">ISI / 06 / BIURO WYSZUKIWANIA</a><nav aria-label="Na tej stronie"><a href="#zasada">Indeks</a><a href="#demo">Szukaj</a><a href="#kod">Kod</a><a href="#zadanie">Zadanie</a><a href="#kontrola">Kontrola</a></nav><span class="folio">Archiwum · 2026</span></div></header>
+<div class="hero"><div class="hero-fx" aria-hidden="true"><span class="rule-line l1"></span><span class="rule-line l2"></span><span class="rule-line l3"></span><span class="stamp-fx">INDEKS<br>ODWRÓCONY</span></div><div class="wrap"><div><p class="issue">Numer 06 / B.3 · EK_04 / indeksowanie i ranking</p><h1>Archiwum<br><i>znajduje</i><br>odpowiedź.</h1><p>Jedno słowo wskazuje dokumenty. Ranking decyduje, który z nich przeczytać <em>najpierw</em>. Zbudujesz oba mechanizmy samodzielnie.</p><div class="ill-tabs" role="group" aria-label="Kliknij etap schematu"><button class="ill-tab" data-ill="0" aria-pressed="true"><svg class="tab-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h9l5 5v11H5z"/><path d="M14 4v5h5"/><path d="M8 13h8M8 17h6"/></svg>1 · TOKEN</button><button class="ill-tab" data-ill="1" aria-pressed="false"><svg class="tab-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M4 12h16M4 18h12"/><circle cx="19" cy="6" r="1.6"/><circle cx="20" cy="18" r="1.6"/></svg>2 · INDEKS</button><button class="ill-tab" data-ill="2" aria-pressed="false"><svg class="tab-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V10M10 19V5M15 19v-7M20 19V3"/></svg>3 · BM25</button></div><p class="ill-note" id="illNote">TOKEN: tekst tniemy na małe słowa. „Procesor” zostaje, „i” wypada jako stop-word (słowo pomijane).</p></div><aside class="ticket" aria-label="Przykładowa karta indeksu"><div class="small">Karta indeksowa / hasło</div><div class="term">technologia</div><div class="row"><span>ART. 001</span><b>tf=1</b></div><div class="row"><span>ART. 004</span><b>tf=1</b></div><div class="row"><span>ART. 005</span><b>tf=1</b></div><div class="row"><span>ART. 008</span><b>tf=1</b></div><p class="small">Tak wygląda lista wystąpień z dostarczonych 40 artykułów: <em>df=4</em> dla tego hasła.</p></aside></div></div><div class="ribbon">OD TEKSTU DO INDEKSU &nbsp; / &nbsp; OD INDEKSU DO RANKINGU &nbsp; / &nbsp; OD RANKINGU DO ODPOWIEDZI</div>
+<main><aside class="course-start" aria-label="Jak pracować z laboratorium">
+<h2>Lab 06: od czego zacząć</h2>
+<p>Zbudujesz wyszukiwarkę, która znajduje artykuły po słowach i porządkuje wyniki.</p>
+<div class="first-try" style="--term-accent:#8a97a0"><h3>Rozgrzewka z Lab 05 · DBSCAN</h3><p class="try-question">Co oznacza etykieta <code>-1</code> w DBSCAN i kiedy punkt jest rdzeniem? Odpowiedz z pamięci, potem sprawdź.</p><details><summary>Sprawdź odpowiedź</summary><p><code>-1</code> to szum: punkt poza każdą grupą. Rdzeń ma co najmniej <code>min_samples</code> punktów w promieniu <code>eps</code> (licząc siebie). Punkt brzegowy leży w kole rdzenia, ale sam nie jest rdzeniem.</p></details></div>
+<div class="first-try" style="--term-accent:#bb5940"><h3>Ile razy i w ilu artykułach?</h3><p><dfn>TF</dfn> określa, ile razy słowo wystąpiło w jednym dokumencie. <dfn>DF</dfn> mówi, w ilu dokumentach wystąpiło przynajmniej raz. Indeks odwrócony (inverted index) pozwala znaleźć te dokumenty po słowie.</p><figure class="lab-sketch"><figcaption>Policz słowa, potem dokumenty</figcaption><svg viewBox="0 0 320 132" role="img" aria-label="Dokument A zawiera słowo procesor dwa razy. Dokumenty B i C nie zawierają go wcale."><text x="12" y="22" class="key">FRAGMENTY ARCHIWUM</text><text x="12" y="53" class="key">A</text><text x="52" y="53" class="">procesor … procesor</text><text x="12" y="84" class="key">B</text><text x="52" y="84" class="">trening zawodników</text><text x="12" y="115" class="key">C</text><text x="52" y="115" class="">kredyt mieszkaniowy</text></svg></figure><p class="try-question">„Procesor” występuje dwa razy w jednym artykule i ani razu w pozostałych. Jakie są TF i DF?</p><details><summary>Sprawdź odpowiedź</summary><p>Dla tego artykułu TF wynosi 2. W całym zbiorze DF wynosi 1. Dodanie trzeciego wystąpienia w tym samym artykule zwiększyłoby tylko TF. <a href="#zasada">Zajrzyj do indeksu</a>.</p></details></div>
+<div class="start-tasks">
+<h3>Zadania do wykonania</h3>
+<ol>
+<li><a href="#zasada">Odczytaj indeks.</a> W miniindeksie wpisz <code>technologia</code> i zapisz identyfikatory trafień. Potem uruchom serwer i otwórz <a href="http://127.0.0.1:5006/api/index/technologia">indeks wszystkich 40 artykułów</a>. Którego identyfikatora brakowało w demonstracji? Sprawdź, dlaczego pełny indeks zwraca <code>df=4</code>.</li>
+<li><a href="#demo">Porównaj wyniki.</a> Wyszukaj najpierw <code>procesor</code>, potem <code>procesor laptopów</code>. Zapisz pierwszy tytuł i wskaż w nim lub w treści słowa pasujące do zapytania.</li>
+<li><a href="#kod">Sprawdź implementację.</a> Zbuduj indeks dla 40 artykułów i uporządkuj trafienia według malejącego BM25. Przy remisie ustaw mniejszy identyfikator pierwszy. W kalkulatorze zmień tylko długość dokumentu i zapisz, jak zmienił się wynik.</li>
+<li><a href="#zadanie">Przetestuj API i widok.</a> Sprawdź filtr kategorii oraz wyróżnianie trafień za pomocą elementu <code>mark</code>. Porównaj nieznane słowo (np. „procezor”) z pustym zapytaniem. Pierwsze powinno zwrócić pustą listę wyników, drugie kod HTTP 400.</li>
+</ol>
+<p class="start-note">Do oddania przygotuj <code>search_engine.py</code>, <code>app.py</code> i zapisane rankingi z wyjaśnieniem.</p>
+</div>
+<p>Pobierz cały kurs i rozpakuj archiwum. W katalogu <code>lab6</code> zainstaluj zależności poleceniem <code>py -m pip install -r ../requirements.txt</code>. Następnie uruchom <code>py app.py</code> i otwórz <code>http://127.0.0.1:5006/</code>. Formularze korzystają z tego serwera. </p>
+<div class="files"><a href="../lab4/articles.csv" download>articles.csv</a> <a href="search_engine.py" download>search_engine.py</a> <a href="app.py" download>app.py</a> <a href="../kurs.zip" download>Pobierz cały kurs (ZIP)</a> <a href="../requirements.txt" download>Zależności podstawowe</a> <a href="../index.html#laby">Wszystkie laboratoria</a></div>
+<p><a href="#dodatkowe-przyklady">Przejdź do dodatkowych przykładów</a></p>
+</aside>
+<section id="zasada"><div class="wrap"><p class="eyebrow">01 / pytanie od redaktora</p><h2 class="title">„Gdzie pisaliśmy<br>o procesorach?”</h2><div class="columns"><p class="lede">Archiwum ma <a href="../lab4/articles.csv" download>40 artykułów z Lab 4</a>. Przeszukiwanie każdego tekstu od początku działa, ale nie pokazuje, gdzie występuje słowo, i nie daje rankingu. Indeks odwrócony przechowuje odpowiedź dla każdego hasła.</p><div class="note"><h3>Kontrakt API</h3><p><code>GET /api/search?q=procesor</code> zwraca tytuł, kategorię, fragment tekstu i wynik BM25. <code>GET /api/index/technologia</code> pokazuje listę dokumentów w indeksie.</p></div></div>
+<h3 class="sub-title">Po co komu odwrócony indeks</h3>
+<p>Bez indeksu każde zapytanie czyta wszystkie 40 artykułów od początku. Przy dwóch pytaniach to 80 przeczytań, przy dziesięciu 400. Indeks odwrócony robi tę pracę raz: buduje spis „słowo → dokumenty”, a wyszukiwanie zagląda tylko do spisu.</p>
+<p>Wygląda to jak wpis w spisie rzeczy na końcu podręcznika: hasło po lewej, numery stron po prawej. Hasło <code>technologia</code> prowadzi do czterech artykułów (001, 004, 005, 008), hasło <code>procesor</code> do jednego artykułu, a hasło, którego w korpusie nie ma, do żadnego.</p>
+<p>Taka lista wystąpień nazywa się <em>posting list</em>, a pojedyncze jej wejście to para <code>id &#8594; tf</code>: dokument oraz liczba wystąpień terminu właśnie w nim. Całą strukturę tworzy pętla po licznikach częstości. W kodzie zajmuje to kilka linii, a na tej liście opiera się całe wyszukiwanie.</p>
+<p>W archiwum jest 516 różnych haseł, a średni artykuł liczy 18,9 tokenów. Te dwie liczby pokazują, że większość haseł występuje rzadko i tylko w kilku artykułach.</p>
+<p>Term frequency (tf) to licznik lokalny: ile razy słowo pojawiło się w tym jednym dokumencie. Document frequency (df) to licznik globalny: w ilu dokumentach całego korpusu słowo w ogóle występuje. Hasło <code>procesor</code> ma tf=2 i df=1. Dwa razy w artykule 001 i tylko tam. Hasło <code>technologia</code> ma tf=1 w każdym z czterech artykułów, więc jego df=4.</p>
+<p>Pierwszy licznik odpowiada na pytanie „czy ten tekst jest właśnie o tym”, drugi na pytanie, czy słowo jest w całym archiwum rzadkie. W rankingu liczą się oba naraz: silne tf przy małym df daje wysoki wynik, a to samo tf przy dużym df prawie nic nie znaczy.</p>
+<p>Indeks odwrócony ma też granicę, którą trzeba zobaczyć na własne oczy, zanim przejdziecie do Lab 7. Jest on słownikiem dokładnych napisów, a nie słownikiem znaczeń, i nie zna odmian.</p>
+<p>Hasła <code>urządzenia</code> (df=6) i <code>urządzeń</code> (df=3) to dwa osobne wpisy, chociaż to formy tego samego słowa. Indeks traktuje je osobno i liczy dla nich różne idf, czyli wagi rzadkości słowa. Jeśli zapytanie składa się z jednej formy, tekst zawierający wyłącznie drugą nie dostanie punktów za to słowo. W Lab 7 porównasz dopasowanie tokenów z tolerancją literówek i wyszukiwaniem semantycznym.</p>
+<details><summary>Czym jest token, skoro hasło to nie zawsze słowo?</summary><p>Tokenizator najpierw zamienia tekst na małe litery, potem tnie go wzorcem <code>[^\W_]+</code>. Zostają litery i cyfry, wypadają spacje, przecinki i kropki, więc z „urządzeń,” robi się jedno hasło <code>urządzeń</code>.</p>
+<p>Dodatkowo odrzucamy tokeny krótsze niż dwa znaki oraz słowa pomijane (stop words): i, w, na, do, z, o, po, dla, oraz, nad, przed, że, się, jest, ma, są. Bez tego indeks kończyłby się hasłami dla najczęstszych spójników, a one nie niosą informacji o temacie. Wpis <code>index[&quot;technologia&quot;]</code> pokaże dokumenty zawierające token „technologia” i liczbę jego wystąpień w każdym z nich.</p></details>
+<div class="diagram" aria-label="Schemat indeksowania"><div><b>Dokument</b><p>„Nowy procesor dla laptopów...”</p></div><div class="arrow" aria-hidden="true">→</div><div><b>Tokeny</b><p>nowy · procesor · laptopów</p></div><div class="arrow" aria-hidden="true">→</div><div><b>Indeks</b><p>procesor → {1: 2}</p></div></div><figure class="inv-fig"><div class="inv-row" role="img" aria-label="Animacja indeksu odwróconego: trzy dokumenty przepływają przez strzałkę do hasła, a pod hasłem kolejno, jedna po drugiej, pojawia się lista numerów dokumentów."><div class="inv-docs" aria-hidden="true"><i>dok. 004</i><i>dok. 007</i><i>dok. 008</i></div><span class="inv-arrow" aria-hidden="true">→</span><div class="inv-term" aria-hidden="true"><b>hasło: „urządzeń”</b><small>lista wystąpień (posting list)</small><ul><li>ART. 004 · tf=1</li><li>ART. 007 · tf=1</li><li>ART. 008 · tf=1</li></ul></div></div><figcaption>Hasło w indeksie od razu wskazuje dokumenty, w których występuje. <strong>Indeks</strong> mówi, GDZIE słowo jest, a <strong>BM25</strong> mówi, KTÓRY dokument czytać pierwszy. <em>Jak indeks na końcu podręcznika.</em></figcaption></figure>
+<div class="lookup">
+<h3 class="sub-title">Wpisz hasło i zobacz, co robi indeks</h3>
+<p class="sub">Poniżej działa miniaturowy indeks z czterech prawdziwych artykułów archiwum: 001, 002, 004 i 005. Tokenizator, stop-listy i struktura <code>id &#8594; tf</code> są takie same jak w <a href="search_engine.py" download>search_engine.py</a>. Wpisane hasło jest natychmiast dzielone na tokeny, a trafienia podświetlane w tekście dokumentu.</p>
+<form class="lookup-form" id="lookup-form">
+<label for="lookup-term" class="sr-only" style="position:absolute;clip:rect(0 0 0 0);width:1px;height:1px;overflow:hidden">Hasło do wyszukania</label>
+<input id="lookup-term" name="term" value="technologia" autocomplete="off" maxlength="60" required>
+<button type="submit">Znajdź dokładnie</button>
+<button type="button" id="lookup-typo">Wpisz z literówką</button>
+</form>
+<p class="lookup-status" id="lookup-status" role="status"></p>
+<div class="lookup-out">
+<div class="lookup-box"><h4>Lista wystąpień (posting list)</h4><div id="lookup-posting"></div></div>
+<div class="lookup-box"><h4>Dokumenty z podświetlonym hasłem</h4><div id="lookup-docs"></div></div>
+</div>
+<p class="lookup-hint">Spróbujcie kolejno: <code>urządzeń</code>, <code>urządzenia</code>, <code>procesor</code> i <code>procezor</code>. Puste pole wyniku przy literówce nie jest awarią. Takiego napisu nie ma w indeksie. Silnik mówi to wprost i proponuje poprawne hasło, zamiast po cichu podmieniać zapytanie. Porównanie <code>urządzeń</code> i <code>urządzenia</code> pokazuje drugą granicę: odmiana tworzy osobne wpisy.</p>
+</div>
+</div></section>
+<section class="searchlab" id="demo"><div class="wrap"><p class="eyebrow">02 / archiwum na żywo</p><h2 class="title">Sprawdź ranking</h2><p class="lede">Uruchom <code>py app.py</code> w katalogu <code>lab6</code> i otwórz tę stronę przez <code>http://127.0.0.1:5006/</code>. Otwarta jako plik pokazuje instrukcje, ale nie odpytuje serwera.</p><form class="searchbox" id="search-form"><label for="query" class="sr-only" style="position:absolute;clip:rect(0 0 0 0);width:1px;height:1px;overflow:hidden">Szukaj artykułów</label><input id="query" name="q" value="procesor laptopów" autocomplete="off" required maxlength="200"><button type="submit">Szukaj ↗</button></form><div class="filters"><label for="category">Dział:</label><select id="category"><option value="">Wszystkie</option><option>Tech</option><option>Sport</option><option>Biznes</option><option>Kultura</option><option>Środowisko</option></select><span id="search-status" role="status">Wpisz zapytanie i uruchom wyszukiwanie.</span></div><div class="results" id="results"></div><p class="hint">Spróbuj też: „kredyt mieszkań”, „trening zawodników”, „telefon nocny”. Wpisz literówkę „procezor” i zobacz propozycję poprawki: <em>dokładne</em> dopasowanie tego słowa nie istnieje w indeksie.</p></div></section>
+<section id="kod"><div class="wrap"><p class="eyebrow">03 / zbuduj silnik</p><h2 class="title">Odsłoń mechanizm</h2><p class="lede">Pracujcie w parze. Jedna osoba przewiduje wynik zapytania na papierze, druga sprawdza go w kodzie. Potem zamieńcie role.</p>
+<h3 class="sub-title">Co dokładnie liczy BM25</h3>
+<p>Wynik BM25 dla pary zapytanie-dokument to suma wkładów poszczególnych słów. Jeden wkład to iloczyn dwóch części: idf, który mówi, ile słowo jest warte w tym korpusie, oraz normowanego tf, który mówi, jak mocno słowo jest obecne w tym dokumencie. Wzór staje się czytelny po rozłożeniu na cztery elementy: rzadkość, nasycenie, długość i sumowanie.</p>
+<p>Rzadkość: idf. W kodzie jest to <code>idf = log(1 + (N - df + 0.5) / (df + 0.5))</code>. Dla N=40 i df=4 wychodzi około 2,21, dla df=1 około 3,31, a dla słowa obecnego we wszystkich 40 dokumentach około 0,0123. W tym wariancie IDF pozostaje dodatnie nawet dla df=N.</p>
+<p>Słowo powszechne słabo odróżnia dokumenty, a rzadkie dostaje większą wagę. Stałe <code>+1</code> i <code>+0.5</code> to nie ozdoba: pilnują, żeby idf nie zrobił się ujemny przy dużym df i nie dzielił przez zero przy haśle, którego nie ma.</p>
+<p>Nasycenie częstości. Licznik <code>tf&#183;(k1+1)</code> rośnie liniowo, ale mianownik <code>tf + k1&#183;(...)</code> rośnie razem z nim, więc przyrost maleje. Przy k1=1,2 i długości równej średniej przejście z tf=1 na tf=2 podnosi wkład o 37,5%, a nie dwukrotnie. Dalsze powtórzenia dokładają już niewiele.</p>
+<p>Tekst, w którym słowo występuje pięć razy, nie jest automatycznie pięć razy lepszy, bo powtarzanie bywa redakcyjnym nawykiem, a nie sygnałem. Parametr k1 steruje krzywą: k1=0 wyłącza częstość całkowicie, duże k1 osłabia nasycenie, więc kolejne powtórzenia mają większy wpływ. Przy b&gt;0 nadal działa normalizacja długości.</p>
+<p>Długość dokumentu: normalizacja b. Mianownik zawiera <code>k1&#183;(1 - b + b&#183;|d|/avgdl)</code>, czyli karę za długość. Dla artykułu o średniej długości wyrażenie w nawiasie wynosi 1. Gdy dodatkowo tf=1, wkład słowa jest równy jego idf. Przy tym samym tf dłuższy tekst zwiększa mianownik i obniża wkład słowa.</p>
+<p>Parametr b decyduje, jak mocno: b=0 nie normalizuje w ogóle, b=1 karze maksymalnie. Wartości k1=1,2 i b=0,75 to wartości domyślne w Lucene, a nie prawo natury. Zmiana parametrów może zmienić wyniki punktowe i kolejność. Dla b=0 poniższe cztery artykuły mają ten sam wynik, więc o kolejności decyduje id.</p>
+<p>Surowy iloczyn <code>idf·tf</code>, bez normalizacji wektora, może faworyzować długie teksty. W Lab 2 używaliśmy jednak <code>TfidfVectorizer</code> z domyślną normalizacją L2, która skaluje cały wektor do długości 1. BM25 koryguje częstość każdego słowa z uwzględnieniem długości dokumentu.</p>
+<p>Sama liczba różnych słów wspólnych z zapytaniem da ten sam wynik dla krótkiej notki i długiego artykułu, jeśli oba zawierają te same dziesięć haseł, choć w notce opisują całość, a w artykule są jedną z wielu wzmianek.</p>
+<p>Długi dokument ma też więcej okazji, by trafić na kolejne słowa zapytania. W BM25 składowa b to właśnie korekta tego błędu, a w zadaniu na dole strony musicie porównać rankingi dla krótkiego i długiego artykułu.</p>
+<p>Do tego dochodzi sumowanie: zapytanie „technologia urządzenia” skanuje listy obu haseł i dodaje ich wkłady. Dokument może wygrać dzięki dwóm umiarkowanym trafieniom, a przegrać mimo jednego bardzo silnego. W naszych danych wkłady słów „technologia” i „urządzenia” dają 3,957 dla artykułu 005 i 3,875 dla artykułu 001. Różnicę tłumaczą długość i częstości, nie tytuł.</p>
+<p>Wyliczmy to jeszcze dokładniej na przykładzie, w którym wszystko poza długością jest takie samo. Hasło <code>technologia</code> ma df=4 i w każdym z tych czterech artykułów tf=1. Różnią się wyłącznie liczbą tokenów: 18, 20, 21 i 22 przy średniej 18,9.</p>
+<p>Przy domyślnych k1=1,2 i b=0,75 artykuł 004 dostaje 2,253, artykuł 005 dostaje 2,158, artykuł 001 dostaje 2,113, a artykuł 008 dostaje 2,071. Ten sam tf, ten sam df, cztery różne miejsca w rankingu. Różnicę powoduje normalizacja długości.</p>
+<div class="calc" id="calc">
+<h4>Kalkulator wkładu słowa</h4>
+<p class="calc-sub">Te same wyrażenia co w <code>bm25()</code>: <code>idf &#183; tf(k1+1) / [tf + k1(1 - b + b&#183;|d|/avgdl)]</code>, dla N=40 i avgdl=18,9. Suwaki k1 i b przestawiają też ranking czterech artykułów z hasłem; suwaki tf i |d| pokazują, jaki wkład daje hipotetyczny dokument.</p>
+<div class="calc-grid">
+<div><label for="calc-term">Hasło z korpusu</label><select id="calc-term">
+<option value="technologia">technologia · df=4</option>
+<option value="urządzenia">urządzenia · df=6</option>
+<option value="procesor">procesor · df=1, tf=2</option>
+</select></div>
+<div><label for="calc-k1">k1 = <b id="calc-k1out">1,2</b></label><input type="range" id="calc-k1" min="0" max="2" step="0.1" value="1.2"></div>
+<div><label for="calc-b">b = <b id="calc-bout">0,75</b></label><input type="range" id="calc-b" min="0" max="1" step="0.05" value="0.75"></div>
+<div><label for="calc-tf">tf = <b id="calc-tfout">1</b></label><input type="range" id="calc-tf" min="1" max="6" step="1" value="1"></div>
+<div><label for="calc-len">|d| = <b id="calc-lenout">19</b> tokenów</label><input type="range" id="calc-len" min="8" max="40" step="1" value="19"></div>
+</div>
+<div class="calc-out">
+<div class="calc-num"><b id="calc-score">2,21</b><small>wkład jednego słowa w BM25</small></div>
+<div class="calc-rows" id="calc-rows"></div>
+</div>
+<p class="calc-flat" id="calc-flat"></p>
+<div class="calc-bars" id="calc-bars"></div>
+<p class="calc-legend" id="calc-legend"></p>
+</div>
+<details><summary>Kiedy wkład słowa jest równy idf?</summary><p>Sprawdź wynik ręcznie: dla <code>tf = 1</code> i długości równej średniej licznik i mianownik części BM25 są równe <code>1 + k1</code>. Ułamek wynosi 1, więc zostaje samo IDF: około 2,209.</p></details>
+<details><summary>Czy wynik BM25 może być większy niż 1?</summary><p>Tak, i w naszym korpusie jest. Wkład jednego słowa jest iloczynem idf i ilorazu, więc przy idf&#8776;3,31 oraz tf=2 hasło <code>procesor</code> daje 4,41. Wynik rankingowy nie jest prawdopodobieństwem i nie mieści się w przedziale 0-1; porównywalne są tylko wyniki wewnątrz jednego zapytania. 4,41 nie znaczy „441% trafności”, tylko wyżej niż 2,21 przy tym samym pytaniu.</p></details>
+<div class="steps">
+<article class="step"><span>01</span><div class="body"><h3>Tokeny i odwrócony indeks</h3><p>Uruchom <a href="search_engine.py" download>search_engine.py</a>. Licznik częstości tworzy dla każdego słowa listę par <code>id → tf</code>. Sprawdź <code>index["technologia"]</code> (cztery dokumenty, <em>df=4</em>) oraz jedno słowo, które występuje w tylko jednym artykule.</p><div class="codebar"><span>fragment search_engine.py</span><button type="button" data-copy="code1">Kopiuj</button></div><pre class="code" id="code1" data-language="python">counts = Counter(tokenize(doc["title"] + " " + doc["text"]))
+for term, frequency in counts.items():
+    index[term][doc["id"]] = frequency</pre><details><summary>Co tutaj jest „odwrócone”?</summary><p>Zamiast dokument → słowa przechowujemy słowo → dokumenty. Zapytanie może od razu zebrać kandydatów z list wystąpień, <em>bez czytania wszystkich tekstów</em>.</p></details></div></article>
+<article class="step"><span>02</span><div class="body"><h3>BM25: rzadkość, częstość, długość</h3><p>Prześledź <code>bm25(term, doc_id)</code> dla jednego słowa (<code>df</code> = w ilu dokumentach jest słowo, <code>tf</code> = ile razy w tym dokumencie). Rzadkie słowo + krótki dokument = wyżej w rankingu (<em>k1=1,2, b=0,75</em>).</p><div class="formula">score(q,d) = Σ idf(t) · tf(t,d)(k1+1) / [tf(t,d) + k1(1-b+b·|d|/avgdl)]</div>
+<p><b>Symbole:</b> q to zapytanie, d to dokument, t to jedno hasło, a Σ sumuje wkłady wszystkich haseł zapytania. N to liczba dokumentów w korpusie, df to liczba dokumentów z danym hasłem, tf to liczba wystąpień hasła w dokumencie d, |d| to długość dokumentu w tokenach, avgdl to średnia długość dokumentu w korpusie. k1 steruje nasyceniem częstości, b siłą kary za długość.</p><div class="codebar"><span>fragment search_engine.py</span><button type="button" data-copy="code2">Kopiuj</button></div><pre class="code" id="code2" data-language="python">idf = log(1 + (N - df + 0.5) / (df + 0.5))
+norm = K1 * (1 - B + B * lengths[doc_id] / AVGDL)
+return idf * tf * (K1 + 1) / (tf + norm)</pre><p>Wystarczy jedno wspólne słowo, by wejść do rankingu. Token powtórzony w zapytaniu liczymy raz; <em>fraz i odmian nie rozpoznajemy</em>. Sortujemy pełne wyniki, wynik zaokrąglamy na końcu, remis rozstrzyga id.</p><p>Przykład: N=40, df=4, tf=1, długość = średnia → wkład słowa ≈2,21, czyli <em>dokładnie idf</em>.</p><details><summary>Czy 3,9 oznacza „39% podobieństwa”?</summary><p>Nie. 3,9 nie znaczy 39%, tylko wyżej niż 2,21. To <em>wynik rankingowy</em>, nie prawdopodobieństwo.</p></details></div></article>
+<article class="step"><span>03</span><div class="body"><h3>API i bezpieczny znacznik trafienia</h3><p>Uruchom <a href="app.py" download>app.py</a>. Frontend, czyli część strony działająca w przeglądarce, tworzy elementy <code>&lt;mark&gt;</code> i wstawia tekst jako węzły DOM, nie jako HTML. <em>Tekst z API nigdy nie jest interpretowany jako kod</em>. Inaczej tytuł mógłby wstawić do strony własny znacznik.</p><div class="codebar"><span>terminal</span><button type="button" data-copy="code3">Kopiuj</button></div><pre class="code" id="code3" data-language="bash">py app.py
+# w drugim terminalu:
+curl.exe "http://127.0.0.1:5006/api/search?q=procesor&amp;top_k=3"
+curl.exe "http://127.0.0.1:5006/api/index/technologia"</pre><p>Zły parametr (<code>?q=</code>, <code>?top_k=0</code>, zła kategoria) daje JSON z kodem 400, a hasło spoza indeksu daje <em>pustą listę</em>, nie błąd.</p></div></article>
+</div></div></section>
+<section class="assignment" id="zadanie"><div class="wrap"><p class="eyebrow">04 / zadanie dla zespołu</p><h2 class="title">Zobacz, gdzie<br>ranking kłamie</h2><div class="columns"><div><h3 class="sub-title">Praca główna</h3><ol><li>Porównaj ranking dla dwóch zapytań, np. „procesor” i „technologia”. Wskaż, które słowo ma większe IDF i dlaczego.</li><li>Dodaj filtr <code>category</code> do własnego klienta API. Sprawdź, że wynik nie zawiera tekstów z innego działu.</li><li>Podświetl dopasowane słowa przez <code>&lt;mark&gt;</code>, tworząc węzły DOM jak na tej stronie.</li></ol></div><div><h3 class="sub-title">Dalsza próba</h3><ol><li>Wpisz zapytanie z literówką. Skorzystaj z pola <code>suggestions</code> w odpowiedzi API (tworzy je funkcja <code>suggest()</code>), ale nie zmieniaj po cichu oryginalnego zapytania.</li><li>Usuń z jednego artykułu powtarzalne zdanie redakcyjne (np. „Technologia i urządzenia będą testowane przez użytkowników.” z artykułu 001 albo 005) i sprawdź, jak zmienił się ranking. To mały przykład wpływu danych na trafność.</li><li>Zapisz zapytanie, dla którego indeks słów nie znajduje sensownego wyniku, mimo że artykuł istnieje (np. „smartfon”, choć artykuł 002 opisuje telefon). Przyda się w Lab 7.</li></ol></div></div></div></section>
+<section><div class="wrap"><p class="eyebrow">05 / źródła techniczne</p><h2 class="title">Dalej niż ten korpus</h2><div class="resources"><a href="https://lucene.apache.org/core/10_0_0/core/org/apache/lucene/search/similarities/package-summary.html" target="_blank" rel="noopener"><b>Lucene: parametry BM25</b><span>Oficjalny opis wpływu k1 i b na ranking.</span></a><a href="https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/similarity" target="_blank" rel="noopener"><b>Elasticsearch: similarity</b><span>BM25 jako domyślny ranking tekstu w silniku produkcyjnym.</span></a><a href="https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent" target="_blank" rel="noopener"><b>MDN: textContent</b><span>Dlaczego tekst z API powinien zostać tekstem, a nie HTML.</span></a><a href="https://docs.python.org/3/library/collections.html#collections.Counter" target="_blank" rel="noopener"><b>Python: Counter</b><span>Biblioteka standardowa do zliczania częstości słów.</span></a></div></div></section>
+<section class="practice-lab" id="dodatkowe-przyklady" aria-labelledby="praktyka-title">
+<h2 id="praktyka-title">Dodatkowe przykłady</h2>
+<p>Przewidź wynik przed otwarciem odpowiedzi. Podpowiedź możesz odsłonić osobno.</p>
+<details class="practice-case"><summary>Od słowa do kandydatów</summary>
+<p>Indeks podaje port → {1, 3} oraz ekran → {2, 3}. Które dokumenty są kandydatami, jeśli wystarczy jedno słowo, a które, jeśli wymagamy obu?</p>
+<ol class="practice-flow" aria-label="Kolejne etapy przykładu">
+<li>Tokeny port i ekran</li>
+<li>Listy dokumentów z indeksu</li>
+<li>Kandydaci do rankingu</li>
+</ol>
+<details><summary>Podpowiedź</summary><p>Zacznij od sumy zbiorów, potem znajdź część wspólną.</p></details>
+<details><summary>Odpowiedź</summary><p>Dla co najmniej jednego słowa są to 1, 2 i 3. Przy wymaganiu obu zostaje tylko 3. Dopiero potem można uporządkować kandydatów według wyniku.</p></details>
+</details>
+<details class="practice-case"><summary>Powtórzenie słowa w artykule</summary>
+<p>Dwa dokumenty mają tę samą długość. W pierwszym szukane słowo pada raz, w drugim cztery razy. Czy wkład słowa w wynik BM25 rośnie czterokrotnie?</p>
+<details><summary>Podpowiedź</summary><p>Każde kolejne wystąpienie daje coraz mniejszy przyrost.</p></details>
+<details><summary>Odpowiedź</summary><p>Przy dodatniej wadze słowa oraz standardowych parametrach BM25 drugi wkład będzie większy, ale mniej niż czterokrotnie. To efekt nasycenia częstości.</p></details>
+</details>
+<details class="practice-case"><summary>Artykuł z dopisanym akapitem</summary>
+<p>Do artykułu dopisano długi akapit bez szukanego słowa. Jak może to wpłynąć na jego ocenę?</p>
+<details><summary>Podpowiedź</summary><p>Liczba trafień się nie zmienia, długość dokumentu rośnie.</p></details>
+<details><summary>Odpowiedź</summary><p>Normalizacja długości może obniżyć wkład tego słowa do wyniku. Porównaj punkty i pozycję przed zmianą i po ponownym zbudowaniu indeksu.</p></details>
+</details>
+</section>
+<section id="own-trial" class="reveal"><div class="wrap"><div class="trial-card"><h2>Własna próba</h2><p>Partner podaje słowo z korpusu i słowo, którego tam nie ma. Przewidujcie zawartość listy wystąpień i odpowiedź wyszukiwarki. Sprawdźcie obie, a następnie wyjaśnijcie, skąd wziął się pierwszy wynik: wskażcie konkretne tokeny i ich wkłady.</p><p>Zapiszcie przewidywanie i wynik. Wyjaśnijcie różnicę, a potem zamieńcie się rolami.</p></div></div></section>
+<section id="kontrola"><div class="wrap"><p class="eyebrow">06 / kontrola przed commitem</p><h2 class="title">Pokaż to drugiej<br>osobie z pary</h2><div class="columns"><div class="checklist" id="checks"><label><input type="checkbox">Potrafię odczytać listę wystąpień wybranego słowa.</label><label><input type="checkbox">Umiem odróżnić tf od df.</label><label><input type="checkbox">API oddaje wyniki w kolejności malejącego BM25.</label><label><input type="checkbox">Błędne parametry zwracają 400, a brak trafień pustą listę.</label><label><input type="checkbox">Wiem, dlaczego fragment tekstu (snippet) nie trafia do innerHTML.</label></div><div><p id="progress" class="small">0 / 5</p><div class="meter"><div id="fill"></div></div><div class="note"><h3 class="sub-title">W pracy</h3><p>Indeks i ranking to codzienne narzędzia w wyszukiwarkach sklepów, dokumentów i katalogów. Ten sam sposób myślenia przyda się, gdy będziecie tłumaczyć, <em>czemu wynik znalazł się na pierwszym miejscu</em>.</p></div></div></div><div class="q"><h3>1. Co przechowuje posting list?</h3><div class="answers" data-answer="0" data-note="Termin wskazuje dokumenty i częstość jego wystąpienia w każdym z nich."><button type="button">Dokumenty i tf terminu</button><button type="button">Same tytuły</button><button type="button">Wynik sieci neuronowej</button></div><p class="feedback" aria-live="polite"></p></div><div class="q"><h3>2. Czy wynik BM25 jest prawdopodobieństwem?</h3><div class="answers" data-answer="1" data-note="3,9 i 2,1 to wyniki rankingowe, nie procenty. Wyższy wynik oznacza wyższą pozycję na liście."><button type="button">Tak, zawsze od 0 do 1</button><button type="button">Nie, to wynik rankingowy</button><button type="button">Tak, po podzieleniu przez 100</button></div><p class="feedback" aria-live="polite"></p></div><div class="q"><h3>3. Co powinno się stać dla nieznanego słowa?</h3><div class="answers" data-answer="2" data-note="Silnik zwraca pustą listę lub propozycję pisowni; nie udaje, że znalazł dokument."><button type="button">Błąd 500</button><button type="button">Pierwszy dokument z bazy</button><button type="button">Brak trafień i ewentualna sugestia</button></div><p class="feedback" aria-live="polite"></p></div><p id="score" class="small">Wynik: 0 / 3</p><div class="exit"><label for="notes">Bilet wyjściowy: zapiszcie zapytanie, które zaskoczyło Waszą parę, i wyjaśnijcie, co pomogło znaleźć odpowiedź:</label><textarea id="notes" placeholder="Nasze zapytanie i wyjaśnienie…"></textarea><p id="saved" class="small" aria-live="polite"></p></div></div></section>
+</main><footer><div class="wrap"><span>ISI / AW / LAB 06 / B.3</span><span><a href="../index.html">↑ Hub kursu</a> &nbsp; <a href="../lab5/index.html">← Lab 5</a> &nbsp; <a href="../lab7/index.html">Lab 7: dalej niż słowa →</a></span></div></footer>
+<script>
+(()=>{const form=document.getElementById('search-form'),status=document.getElementById('search-status'),results=document.getElementById('results');function highlight(el,text,terms){const pattern=terms.filter(Boolean).map(t=>t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|');if(!pattern){el.textContent=text;return}const re=new RegExp(`(${pattern})`,'giu');for(const part of text.split(re)){if(!part)continue;if(terms.some(t=>t.toLocaleLowerCase('pl')===part.toLocaleLowerCase('pl'))){const mark=document.createElement('mark');mark.textContent=part;el.append(mark)}else el.append(document.createTextNode(part))}}
+form.addEventListener('submit',async e=>{e.preventDefault();results.replaceChildren();if(location.protocol==='file:'){status.textContent='Uruchom py app.py i otwórz http://127.0.0.1:5006/';return}const q=document.getElementById('query').value.trim(),category=document.getElementById('category').value;try{const url=new URL('api/search',location.href);url.searchParams.set('q',q);url.searchParams.set('top_k','10');if(category)url.searchParams.set('category',category);const response=await fetch(url);const data=await response.json();if(!response.ok){status.textContent=data.error||`HTTP ${response.status}`;return}status.textContent=`${data.count} ${{one:'wynik',few:'wyniki',many:'wyników',other:'wyniku'}[new Intl.PluralRules('pl').select(data.count)]}`+(Object.keys(data.suggestions).length?' · Być może: '+Object.entries(data.suggestions).map(([a,b])=>`${a} → ${b}`).join(', '):'');const terms=q.toLocaleLowerCase('pl').match(/[\p{L}\p{N}]+/gu)||[];for(const hit of data.results){const card=document.createElement('article');card.className='result';const meta=document.createElement('div');meta.className='meta';meta.textContent=`ART. ${String(hit.id).padStart(3,'0')} / ${hit.category} / BM25 ${hit.score}`;const h=document.createElement('h3');highlight(h,hit.title,terms);const p=document.createElement('p');highlight(p,hit.snippet,terms);card.append(meta,h,p);results.append(card)}}catch(error){status.textContent='Nie można połączyć się z API: '+error.message}});
+document.querySelectorAll('[data-copy]').forEach(button=>button.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(document.getElementById(button.dataset.copy).textContent);button.textContent='Skopiowano'}catch{button.textContent='Zaznacz ręcznie'}setTimeout(()=>button.textContent='Kopiuj',1800)}));
+const checks=[...document.querySelectorAll('#checks input')];try{const saved=JSON.parse(localStorage.getItem('isi-lab6-checks')||'[]');checks.forEach((c,i)=>c.checked=!!saved[i])}catch{}function progress(){let n=checks.filter(c=>c.checked).length;document.getElementById('progress').textContent=`${n} / ${checks.length}`;document.getElementById('fill').style.width=`${n/checks.length*100}%`;try{localStorage.setItem('isi-lab6-checks',JSON.stringify(checks.map(c=>c.checked)))}catch{}}checks.forEach(c=>c.addEventListener('change',progress));progress();
+let score=0;document.querySelectorAll('.answers').forEach(group=>group.querySelectorAll('button').forEach((b,i)=>b.addEventListener('click',()=>{if(group.dataset.done)return;group.dataset.done='1';let correct=i===+group.dataset.answer;b.classList.add(correct?'good':'bad');group.querySelectorAll('button')[+group.dataset.answer].classList.add('good');group.nextElementSibling.textContent=group.dataset.note;if(correct)score++;document.getElementById('score').textContent=`Wynik: ${score} / 3`})));
+const notes=document.getElementById('notes');try{notes.value=localStorage.getItem('isi-lab6-notes')||''}catch{}notes.addEventListener('input',()=>{try{localStorage.setItem('isi-lab6-notes',notes.value);document.getElementById('saved').textContent='Zapisano lokalnie'}catch{document.getElementById('saved').textContent='Zapis lokalny niedostępny'}});
+})();
+</script><style>
+/* FX 06: archiwum papierowe - ziarno, linie kartoteki, pieczatka, reveal */
+body::after{content:'';position:fixed;inset:0;z-index:90;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.32 0 0 0 0 0.25 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23p)'/%3E%3C/svg%3E")}
+.hero-fx{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.rule-line{position:absolute;left:0;right:0;height:2px;background:repeating-linear-gradient(90deg,var(--line) 0 14px,transparent 14px 26px);opacity:.5}
+.rule-line.l1{top:22%}.rule-line.l2{top:48%}.rule-line.l3{top:74%}
+.stamp-fx{position:absolute;right:6%;top:12%;border:3px double var(--red);color:var(--red);font:700 17px/1.35 var(--mono);letter-spacing:.14em;text-align:center;padding:14px 18px;transform:rotate(9deg);opacity:.5;border-radius:6px;animation:stampFx 1s cubic-bezier(.2,1.5,.3,1) .4s backwards}
+@keyframes stampFx{from{transform:rotate(30deg) scale(1.9);opacity:0}}
+.ticket{animation:ticketIn .9s cubic-bezier(.2,1.3,.3,1) .2s backwards,ticketFloat 7s ease-in-out 1.4s infinite}
+@keyframes ticketIn{from{transform:rotate(14deg) translateY(50px);opacity:0}}
+@keyframes ticketFloat{50%{transform:rotate(.6deg) translateY(-8px)}}
+#read-progress{position:fixed;top:0;left:0;height:4px;width:0;background:var(--red);box-shadow:0 0 12px var(--red);z-index:100}
+.fx main section,.fx body>section{opacity:0;transform:translateY(28px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+.fx section.in{opacity:1;transform:none}
+
+</style>
+<div id="read-progress" aria-hidden="true"></div>
+<script>
+(function(){
+  document.documentElement.classList.add('fx');
+  const bar=document.getElementById('read-progress');
+  addEventListener('scroll',()=>{const m=document.documentElement.scrollHeight-innerHeight;bar.style.width=(m>0?scrollY/m*100:0)+'%';},{passive:true});
+  const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.08});
+  document.querySelectorAll('main section, body > section').forEach(s=>io.observe(s));
+})();
+</script><script data-pi="1">
+(function(){
+var SEL='.question[data-answer],fieldset.question[data-answer],.q [data-answer],.quiz-pytanie[data-poprawna],.answers[data-correct],.answers[data-answer]';
+var PROMPT='Głos wstępny zapisany, wynik jeszcze nie został oceniony. Omów odpowiedź z drugą osobą (około 3 minut). Następnie kliknij wybraną odpowiedź ponownie, aby ją zatwierdzić, nawet jeśli jej nie zmieniasz.';
+function fb(group){
+return group.querySelector('.feedback')||(group.parentElement&&group.parentElement.querySelector('.feedback,small,.quiz-wyjasnienie,.quiz-feedback'))||group.querySelector('small,.quiz-wyjasnienie,.quiz-feedback');
+}
+document.querySelectorAll(SEL).forEach(function(group){
+if(group.dataset.piOn)return;group.dataset.piOn='1';
+group.addEventListener('click',function(e){
+var btn=e.target.closest?e.target.closest('button'):null;
+if(!btn||!group.contains(btn))return;
+var buttons=group.querySelectorAll('button');
+if(!group.dataset.piSolo){
+e.preventDefault();e.stopPropagation();
+buttons.forEach(function(b){b.style.outline='';b.classList.remove('pi-solo');});
+btn.classList.add('pi-solo');btn.style.outline='3px dashed currentColor';btn.style.outlineOffset='2px';
+group.dataset.piSolo='1';
+var f=fb(group);if(f)f.textContent=PROMPT;
+}else{
+buttons.forEach(function(b){b.style.outline='';b.classList.remove('pi-solo');});
+delete group.dataset.piSolo;
+}
+},true);
+});
+})();
+</script>
+<script data-ill="1">
+(function(){
+  var ILL = [
+    "<strong>TOKEN:</strong> tekst tniemy na małe słowa. „Procesor” zostaje, „i” wypada jako stop-word (słowo pomijane).",
+    "<strong>INDEKS:</strong> każde słowo ma listę wystąpień: który artykuł i ile razy. Zapytanie zagląda tylko na te listy.",
+    "<strong>BM25:</strong> ranking waży rzadkość słowa, jego częstość i długość tekstu. Wyższy słupek = czytaj najpierw."
+  ];
+  var note = document.getElementById("illNote");
+  var tabs = Array.prototype.slice.call(document.querySelectorAll(".ill-tab"));
+  if (note && tabs.length) {
+    tabs.forEach(function(btn){
+      btn.addEventListener("click", function(){
+        tabs.forEach(function(b){ b.setAttribute("aria-pressed", b === btn ? "true" : "false"); });
+        note.innerHTML = ILL[+btn.dataset.ill] || ILL[0];
+      });
+    });
+  }
+})();
+</script>
+<script>
+(function(){
+  var CORPUS=[
+    {id:1,title:'Nowy procesor dla laptopów',text:'Procesor laptopów ma szybsze rdzenie i niższy pobór energii. Producent zapowiada dłuższą pracę baterii. Technologia i urządzenia będą testowane przez użytkowników.'},
+    {id:2,title:'Telefon z aparatem nocnym',text:'Nowy telefon wykorzystuje algorytm obrazu do zdjęć nocnych. Test aparatu pokazuje mniej szumu. Użytkownicy sprawdzają urządzenia oraz zmiany w technologii.'},
+    {id:4,title:'Aktualizacja systemu mobilnego',text:'Aktualizacja systemu naprawia błędy aplikacji i poprawia ochronę danych użytkownika. Nowa technologia trafia do urządzeń wielu użytkowników.'},
+    {id:5,title:'Bezpieczeństwo haseł w chmurze',text:'Eksperci opisali atak na hasła w chmurze. Firmy wdrażają klucze dostępu i dodatkowe uwierzytelnianie. Technologia i urządzenia będą testowane przez użytkowników.'}
+  ];
+  var STOP={i:1,w:1,na:1,do:1,z:1,o:1,po:1,dla:1,oraz:1,nad:1,przed:1,'że':1,'się':1,jest:1,ma:1,'są':1};
+  function tokenize(text){
+    var raw=text.toLowerCase().match(/[\p{L}\p{N}]+/gu)||[],out=[];
+    for(var i=0;i<raw.length;i++){if(raw[i].length>1&&!STOP[raw[i]])out.push(raw[i]);}
+    return out;
+  }
+  var BY={},INDEX={},LEN={};
+  CORPUS.forEach(function(d){
+    BY[d.id]=d;
+    LEN[d.id]=tokenize(d.title+' '+d.text).length;
+    var counts={};
+    tokenize(d.title+' '+d.text).forEach(function(t){counts[t]=(counts[t]||0)+1;});
+    Object.keys(counts).forEach(function(t){INDEX[t]=INDEX[t]||{};INDEX[t][d.id]=counts[t];});
+  });
+  function pad(n){return String(n).length<3?('00'+n).slice(-3):String(n);}
+  function highlight(parent,text,terms){
+    var re=null;
+    if(terms.length){
+      var pattern=terms.filter(Boolean).map(function(t){return t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}).join('|');
+      if(pattern) re=new RegExp('('+pattern+')','giu');
+    }
+    if(!re){parent.textContent=text;return;}
+    String(text).split(re).forEach(function(part){
+      if(!part) return;
+      var hit=terms.some(function(t){return t.toLocaleLowerCase('pl')===part.toLocaleLowerCase('pl');});
+      if(hit){var mark=document.createElement('mark');mark.textContent=part;parent.append(mark);}
+      else parent.append(document.createTextNode(part));
+    });
+  }
+  function editDistance(a,b){
+    if(a===b) return 0;
+    var m=a.length,n=b.length,rows=[],i,j;
+    for(i=0;i<=m;i++){rows.push([i]);for(j=1;j<=n;j++)rows[i][j]=i?0:j;}
+    for(i=1;i<=m;i++)for(j=1;j<=n;j++){
+      rows[i][j]=Math.min(rows[i-1][j]+1,rows[i][j-1]+1,rows[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
+    }
+    return rows[m][n];
+  }
+  function nearest(term){
+    var best=null,bestD=99;
+    Object.keys(INDEX).sort().forEach(function(t){
+      var d=editDistance(term,t);
+      if(d<bestD){bestD=d;best=t;}
+    });
+    return best?{term:best,dist:bestD}:null;
+  }
+  var form=document.getElementById('lookup-form'),
+      input=document.getElementById('lookup-term'),
+      status=document.getElementById('lookup-status'),
+      posting=document.getElementById('lookup-posting'),
+      docs=document.getElementById('lookup-docs');
+  function empty(text){
+    var p=document.createElement('p');
+    p.textContent=text;
+    return p;
+  }
+  function runLookup(raw){
+    var terms=tokenize(raw);
+    posting.replaceChildren();
+    docs.replaceChildren();
+    status.replaceChildren();
+    if(!terms.length){
+      status.textContent='Po tokenizacji nie zostało żadne hasło: same stop-słowa lub znaki, których indeks nie zna.';
+      posting.append(empty('Pusta lista wystąpień: zapytanie nie zawiera tokenu do wyszukania.'));
+      docs.append(empty('Żaden dokument nie został sprawdzony.'));
+      return;
+    }
+    var hits={},order=[],parts=terms.map(function(t){return {term:t,ids:Object.keys(INDEX[t]||{})};});
+    parts.forEach(function(part,i){
+      if(i) status.append(document.createTextNode('  ·  '));
+      var b=document.createElement('b');
+      b.textContent='„'+part.term+'”';
+      status.append(b);
+      status.append(document.createTextNode(part.ids.length?' → '+part.ids.length+(part.ids.length===1?' dokument':' dokumenty'):' → brak hasła w indeksie'));
+      part.ids.forEach(function(id){
+        if(!hits[id]){hits[id]={};order.push(id);}
+        hits[id][part.term]=(INDEX[part.term]||{})[id];
+      });
+    });
+    order.sort(function(a,b){return a-b;});    if(!order.length){
+      posting.append(empty('Pusta lista wystąpień. Hasła nie ma w indeksie, więc nie ma też kandydatów. Serwer nie wymyśla dokumentu, którego nie zindeksował.'));
+      docs.append(empty('Brak dokumentów. W prawdziwym API tu pojawiają się sugestie w polu suggestions, ale oryginalne zapytanie pozostaje nietknięte.'));
+      return;
+    }
+    order.forEach(function(id,i){
+      var row=document.createElement('div');
+      row.className='lp-row';
+      row.style.animationDelay=(i*0.12)+'s';
+      var left=document.createElement('span');
+      left.textContent='ART. '+pad(id)+'  ·  |d| = '+LEN[id];
+      var right=document.createElement('b');
+      right.textContent=Object.keys(hits[id]).map(function(t){return t+' ×'+hits[id][t];}).join(', ');
+      row.append(left,right);
+      posting.append(row);
+    });
+    order.forEach(function(id,i){
+      var art=document.createElement('article');
+      art.className='lookup-doc';
+      art.style.animationDelay=(i*0.12)+'s';
+      var meta=document.createElement('div');
+      meta.className='meta';
+      meta.textContent='ART. '+pad(id)+'  ·  '+LEN[id]+' tokenów';
+      var h=document.createElement('h5'),p=document.createElement('p');
+      highlight(h,BY[id].title,terms);
+      highlight(p,BY[id].text,terms);
+      art.append(meta,h,p);
+      docs.append(art);
+    });
+  }
+  form.addEventListener('submit',function(e){e.preventDefault();runLookup(input.value);});
+  document.getElementById('lookup-typo').addEventListener('click',function(){
+    input.value='procezor';
+    runLookup('procezor');
+    var near=nearest('procezor');
+    if(near){
+      var s=document.createElement('span');
+      s.textContent='  ·  sugestia (zapytanie NIE jest podmieniane): '+near.term+' → '+(Object.keys(INDEX[near.term]||{}).length||0)+' dokument';
+      status.append(s);
+    }
+  });
+  runLookup(input.value);
+
+  var CALC={
+    N:40,AVGDL:18.9,
+    terms:{
+      'technologia':{df:4,postings:{1:{tf:1,len:21},4:{tf:1,len:18},5:{tf:1,len:20},8:{tf:1,len:22}}},
+      'urządzenia':{df:6,postings:{1:{tf:1,len:21},2:{tf:1,len:20},3:{tf:1,len:20},5:{tf:1,len:20},6:{tf:1,len:17},7:{tf:1,len:19}}},
+      'procesor':{df:1,postings:{1:{tf:2,len:21}}}
+    }
+  };
+  function idfOf(df){return Math.log(1+(CALC.N-df+0.5)/(df+0.5));}
+  function part(df,tf,len,k1,b){
+    var norm=k1*(1-b+b*len/CALC.AVGDL);
+    return idfOf(df)*tf*(k1+1)/(tf+norm);
+  }
+  function num(v){return String(Math.round(v*1000)/1000).replace('.',',');}
+  var termSel=document.getElementById('calc-term'),
+      k1=document.getElementById('calc-k1'),
+      b=document.getElementById('calc-b'),
+      tfR=document.getElementById('calc-tf'),
+      lenR=document.getElementById('calc-len'),
+      out=document.getElementById('calc-score'),
+      rows=document.getElementById('calc-rows'),
+      flat=document.getElementById('calc-flat'),
+      bars=document.getElementById('calc-bars'),
+      legend=document.getElementById('calc-legend');
+  function update(){
+    var t=CALC.terms[termSel.value]||CALC.terms['technologia'];
+    var k1v=+k1.value,bv=+b.value,tfv=+tfR.value,lenv=+lenR.value;
+    document.getElementById('calc-k1out').textContent=num(k1v);
+    document.getElementById('calc-bout').textContent=num(bv);
+    document.getElementById('calc-tfout').textContent=String(tfv);
+    document.getElementById('calc-lenout').textContent=String(lenv);
+    var score=part(t.df,tfv,lenv,k1v,bv);
+    out.textContent=num(score);
+    var norm=k1v*(1-bv+bv*lenv/CALC.AVGDL);
+    rows.replaceChildren();
+    [['idf',num(idfOf(t.df))],['tf',String(tfv)],['norm',num(norm)],['|d| / avgdl',num(lenv/CALC.AVGDL)],['df',String(t.df)]].forEach(function(pair){
+      var div=document.createElement('div');
+      var b2=document.createElement('b');
+      b2.textContent=pair[0]+' = '+pair[1];
+      div.append(b2);
+      rows.append(div);
+    });
+    var plain=idfOf(t.df)*tfv;
+    flat.textContent='Surowy iloczyn idf·tf, bez normalizacji L2, wynosi '+num(plain)+': tyle samo dla |d| = 8 i |d| = 40. BM25 daje '+num(score)+', czyli '+(score<plain?num(plain-score)+' mniej':num(score-plain)+' więcej')+' za ten sam tf.';
+    var scored=[];
+    Object.keys(t.postings).forEach(function(id){
+      scored.push({id:id,score:part(t.df,t.postings[id].tf,t.postings[id].len,k1v,bv),len:t.postings[id].len,tf:t.postings[id].tf});
+    });
+    scored.sort(function(x,y){return y.score-x.score;});
+    var max=Math.max.apply(null,scored.map(function(x){return x.score;}))||1;
+    bars.replaceChildren();
+    scored.forEach(function(x,i){
+      var row=document.createElement('div');
+      row.className='calc-bar'+(i===0?' top':'');
+      var fill=document.createElement('i');
+      fill.style.width=(x.score/max*100)+'%';
+      row.append(fill);
+      var label=document.createElement('span');
+      var a=document.createElement('b');a.textContent='ART. '+pad(+x.id)+'  ·  tf='+x.tf+'  ·  |d|='+x.len;
+      var c=document.createElement('b');c.textContent=num(x.score);
+      label.append(a,c);
+      row.append(label);
+      bars.append(row);
+    });
+    legend.textContent='Słupy: wkład hasła „'+termSel.value+'” w '+scored.length+(scored.length===1?' dokumencie':' dokumentach')+' korpusu (N=40, avgdl=18,9), posortowane malejąco. Ciemniejszy słupek = pierwsze miejsce w rankingu.';
+  }
+  [termSel,k1,b,tfR,lenR].forEach(function(el){el.addEventListener('input',update);el.addEventListener('change',update);});
+  update();
+})();
+</script></body></html>
