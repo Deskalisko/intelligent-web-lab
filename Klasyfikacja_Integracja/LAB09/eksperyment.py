@@ -149,5 +149,6 @@ def zadanie5_walidacja():
 if __name__ == "__main__":
     zadanie1()
     zadanie2()
+    zadanie3_api()
     zadanie4_dim16()
     zadanie5_walidacja()

@@ -1,6 +1,5 @@
 from pathlib import Path
 import sys
-#dodajemy sciezke folderu do sys.path
 lab_dir = str(Path(__file__).resolve().parent)
 if lab_dir not in sys.path:
     sys.path.insert(0, lab_dir)
