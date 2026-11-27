@@ -1,0 +1,7 @@
+odpalenie eksperyment.py dla lab 8
+
+Zadanie 1 - przygotowanie danych i podzial train/test
+podzial: train_test_split 75/25 ze stratyfikacja i random_state=42 przed fit TF-IDF (brak wycieku danych)
+- sentiment: 54 opinie -> train=40 ({negative: 14, neutral: 13, positive: 13}), test=14 ({negative: 4, neutral: 5, positive: 5}), slownik TF-IDF z train = 454 cechy (unigramy + bigramy)
+- spam: 40 wiadomosci -> train=30 ({ham: 15, spam: 15}), test=10 ({ham: 5, spam: 5}), slownik TF-IDF z train = 302 cechy
+wniosek: slownik TF-IDF jest budowany wylacznie na czesci treningowej, dzieki czemu dane testowe nie wplywaja na wagi i slownik przed ewaluacja.
