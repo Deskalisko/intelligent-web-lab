@@ -1,0 +1,507 @@
+================================================================================
+                    LAB 01: PODSUMOWANIE, QUIZ I OBRONA
+================================================================================
+
+1. PODSTAWOWE KOMENDY ŚRODOWISKA I GITA:
+--------------------------------------------------------------------------------
+# Tworzenie i aktywacja środowiska venv (Windows CMD):
+python -m venv venv
+venv\Scripts\activate
+pip install flask
+pip freeze > requirements.txt
+
+# Inicjalizacja i pętla pracy Git:
+git init
+git add .
+git commit -m "init: struktura projektu i pierwsze API"
+git branch -M main
+git remote add origin https://github.com/WASZA-PARA/intelligent-web-lab.git
+git push -u origin main
+
+
+2. TESTOWANIE ENDPOINTÓW (cURL):
+--------------------------------------------------------------------------------
+# Sprawdzenie stanu serwera:
+curl http://127.0.0.1:5000/api/health
+
+# Pobranie całego katalogu:
+curl http://127.0.0.1:5000/api/products
+
+# Pobranie konkretnego produktu (np. ID 2):
+curl http://127.0.0.1:5000/api/products/2
+
+# Pobranie nieistniejącego produktu (Błąd 404):
+curl http://127.0.0.1:5000/api/products/99
+
+# Filtracja po cenie max 200 (Zadanie A):
+curl "http://127.0.0.1:5000/api/products?max_price=200"
+
+
+3. PYTANIA I ODPOWIEDZI NA CHECKPOINT / OBRONĘ:
+--------------------------------------------------------------------------------
+Pytanie 1: Co robi dekorator @app.route?
+Odpowiedź: Rejestruje funkcję w routerze Flaska i wiąże wskazaną ścieżkę URL
+(np. /api/health) z tą funkcją, wywołując ją, gdy nadejdzie pasujące żądanie HTTP.
+
+Pytanie 2: Co zwraca jsonify i czym różni się od zwykłego "return słownik"?
+Odpowiedź: jsonify konwertuje słownik/listę w Pythonie na napis w formacie JSON
+oraz ustawia nagłówek HTTP `Content-Type: application/json`. Zwykły return słownika
+we Flasku 2.2+ również generuje JSON, ale jsonify daje pełną kontrolę i obsługuje
+złożone struktury danych oraz tablice.
+
+Pytanie 3: Co się stanie, gdy usuniesz if __name__ == "__main__"?
+Odpowiedź: Kod `app.run(debug=True)` nie wykona się automatycznie przy bezpośrednim
+uruchomieniu pliku komendą `python app.py`. Wzorzec ten gwarantuje, że serwer produkcyjny
+(np. Gunicorn/uWSGI) może zaimportować obiekt `app` bez niechcianego startu serwera dev.
+
+Pytanie 4: Dlaczego GET /api/products/abc zwraca 404 bez wejścia do naszej funkcji?
+Odpowiedź: Konwerter `<int:product_id>` w regule routingu odrzuca wartości niebędące
+liczbami całkowitymi na poziomie samego routera Flaska, zanim zapytanie dotrze do
+naszej funkcji `product()`.
+
+Pytanie 5: Czym różni się błąd 400 od 404 i 500?
+Odpowiedź:
+- 400 Bad Request: Błąd po stronie klienta (np. nieprawidłowy format parametru ?max_price=abc).
+- 404 Not Found: Brak zasobu pod wskazanym adresem (np. produkt o ID 99 nie istnieje).
+- 500 Internal Server Error: Nieobsłużony błąd po stronie serwera/kodu Pythona.
+================================================================================
+
+================================================================================
+                    LAB 02: PODSUMOWANIE, QUIZ I OBRONA
+================================================================================
+
+1. TESTOWANIE API Z TERMINALA (cURL):
+--------------------------------------------------------------------------------
+# Prawidłowe pobranie rekomendacji:
+curl "http://127.0.0.1:5000/api/recommend?title=Inception&top_n=2"
+
+# Rekomendacje z filtrem gatunku (Wyzwanie):
+curl "http://127.0.0.1:5000/api/recommend?title=Inception&genre=sci-fi"
+
+# Błąd 400 - Brak parametru title:
+curl "http://127.0.0.1:5000/api/recommend"
+
+# Błąd 400 - Nieprawidłowy zakres top_n:
+curl "http://127.0.0.1:5000/api/recommend?title=Inception&top_n=99"
+
+# Błąd 404 - Nieznany film:
+curl "http://127.0.0.1:5000/api/recommend?title=NieznanyFilm"
+
+
+2. PYTANIA KONTROLNE NA CHECKPOINT / OBRONĘ:
+--------------------------------------------------------------------------------
+Pytanie 1: Wskaż linię budującą macierz TF-IDF. Jaki byłby jej wymiar dla 200 filmów?
+Odpowiedź: Linia `tfidf_matrix = vectorizer.fit_transform(df["overview"])`.
+Dla 200 filmów wymiar macierzy wyniósłby (200, N), gdzie N to liczba unikalnych
+słów (po usunięciu stop words) występujących we wszystkich 200 opisach.
+
+Pytanie 2: Co dokładnie zwraca cosine_similarity(tfidf_matrix)?
+Odpowiedź: Zwraca dwuwymiarową macierz kwadratową (NumPy ndarray) o wymiarach
+24 x 24. Każda komórka [i, j] zawiera wartość od 0.0 do 1.0 określającą kosinus
+kąta pomiędzy wektorem filmu 'i' a wektorem filmu 'j'.
+
+Pytanie 3: Co by się stało z rekomendacjami, gdybyśmy nie usunęli stop words?
+Odpowiedź: Słowa powszechne (np. "the", "a", "in", "of") zdominowałyby wektory
+opisów. Filmy miałyby wysokie podobieństwo tylko dlatego, że oba opisy zawierają
+spójniki i przyimki, a rzadkie, charakterystyczne słowa (np. "wormhole") straciłyby znaczenie.
+
+Pytanie 4: Dlaczego zmiana parametru top_n w URL nie wymaga restartu serwera?
+Odpowiedź: Ponieważ parametr top_n jest przekazywany dynamicznie przy każdym
+zapytaniu HTTP przez `request.args`, a Flask działa w trybie `debug=True`, który
+na bieżąco obsługuje i interpretuje nowe przychodzące żądania.
+
+
+3. ODPOWIEDZI NA QUIZ (LAB 02):
+--------------------------------------------------------------------------------
+Q1: Co robi w TF-IDF człon IDF (inverse document frequency)?
+    [X] Obniża wagę słów występujących w wielu dokumentach, więc słowa
+        charakterystyczne ważą więcej.
+
+Q2: Cosine similarity równe 1.0 dla dwóch filmów oznacza, że...
+    [X] Wektory TF-IDF mają ten sam kierunek, czyli zbliżony profil słów.
+
+Q3: Po co w TfidfVectorizer ustawiamy stop_words="english"?
+    [X] Żeby usunąć częste słowa funkcyjne (the, a, of) jeszcze przed ważeniem.
+
+Q4: Co robi funkcja recommend() w recommender.py?
+    [X] Sortuje podobieństwa malejąco i zwraca top 5, pomijając film z zapytania.
+
+Q5: GET /api/recommend bez parametru title zwraca...
+    [X] 400 z komunikatem błędu, a nieznany tytuł zwraca 404.
+
+
+================================================================================
+                 ZESTAW TESTÓW DLA REST API (FLASK / LAB 03)
+================================================================================
+
+1. TEST DLA PRAWIDŁOWEGO UŻYTKOWNIKA (PRZYPADEK DOMYŚLNY):
+--------------------------------------------------------------------------------
+Zapytanie (cURL):
+curl -X GET "http://127.0.0.1:5000/api/recommend?user=Ania"
+
+Oczekiwana odpowiedź (200 OK):
+{
+  "user": "Ania",
+  "k": 3,
+  "count": 5,
+  "recommendations": [
+    {
+      "title": "Inception",
+      "predicted": 4.85,
+      "because": ["Celina", "Bartek"]
+    },
+    ...
+  ]
+}
+
+
+2. TEST Z PARAMETRAMI ?k= I ?top_n=:
+--------------------------------------------------------------------------------
+Zapytanie (cURL):
+curl -X GET "http://127.0.0.1:5000/api/recommend?user=Ania&k=5&top_n=3"
+
+Oczekiwana odpowiedź (200 OK):
+{
+  "user": "Ania",
+  "k": 5,
+  "count": 3,
+  "recommendations": [
+    ...
+  ]
+}
+
+
+3. TEST DLA NIEZNANEGO UŻYTKOWNIKA (BŁĄD 404 NOT FOUND):
+--------------------------------------------------------------------------------
+Zapytanie (cURL):
+curl -X GET "http://127.0.0.1:5000/api/recommend?user=NieznanaOsoba"
+
+Oczekiwana odpowiedź (404 Not Found):
+{
+  "error": "nie znam takiego uzytkownika",
+  "known_users": [
+    "Ania",
+    "Bartek",
+    "Celina",
+    "Dominik",
+    "Kamil",
+    ...
+  ]
+}
+
+
+4. TEST BRAKU PARAMETRU ?user= (BŁĄD 400 BAD REQUEST):
+--------------------------------------------------------------------------------
+Zapytanie (cURL):
+curl -X GET "http://127.0.0.1:5000/api/recommend"
+
+Oczekiwana odpowiedź (400 Bad Request):
+{
+  "error": "podaj parametr ?user=..."
+}
+
+
+5. TEST NIEPRAWIDŁOWEJ WARTOŚCI PARAMETRU ?k= (BŁĄD 400 BAD REQUEST):
+--------------------------------------------------------------------------------
+Zapytanie (cURL):
+curl -X GET "http://127.0.0.1:5000/api/recommend?user=Ania&k=99"
+
+Oczekiwana odpowiedź (400 Bad Request):
+{
+  "error": "k musi byc z zakresu 1-11"
+}
+
+
+6.uzytkownicy
+curl.exe -i "http://127.0.0.1:5000/api/users"
+
+================================================================================
+            PYTANIA Z OBRONY I BILET WYJŚCIOWY (CP-1 / LAB 03)
+================================================================================
+
+1. PYTANIA, KTÓRE PADNĄ NA OBRONIE
+--------------------------------------------------------------------------------
+
+Pytanie 1: Dlaczego w top-5 ignorujemy filmy, które Ania już oceniła?
+Odpowiedź: Collaborative filtering przewiduje tylko braki w macierzy: znanej
+oceny nie trzeba przewidywać, a wrzucenie jej do rankingu zafałszowałoby listę
+„co obejrzeć dalej”. Dlatego w recommend() najpierw filtrujemy filmy, które
+użytkownik już ocenił.
+
+Pytanie 2: Skąd bierze się „średnia ważona sąsiadów”?
+Odpowiedź: Ze wzoru:
+predicted(u, film) = mean(u) + Σ sim(u,v) · (ocena(v, film) − mean(v)) / Σ |sim(u,v)|
+Każdy sąsiad głosuje swoim odchyleniem od własnej średniej, a wagą głosu jest
+podobieństwo. Dzielimy przez sumę |sim| osób, które film oceniły, a nie przez k,
+bo nie każdy sąsiad widział ten film.
+
+Pytanie 3: Co, gdy sąsiedzi mają sprzeczne oceny tego samego filmu?
+Odpowiedź: Odchylenia o przeciwnych znakach się znoszą: wynik ląduje blisko
+średniej Ani, czyli model „nie ma zdania”. Gdy sim jest ujemny (odwrotny gust),
+wkład działa przeciwnie. Przy małym przecięciu gustów taki głos mało znaczy.
+To sygnał ostrożności, predykcja z małym wsparciem w ocenach.
+
+Pytanie 4: Czym różni się content-based (lab 2) od collaborative (lab 3)?
+Odpowiedź: Content-based liczy podobieństwo film ↔ film na opisach (TF-IDF),
+potrzebuje metadanych. Collaborative liczy podobieństwo człowiek ↔ człowiek
+na samych ocenach. Filmy mogą być anonimowymi ID-kami, ale nowy użytkownik
+bez ocen wpada w cold start.
+
+Pytanie 5: Dlaczego przed cosine odejmujemy każdemu użytkownikowi jego średnią?
+Odpowiedź: Żeby porównywać odchylenia od własnej skali oceniania (eliminujemy
+styl optymisty/krytyka), a brakujące oceny zastąpione zerami (fillna(0)) były
+traktowane jako neutralne i nie pompowały sztucznie podobieństwa.
+
+
+================================================================================
+2. BILET WYJŚCIOWY (3 ZDANIA NA DROGĘ) - ODPOWIEDZI WŁASNYMI SŁOWAMI
+--------------------------------------------------------------------------------
+
+1) Czym różni się CF od content-based?
+Content-based (Lab 2) proponuje podobne filmy na podstawie opisu i słów kluczowych,
+podczas gdy Collaborative Filtering (Lab 3) całkowicie ignoruje treść filmu i szuka
+osób o podobnym guście na podstawie samych ocen.
+
+2) Po co centrować oceny?
+Centrowanie przesuwa oceny każdego użytkownika do jego osobistego "punktu zero",
+co pozwala porównywać czyste odchylenia od własnej skali oceniania oraz powoduje,
+że brak ocen (0) jest traktowany neutralnie i nie zaburza wyliczeń.
+
+3) Jaki jest jeden realny problem tego podejścia, który naprawia prawdziwy Netflix?
+Głównym problemem jest problem zimnego startu (cold start) dla nowych użytkowników
+oraz wysoka rzadkość macierzy (matrix sparsity), co Netflix rozwiązuje za pomocą
+faktoryzacji macierzy (SVD/Funk SVD) połączonej z modelami hybrydowymi.
+================================================================================
+
+================================================================================
+                    SZEŚĆ PYTAŃ NA ODWAGĘ (CP-1 / LAB 03)
+================================================================================
+
+1. Dlaczego przed cosine odejmujemy od ocen średnią każdego użytkownika?
+--------------------------------------------------------------------------------
+[ ] Żeby liczby były mniejsze i szybciej się liczyło
+[X] Żeby porównać odchylenia od własnych średnich zamiast surowych dodatnich ocen
+[ ] Bo cosine wymaga liczb ujemnych
+
+Wyjaśnienie:
+Dokładnie: po centrowaniu porównujemy odchylenia od własnej skali, a wspólne
+braki (0) nie napompują podobieństwa.
+
+
+2. sim(Ania, Celina) = 0.9 oznacza, że…
+--------------------------------------------------------------------------------
+[ ] obie obejrzały 90% tych samych filmów
+[ ] Celina w 90% zgadza się z każdą oceną Ani
+[X] ich odchylenia od własnych średnich zmieniają się bardzo podobnie
+
+Wyjaśnienie:
+Wartość bliska +1.0 oznacza wysokie podobieństwo wektorów odchyleń. Obie osoby
+oceniają te same filmy powyżej lub poniżej swoich osobistych średnich.
+
+
+3. Nowy użytkownik ocenił 0 filmów. Co zwróci nasz algorytm?
+--------------------------------------------------------------------------------
+[X] Nic sensownego. Nie ma sąsiadów, nie ma średniej; to problem cold start
+[ ] Rekomendacje jak dla przeciętnego użytkownika. z automatu
+[ ] Losowe filmy, bo den = 0 to losowość
+
+Wyjaśnienie:
+Jest to klasyczny problem zimnego startu (cold start). Brak ocen uniemożliwia
+wyliczenie osobistej średniej oraz podobieństwa z jakimkolwiek sąsiadem.
+
+
+4. W recommend() dzielimy przez sum(|w|) sąsiadów, którzy ocenili film. Dlaczego nie przez k?
+--------------------------------------------------------------------------------
+[ ] Bo k to litera zarezerwowana w sklearn
+[X] Bo liczą się wagi osób, które oceniły film; k nie normalizuje ważonych odchyleń
+[ ] Bo sum(|w|) zawsze jest równe 1
+
+Wyjaśnienie:
+Dzielenie przez stałe k zaniżałoby wynik, ponieważ nie każdy z k-sąsiadów musiał
+obejrzeć dany film. Dzielimy wyłącznie przez sumę wag osób, które go widziały.
+
+
+5. Czym collaborative filtering różni się od podejścia z lab 2 (TF-IDF)?
+--------------------------------------------------------------------------------
+[ ] Niczym. Oba liczą podobieństwo filmów
+[ ] CF czyta opisy filmów dokładniej niż TF-IDF
+[X] CF w ogóle nie patrzy na treść filmów, tylko na wzorce ocen ludzi
+
+Wyjaśnienie:
+W CF film to anonimowa kolumna. Zadziałałoby dla książek, restauracji albo haseł,
+wszędzie tam, gdzie ludzie wystawiają oceny.
+
+
+6. Endpoint /api/recommend?user=Zzz powinien zwrócić…
+--------------------------------------------------------------------------------
+[X] 404 z listą znanych użytkowników
+[ ] 200 z pustą listą
+[ ] 500. Nieznany user to wyjątek serwera
+
+Wyjaśnienie:
+Błąd klienta (zły parametr) ≠ błąd serwera. A lista known_users w payloadzie
+zamienia porażkę w podpowiedź.
+================================================================================
+
+================================================================================
+                    CHECKLISTA / PUŁAPKI KONTROLNE (CP-1)
+================================================================================
+
+1. CZY RECOMMEND() POMIJA FILMY JUŻ OCENIONE PRZEZ USERA?
+--------------------------------------------------------------------------------
+Pytanie: Czy polecamy wyłącznie filmy, których użytkownik jeszcze nie widział?
+
+Odpowiedź: TAK.
+
+Gdzie i jak to sprawdzić w kodzie (recommender.py):
+W pętli przechodzącej po filmach sprawdzamy komórkę dla danego użytkownika:
+
+   for movie in matrix.columns:
+       if not pd.isna(matrix.loc[user, movie]):
+           continue  # jeśli ocena istnieje (nie jest NaN), pomijamy film
+
+Wyjaśnienie:
+pd.isna(...) zwraca True, gdy brak oceny (NaN). Negacja `not pd.isna(...)` oznacza,
+że ocena istnieje w macierzy. Słowo kluczowe `continue` natychmiast przerywa
+przetwarzanie obecnego filmu i przechodzi do następnego.
+
+Jak to przetestować?
+1. Sprawdź oceny danego usera w ratings.csv (np. Ania oceniła "Inception" na 5).
+2. Wywołaj recommend("Ania").
+3. Upewnij się, że "Inception" NIE występuje na liście zwróconych rekomendacji.
+
+
+2. CZY NIEZNANY USER DAJE 404, A BRAK PARAMETRU 400?
+--------------------------------------------------------------------------------
+Pytanie: Czy API poprawnie waliduje parametry wejściowe i zwraca odpowiednie kody HTTP?
+
+Odpowiedź: TAK.
+
+Gdzie i jak to sprawdzić w kodzie (app.py):
+
+a) Brak parametru ?user=:
+   user = request.args.get("user", "").strip()
+   if not user:
+       return jsonify({"error": "podaj parametr ?user=..."}), 400
+
+b) Nieznany user (brak w macierzy):
+   recs = recommend(user)
+   if recs is None:
+       return jsonify({
+           "error": "nie znam takiego uzytkownika",
+           "known_users": sorted(matrix.index.tolist())
+       }), 404
+
+Wyjaśnienie:
+- Kod 400 Bad Request oznacza błąd zapytania klienta (brak wymaganego parametru).
+- Kod 404 Not Found oznacza, że dany zasób/użytkownik nie istnieje w bazie.
+
+Jak to przetestować (cURL)?
+- Brak parametru:  curl -i "http://127.0.0.1:5000/api/recommend"
+  -> Nagłówek powinien wykazać: HTTP/1.1 400 BAD REQUEST
+- Nieznany user:   curl -i "http://127.0.0.1:5000/api/recommend?user=BrakTakiegoUsera"
+  -> Nagłówek powinien wykazać: HTTP/1.1 404 NOT FOUND + lista known_users w JSON.
+
+
+3. CZY DZIELISZ PRZEZ SUM(|W|), A NIE PRZEZ K?
+--------------------------------------------------------------------------------
+Pytanie: Czy mianownik uwzględnia tylko wagi sąsiadów, którzy faktycznie widzieli dany film?
+
+Odpowiedź: TAK.
+
+Gdzie i jak to sprawdzić w kodzie (recommender.py):
+
+   num, den = 0.0, 0.0
+   for other, w in neighbors.items():
+       r = matrix.loc[other, movie]
+       if not pd.isna(r):
+           num += w * (r - means[other])
+           den += abs(w)  # sumujemy bezwzględne wagi TYLKO tych, co ocenili film
+
+   if den > 0:
+       predicted = means[user] + num / den
+
+Wyjaśnienie:
+Nie możemy dzielić przez stałe k (np. 3), ponieważ nie każdy z k-sąsiadów musiał
+obejrzeć dany film. Dzielenie przez k zaniżałoby przewidywaną ocenę.
+Suma `den += abs(w)` zbiera wagi wyłącznie od sąsiadów posiadających wpis dla tego filmu.
+
+Jak to sprawdzić?
+Upewnij się, że w pętli `den += abs(w)` znajduje się wewnątrz warunku `if not pd.isna(r)`.
+
+
+4. CZY WYNIK MIEŚCI SIĘ W 1–5? (CLAMP)
+--------------------------------------------------------------------------------
+Pytanie: Czy zabezpieczyliśmy matematycznie wynik predykcji przed przekroczeniem skali 1-5?
+
+Odpowiedź: TAK.
+
+Gdzie i jak to sprawdzić w kodzie (recommender.py):
+
+   predicted = means[user] + num / den
+   scores[movie] = max(1.0, min(5.0, predicted))
+
+Wyjaśnienie:
+Czysta matematyka odchyleń może przy skrajnych ocenach sąsiadów dać wynik np. 5.4 lub 0.7.
+- `min(5.0, predicted)` ucina wartości większe niż 5.0 do dokładnie 5.0.
+- `max(1.0, ...)` ucina wartości mniejsze niż 1.0 do dokładnie 1.0.
+
+Jak to przetestować?
+Możesz podmienić w testach ocenę sąsiada na skrajną (np. 5) przy wysokiej średniej usera
+i upewnić się, że funkcja nigdy nie zwróci liczby wyższej niż 5.00 ani niższej niż 1.00.
+
+
+5. CZY POTRAFISZ WYJAŚNIĆ NA GŁOS, DLACZEGO CENTRUJEMY OCENY ŚREDNIĄ?
+--------------------------------------------------------------------------------
+Pytanie: Po co wykonujemy `centered = matrix.sub(means, axis=0).fillna(0)`?
+
+Odpowiedź (do wypowiedzenia na głos na obronie):
+
+1. Usuwamy indywidualny styl oceniania (skalę użytkownika):
+   "Jedna osoba jest optymistą i stawia same 4 i 5 (średnia 4.5), a druga jest
+   surowym krytykiem i stawia 1 i 2 (średnia 1.5). Centrowanie przesuwa ich oceny
+   do osobistego punktu zero. Jeśli obaj ocenili dany film wyżej niż swoją średnią,
+   to po wyśrodkowaniu obaj mają odchylenie dodatnie (np. +1.0), co pozwala algorytmowi
+   dostrzec, że mają identyczny gust."
+
+2. Neutralizujemy braki danych po fillna(0) (pułapka zer):
+   "W wyśrodkowanej macierzy wartość 0 oznacza ocenę dokładnie równą osobistej
+   średniej użytkownika. Dzięki temu zastąpienie braków ocen (NaN) cyfrą 0 nie
+   wpływa sztucznie na podobieństwo kosinusowe — film nieoceniony jest traktowany
+   jako neutralny."
+================================================================================
+
+================================================================================
+                    ODPOWIEDŹ NA PYTANIE KONTROLNE (CP-1)
+================================================================================
+
+PYTANIE:
+Co się dzieje z przewidywanymi ocenami, gdy k rośnie? Czy zbliżają się do
+średniej w tym konkretnym zbiorze?
+
+ODPOWIEDŹ:
+Nie, nie ma gwarancji, że przewidywane oceny zbliżą się do średniej.
+
+DLACZEGO? (ANALIZA WZORU):
+Wzór na predykcję oceny ma postać:
+predicted = means[user] + (num / den)
+
+gdzie:
+- num (licznik) = suma odchyleń sąsiadów pomnożona przez ich wagę podobieństwa:
+  w * (r - means[other])
+- den (mianownik) = suma bezwzględnych wag podobieństwa: abs(w)
+
+ANALIZA ZNAKU I WKŁADU NOWYCH SĄSIADÓW:
+1. Znak wkładu sąsiada:
+   - Jeśli nowy sąsiad ocenił film powyżej swojej średniej (r > means[other])
+     i ma dodatnie podobieństwo (w > 0), to jego wkład ciągnie wynik W GÓRĘ.
+   - Jeśli ocenił go poniżej swojej średniej (r < means[other]), ciągnie wynik W DÓŁ.
+
+2. Zachowanie przy rosnącym k:
+   - Wynik zbliża się do średniej użytkownika (means[user]) TYLKO WTEDY, gdy
+     odchylenia ocen nowych sąsiadów znoszą się wzajemnie (suma w liczniku
+     dąży do zera) lub gdy nowi sąsiedzi mają wagi podobieństwa bliskie zeru.
+   - Jeśli dołączeni nowi sąsiedzi mają spójne i skrajne opinie (np. wszyscy
+     bardzo wysoko ocenili dany film), dodanie ich spowoduje ODDAELENIE SIĘ
+     przewidywanej oceny od średniej użytkownika.
+
