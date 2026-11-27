@@ -29,3 +29,16 @@ sentiment:
 spam:
 - komorka [ham -> spam] = 1 (falszywy alarm), przyklad (emails.csv linia 32): "Nowa wersja umowy czeka na komentarze" (true_label: ham | predicted_label: spam)
 - komorka [spam -> ham] = 1 (przeoczony spam), przyklad (emails.csv linia 3): "Odbierz darmowy bon po wpłacie opłaty aktywacyjnej" (true_label: spam | predicted_label: ham)
+
+Zadanie 4 - wplyw koncowek (strip_cues)
+Logistic Regression (sentiment, 14 prob testowych):
+- z koncowkami (strip_cues=False): accuracy=0.929 (13/14 trafien), macro_f1=0.922
+- bez koncowek (strip_cues=True): accuracy=0.286 (4/14 trafien), macro_f1=0.299
+- przykladowe powtarzalne koncowki z reviews.csv (po 8 unikalnych na klase, nie mieszaja sie miedzy klasami):
+  positive: "Polecam ten zakup.", "To była dobra decyzja.", "Jestem zadowolona."
+  negative: "Nie polecam tego zakupu.", "To był zły wybór.", "Nie działa jak trzeba."
+  neutral: "To opis cechy.", "Podaję informację bez oceny.", "Brak mojej opinii o jakości."
+- wniosek: uczciwsza podstawa oceny to wynik bez koncowek (0.286), bo 0.929 wynika ze skrotu - te same szablony koncowek trafiaja do train i test. Zeby to naprawic, trzeba zbierac prawdziwe, roznorodne opinie bez powtarzalnych zakonczen i pilnowac usuwania duplikatow / podzialu grupami przed train_test_split.
+- dodatek CountVectorizer vs TF-IDF:
+  przy strip_cues=False oba daja identyczne wyniki (0.929 / 0.922).
+  przy strip_cues=True Count + NB daje 0.357 (macro_f1=0.344), a Count + LR i TF-IDF daja 0.286 (macro_f1=0.299) - zmiana wektoryzatora nie naprawia zle zebranych danych.

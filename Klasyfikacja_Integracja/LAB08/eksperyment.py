@@ -75,7 +75,44 @@ def zadanie3():
             )
 
 
+def zadanie4():
+    #porownanie sentymentu z koncowkami i bez koncowek (strip_cues=True)
+    print("\nzadanie 4 - wplyw powtarzalnych koncowek (strip_cues=True)")
+    lr_full = next(r for r in reports["sentiment"] if r["model"] == "Logistic Regression")
+    _, stripped_reports = train("sentiment", strip_cues=True)
+    lr_stripped = next(r for r in stripped_reports if r["model"] == "Logistic Regression")
+
+    hits_full = round(lr_full["accuracy"] * lr_full["test_size"])
+    hits_stripped = round(lr_stripped["accuracy"] * lr_stripped["test_size"])
+    print(f"z koncowkami: accuracy={lr_full['accuracy']} ({hits_full}/{lr_full['test_size']}), macro_f1={lr_full['macro_f1']}")
+    print(f"bez koncowek: accuracy={lr_stripped['accuracy']} ({hits_stripped}/{lr_stripped['test_size']}), macro_f1={lr_stripped['macro_f1']}")
+
+    #wypisanie unikalnych koncowek po pierwszej kropce w reviews.csv
+    raw_texts, raw_labels = load("sentiment", strip_cues=False)
+    cues = {}
+    for t, l in zip(raw_texts, raw_labels):
+        tail = t.split(".", 1)[1].strip() if "." in t else ""
+        cues.setdefault(l, set()).add(tail)
+    for l in sorted(cues):
+        print(f"koncowki {l} ({len(cues[l])}): {sorted(cues[l])[:3]}")
+
+    #dodatkowe porownanie CountVectorizer vs TfidfVectorizer na tym samym podziale
+    for strip in (False, True):
+        texts, labels = load("sentiment", strip_cues=strip)
+        x_tr, x_te, y_tr, y_te = train_test_split(texts, labels, test_size=0.25, random_state=42, stratify=labels)
+        print(f"[CountVectorizer vs TF-IDF | strip_cues={strip}]")
+        for vec_name, vec in [("TF-IDF", TfidfVectorizer(ngram_range=(1, 2))), ("Count", CountVectorizer(ngram_range=(1, 2)))]:
+            for cls_name, est in [("NB", MultinomialNB()), ("LR", LogisticRegression(max_iter=1000)), ("SVM", LinearSVC())]:
+                pipe = make_pipeline(vec, est)
+                pipe.fit(x_tr, y_tr)
+                pred = pipe.predict(x_te)
+                acc = round(float(accuracy_score(y_te, pred)), 3)
+                mf1 = round(float(f1_score(y_te, pred, average="macro")), 3)
+                print(f"{vec_name} + {cls_name}: acc={acc}, macro_f1={mf1}")
+
+
 if __name__ == "__main__":
     zadanie1()
     zadanie2()
     zadanie3()
+    zadanie4()
