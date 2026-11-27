@@ -29,3 +29,13 @@ ustawienia: torch.manual_seed(42), ten sam podzial 40/14 bez koncowek (strip_cue
 - EMBEDDING_DIM = 16: accuracy=0.357 (5/14 trafien), macro_f1=0.366, confusion=[[1, 1, 2], [2, 3, 0], [4, 0, 1]]
 roznica: 0 trafien (0.0 p.p.), czyli nie przekracza 1 pomylki (~7.1 p.p.).
 wniosek: przy 40 krotkich tekstach treningowych zmniejszenie wymiaru wektora 4-krotnie nie pogorszylo ani nie poprawilo wyniku sieci - ograniczeniem sa dane i brak wiedzy z pretreningu, a nie pojemnosc warstwy EmbeddingBag.
+
+Zadanie 5 - walidacja api i plan wiekszego testu
+walidacja POST /api/predict (port 5009):
+- pusty tekst {"text": ""} -> status 400 | {"error": "podaj niepusty tekst w polu text"}
+- tekst 4001 znakow {"text": "x"*4001} -> status 413 | {"error": "tekst jest za długi (maks. 4000 znaków)"}
+
+plan wiekszego testu:
+- zrodlo danych: prawdziwe opinie z innego zrodla niz obecny CSV (np. zgloszenia z systemu ticketowego lub sklepu), z nowymi produktami, bez powtarzalnych koncowek i po usunieciu duplikatow.
+- liczebnosc: minimum 200-300 opinii na kazda klase (negative, neutral, positive), z osobnym zbiorem walidacyjnym i testowym dzielonym ze stratyfikacja (albo po dacie / grupie produktu).
+- metryki dla zespolu obslugi: macro_f1 (rowna waga wszystkich klas) oraz recall klasy negative (zeby nie przeoczyc niezadowolonych klientow wymagajacych pilnej reakcji), uzupelnione o pomiar mediany pelnego czasu odpowiedzi (tokenizacja/kodowanie + predict).

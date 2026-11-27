@@ -130,7 +130,24 @@ def zadanie4_dim16():
     print(f"roznica: {hits_16 - hits_64:+d} trafien ({diff_pp:+.1f} p.p.)")
 
 
+def zadanie5_walidacja():
+    #sprawdzenie bledow walidacji 400 (pusty tekst) oraz 413 (tekst > 4000 znakow)
+    print("\nzadanie 5 - walidacja api /api/predict (400 i 413)")
+    proc, base_url = start_server()
+    try:
+        for desc, body in [("pusty tekst", {"text": ""}), ("za dlugi 4001", {"text": "x" * 4001})]:
+            st, res = http_json(f"{base_url}/api/predict", body)
+            print(f"{desc} -> status={st}, body={res}")
+    finally:
+        proc.terminate()
+        try:
+            proc.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+
+
 if __name__ == "__main__":
     zadanie1()
     zadanie2()
     zadanie4_dim16()
+    zadanie5_walidacja()
