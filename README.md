@@ -1,8 +1,9 @@
 # Inteligentne Systemy Internetowe — Dokumentacja Projektu (EK_05)
 
-Repozytorium zawiera realizację laboratoriów z przedmiotu **Inteligentne Systemy Internetowe**, podzielonych na dwa moduły tematyczne:
-- **Moduł 1 (Laboratoria 1–3)**: Projektowanie API oraz systemy rekomendacji (Content-Based i Collaborative Filtering).
-- **Moduł 2 (Laboratoria 4–7)**: Analiza tekstu, nienadzorowane grupowanie (K-Means, DBSCAN), indeksowanie odwrócone (BM25) oraz wyszukiwanie semantyczne (MiniLM, Elasticsearch).
+Repozytorium zawiera realizację laboratoriów z przedmiotu **Inteligentne Systemy Internetowe**, podzielonych na trzy działy tematyczne:
+- **Moduł 1 — Rekomendacje (Laboratoria 1–3)**: Projektowanie API oraz systemy rekomendacji (Content-Based i Collaborative Filtering).
+- **Moduł 2 — Klastrowanie i Wyszukiwanie (Laboratoria 4–7)**: Analiza tekstu, nienadzorowane grupowanie (K-Means, DBSCAN), indeksowanie odwrócone (BM25) oraz wyszukiwanie semantyczne (MiniLM, Elasticsearch).
+- **Klasyfikacja i Integracja (Laboratoria 8–10)**: Klasyfikacja tekstu (`TF-IDF`, `LinearSVC`, `LogisticRegression`, sieć `EmbeddingBag` w PyTorch, zamrożony `MiniLM`) oraz integracja modułów (Lab 8–9 ukończone, Lab 10 w przygotowaniu).
 
 ---
 
@@ -19,7 +20,7 @@ python app.py
 ```
 
 > [!NOTE]
-> Aplikacje korzystają z frameworka **Flask**, domyślnie nasłuchując na porcie **`5000`** (lub dedykowanych portach, np. **`5004`** dla Lab 4 oraz **`5005`** dla Lab 5).
+> Aplikacje korzystają z frameworka **Flask**, domyślnie nasłuchując na porcie **`5000`** (lub dedykowanych portach, np. **`5004`** dla Lab 4, **`5005`** dla Lab 5, **`5008`** dla Lab 8 oraz **`5009`** dla Lab 9).
 
 ---
 
@@ -376,5 +377,84 @@ Zestawienie trzech odmiennych podejść do wyszukiwania informacji w jednym inte
         "title": "Nowe procesory i ich zastosowanie w serwerach"
       }
     ]
+  }
+  ```
+
+
+---
+
+# 🏷️ Klasyfikacja i Integracja (Laboratoria 8–10)
+
+---
+
+### 🔹 Lab 08: Sortownia wiadomości (Klasyfikacja tekstu)
+
+#### Co działa:
+System klasyfikacji opinii (`sentiment`: `positive`, `neutral`, `negative` — 54 rekordy) oraz wiadomości (`spam` / `ham` — 40 rekordów) oparty o wspólny potok `TfidfVectorizer(ngram_range=(1, 2))` i trzy klasyfikatory (`MultinomialNB`, `LogisticRegression`, `LinearSVC`).
+- **Brak wycieku danych (*data leakage*):** podział `train_test_split` (75% / 25%, `stratify=labels`, `random_state=42`) jest wykonywany **przed** dopasowaniem słownika TF-IDF (`fit` wyłącznie na `train`).
+- **Ewaluacja i analiza skrótów (`strip_cues=True`):** na pełnych tekstach `sentiment` wszystkie trzy modele osiągają `accuracy = 0.929` (13/14) i `macro_f1 = 0.922`, a na `spam` `0.80` / `0.80` (8/10). Po obcięciu powtarzalnych końcówek opinii (`strip_cues=True`) wynik spada do **`0.286`** (4/14, `macro_f1 = 0.299`), co ujawnia poleganie na schematycznych zakończeniach zdań w małym CSV.
+- **API (`port 5008`):** `/api/metrics` zwraca raporty z macierzami pomyłek i listą błędów `errors`, a `POST /api/classify/<task>` klasyfikuje nowe teksty regresją logistyczną (z walidacją kodów `400`, `404`, `413`).
+
+#### Przykładowe żądania i odpowiedzi:
+
+**1. Klasyfikacja wiadomości spam**
+- **Żądanie:**  
+  `POST /api/classify/spam`
+- **Body (`application/json`):**
+  ```json
+  {
+    "text": "Kliknij link i podaj hasło"
+  }
+  ```
+- **Odpowiedź (`200 OK`):**
+  ```json
+  {
+    "label": "spam",
+    "model": "Logistic Regression",
+    "probability_estimate": 0.553,
+    "task": "spam"
+  }
+  ```
+
+---
+
+### 🔹 Lab 09: Porównanie modeli (Bayes, EmbeddingBag PyTorch, MiniLM + LR)
+
+#### Co działa:
+Porównanie trzech architektur klasyfikacji na tym samym podziale 54 opinii **bez powtarzalnych końcówek** (`strip_cues=True`, 40 treningowych / 14 testowych):
+1. **Naive Bayes (`MultinomialNB` + TF-IDF):** `accuracy = 0.286`, `macro_f1 = 0.299`, `inference_ms ≈ 0.2 ms`.
+2. **Mała sieć `EmbeddingBag` w PyTorch (60 epok, Adam):** `accuracy = 0.357` (5/14, identycznie dla `EMBEDDING_DIM = 64` oraz `16`), `macro_f1 = 0.366`, `inference_ms ≈ 0.3 ms`. Przez uśrednianie wektorów (`mode="mean"`) sieć nie widzi kolejności słów.
+3. **Zamrożony `MiniLM` + `LogisticRegression`:** `accuracy = 0.714` (10/14), `macro_f1 = 0.715`, `inference_ms ≈ 89–136 ms` (obejmuje kodowanie zdań przez Transformer + predykcję głowicy LR).
+- **API (`port 5009`):** `/api/metrics` oraz `POST /api/predict` (z walidacją `400` dla pustego tekstu i `413` powyżej 4000 znaków) zwracające równolegle decyzje wszystkich trzech modeli.
+
+#### Przykładowe żądania i odpowiedzi:
+
+**Porównanie predykcji trzech modeli dla nowej opinii**
+- **Żądanie:**  
+  `POST /api/predict`
+- **Body (`application/json`):**
+  ```json
+  {
+    "text": "Aplikacja działa płynnie"
+  }
+  ```
+- **Odpowiedź (`200 OK`):**
+  ```json
+  {
+    "predictions": {
+      "EmbeddingBag PyTorch": {
+        "label": "neutral",
+        "score": 0.986
+      },
+      "MiniLM + LR": {
+        "label": "positive",
+        "score": 0.511
+      },
+      "Naive Bayes": {
+        "label": "neutral",
+        "score": 0.376
+      }
+    },
+    "text": "Aplikacja działa płynnie"
   }
   ```
