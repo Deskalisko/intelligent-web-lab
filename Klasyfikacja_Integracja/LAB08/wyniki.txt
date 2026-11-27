@@ -42,3 +42,29 @@ Logistic Regression (sentiment, 14 prob testowych):
 - dodatek CountVectorizer vs TF-IDF:
   przy strip_cues=False oba daja identyczne wyniki (0.929 / 0.922).
   przy strip_cues=True Count + NB daje 0.357 (macro_f1=0.344), a Count + LR i TF-IDF daja 0.286 (macro_f1=0.299) - zmiana wektoryzatora nie naprawia zle zebranych danych.
+
+Zadanie 5 - testy api na porcie 5008 i porownanie zapytan
+podstawowe endpointy i walidacja bledow:
+- GET /api/metrics -> 200 (sentiment: test_size=14, suma macierzy=14; spam: test_size=10, suma macierzy=10)
+- POST /api/classify/spam {"text": "Kliknij link i podaj hasło"} -> 200 | spam (probability_estimate=0.553)
+- POST /api/classify/spam {"text": ""} -> 400 | {"error": "podaj niepusty tekst w polu text"}
+- POST /api/classify/inne {"text": "test"} -> 404 | {"error": "nieznane zadanie", "tasks": ["sentiment", "spam"]}
+- POST /api/classify/spam (4001 znakow) -> 413 | {"error": "tekst jest za długi (maks. 4000 znaków)"}
+
+seria zapytan przez API (roznica slowa, koncowki, negacji i kontekstu):
+sentiment:
+1. "Produkt działa szybko i stabilnie. Polecam ten zakup." -> positive (0.548)
+2. "Produkt działa szybko i stabilnie" -> positive (0.456) [brak koncowki obniza wynik z 0.548 na 0.456]
+3. "Obsługa była szybka i pomocna" -> positive (0.41)
+4. "Obsługa nie była szybka ani pomocna" -> negative (0.472) [negacja "nie" zmienia etykiete]
+5. "Telefon świetnie trzyma na baterii podczas wyjazdu" -> neutral (0.337)
+6. "Telefon strasznie krótko trzyma na baterii podczas wyjazdu" -> neutral (0.337) [zdania calkiem spoza slownika CSV dostaja ten sam wynik neutral 0.337]
+7. "Telefon ma ekran OLED i waży 180 gramów" -> neutral (0.365)
+
+spam:
+8. "Kliknij link aby odebrać darmową nagrodę i podaj dane karty" -> spam (0.58)
+9. "Przesyłam link do notatek ze spotkania zespołu" -> ham (0.593) [mimo slowa "link" kontekst sluzbowy daje ham]
+10. "Faktura za zamówienie i opłata za wysyłkę w załączniku" -> ham (0.548)
+11. "Twoja paczka czeka na pilną dopłatę kliknij link" -> spam (0.58)
+
+wniosek do api: regresja logistyczna zwraca probability_estimate (LinearSVC nie ma predict_proba), a przy slowach spoza malego slownika treningowego (np. "świetnie", "strasznie") model traci rozroznianie sentymentu i zwraca identyczny wynik neutral.

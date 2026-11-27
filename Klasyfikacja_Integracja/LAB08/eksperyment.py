@@ -111,8 +111,86 @@ def zadanie4():
                 print(f"{vec_name} + {cls_name}: acc={acc}, macro_f1={mf1}")
 
 
+def http_json(url, payload=None):
+    #wyslanie prawdziwego zadania HTTP GET lub POST i zwrot statusu oraz body json
+    data = json.dumps(payload).encode("utf-8") if payload is not None else None
+    headers = {"Content-Type": "application/json; charset=utf-8"} if payload is not None else {}
+    req = urllib.request.Request(url, data=data, headers=headers, method="POST" if payload is not None else "GET")
+    try:
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            return resp.status, json.loads(resp.read().decode("utf-8"))
+    except urllib.error.HTTPError as err:
+        return err.code, json.loads(err.read().decode("utf-8"))
+
+
+def zadanie5_api():
+    #uruchomienie serwera app.py na porcie 5008 i wykonanie prawdziwych zapytan HTTP
+    print("\nzadanie 5 - testy api na porcie 5008")
+    base_url = "http://127.0.0.1:5008"
+    app_path = Path(__file__).resolve().parent / "app.py"
+    proc = subprocess.Popen(
+        [sys.executable, str(app_path)],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    try:
+        #czekanie na gotowosc serwera
+        for _ in range(30):
+            try:
+                status, metrics = http_json(f"{base_url}/api/metrics")
+                if status == 200:
+                    break
+            except Exception:
+                time.sleep(0.25)
+        else:
+            raise RuntimeError("serwer app.py nie odpowiedzial na porcie 5008")
+
+        #sprawdzenie /api/metrics i zgodnosci sumy macierzy z test_size
+        for task in ("sentiment", "spam"):
+            lr = next(r for r in metrics[task] if r["model"] == "Logistic Regression")
+            matrix_sum = sum(sum(row) for row in lr["confusion"])
+            print(f"GET /api/metrics [{task}]: status={status}, test_size={lr['test_size']}, matrix_sum={matrix_sum}")
+
+        #test podstawowy i bledne zadania 400, 404, 413
+        checks = [
+            ("POST /api/classify/spam (poprawny)", f"{base_url}/api/classify/spam", {"text": "Kliknij link i podaj hasło"}),
+            ("POST /api/classify/spam (pusty 400)", f"{base_url}/api/classify/spam", {"text": ""}),
+            ("POST /api/classify/inne (nieznane 404)", f"{base_url}/api/classify/inne", {"text": "test"}),
+            ("POST /api/classify/spam (za dlugi 413)", f"{base_url}/api/classify/spam", {"text": "a" * 4001}),
+        ]
+        for label, url, body in checks:
+            st, res = http_json(url, body)
+            print(f"{label} -> status={st}, body={res}")
+
+        #seria zapytan podobnych oraz rozniacych sie slowem, koncowka, negacja lub kontekstem
+        probes = [
+            ("sentiment", "z koncowka", "Produkt działa szybko i stabilnie. Polecam ten zakup."),
+            ("sentiment", "bez koncowki", "Produkt działa szybko i stabilnie"),
+            ("sentiment", "pozytyw bez negacji", "Obsługa była szybka i pomocna"),
+            ("sentiment", "ta sama fraza z negacja", "Obsługa nie była szybka ani pomocna"),
+            ("sentiment", "poza csv pozytyw", "Telefon świetnie trzyma na baterii podczas wyjazdu"),
+            ("sentiment", "poza csv negatyw", "Telefon strasznie krótko trzyma na baterii podczas wyjazdu"),
+            ("sentiment", "poza csv neutral", "Telefon ma ekran OLED i waży 180 gramów"),
+            ("spam", "link + nagroda/karta", "Kliknij link aby odebrać darmową nagrodę i podaj dane karty"),
+            ("spam", "link sluzbowy (ham)", "Przesyłam link do notatek ze spotkania zespołu"),
+            ("spam", "oplata/faktura sluzbowa", "Faktura za zamówienie i opłata za wysyłkę w załączniku"),
+            ("spam", "paczka + doplata + link", "Twoja paczka czeka na pilną dopłatę kliknij link"),
+        ]
+        print("seria zapytan przez API:")
+        for task, desc, txt in probes:
+            st, res = http_json(f"{base_url}/api/classify/{task}", {"text": txt})
+            print(f"[{task} | {desc}] status={st} -> label={res.get('label')}, prob={res.get('probability_estimate')} | '{txt}'")
+    finally:
+        proc.terminate()
+        try:
+            proc.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+
+
 if __name__ == "__main__":
     zadanie1()
     zadanie2()
     zadanie3()
     zadanie4()
+    zadanie5_api()
