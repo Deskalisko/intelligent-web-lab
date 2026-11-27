@@ -1,3 +1,4 @@
+from pathlib import Path
 from unittest import result
 import pandas as pd
 from pyexpat import features
@@ -10,7 +11,8 @@ from difflib import get_close_matches
 # TF (Term Frequency): Im częściej słowo występuje w opisie jednego filmu, tym jest ważniejsze dla tego filmu.
 # IDF (Inverse Document Frequency): Im rzadziej słowo występuje w całej bazie innych filmów, tym lepszym jest "wyróżnikiem".
 
-df = pd.read_csv("movies.csv")
+DATA_PATH = Path(__file__).resolve().parent / "movies.csv"
+df = pd.read_csv(DATA_PATH)
 df["overview"] = df["overview"].fillna("") # wypełnienie brakow w opisach pustym tekstem
 df["genres"] = df["genres"].fillna("") #brak gatunuku
 

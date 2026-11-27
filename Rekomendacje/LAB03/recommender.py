@@ -1,9 +1,11 @@
 from difflib import get_close_matches
+from pathlib import Path
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import pandas as pd
 
-df = pd.read_csv("ratings.csv")
+DATA_PATH = Path(__file__).resolve().parent / "ratings.csv"
+df = pd.read_csv(DATA_PATH)
 matrix = df.pivot_table(index="user", columns="title", values="rating")
 
 user_means = matrix.mean(axis=1)

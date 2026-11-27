@@ -2,14 +2,19 @@
 from html import escape
 from pathlib import Path
 import sys
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+lab_dir = str(Path(__file__).resolve().parent)
+root_dir = str(Path(__file__).resolve().parents[2])
+if lab_dir not in sys.path:
+    sys.path.insert(0, lab_dir)
+if root_dir not in sys.path:
+    sys.path.insert(0, root_dir)
 
 from flask import Flask, jsonify, request, send_from_directory
 from course import materials, page
-from lab2.recommender import df as movies, recommend as by_content
-from lab3.recommender import matrix as ratings, recommend as by_user
-from lab6.search_engine import documents, search
-from lab8.classifier import classify
+from Rekomendacje.LAB02.recommender import df as movies, recommend as by_content    
+from Rekomendacje.LAB03.recommender import matrix as ratings, recommend as by_user
+from Wyszukiwanie.LAB06.search_engine import documents, search
+from Klasyfikacja_Integracja.LAB08.classifier import classify
 
 app = Flask(__name__, static_folder="../assets", static_url_path="/assets")
 

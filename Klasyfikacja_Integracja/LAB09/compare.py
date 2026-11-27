@@ -4,7 +4,10 @@ from pathlib import Path
 import re
 import sys
 from time import perf_counter
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+root_dir = str(Path(__file__).resolve().parents[2])
+if root_dir not in sys.path:
+    sys.path.insert(0, root_dir)
 
 import numpy as np
 import torch
@@ -13,8 +16,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, confusion_matrix, f1_score
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
-from lab8.classifier import load
-from lab7.search import semantic_index
+from Klasyfikacja_Integracja.LAB08.classifier import load
+from Wyszukiwanie.LAB07.search import semantic_index
 
 LABELS = ["negative", "neutral", "positive"]
 EMBEDDING_DIM = 64

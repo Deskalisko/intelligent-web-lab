@@ -1,5 +1,9 @@
 from pathlib import Path
 import sys
+
+lab_dir = str(Path(__file__).resolve().parent)
+if lab_dir not in sys.path:
+    sys.path.insert(0, lab_dir)
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from flask import Flask, jsonify, request, send_from_directory
