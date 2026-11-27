@@ -110,7 +110,27 @@ def zadanie3_api():
             proc.kill()
 
 
+def zadanie4_dim16():
+    #porownanie EmbeddingBag dla EMBEDDING_DIM=64 oraz EMBEDDING_DIM=16 z tym samym ziarnem 42
+    print("\nzadanie 4 - zmiana EMBEDDING_DIM z 64 na 16")
+    rep_64 = next(r for r in compare.experiment()["reports"] if r["model"] == "EmbeddingBag PyTorch")
+    compare.EMBEDDING_DIM = 16
+    compare.experiment.cache_clear()
+    try:
+        rep_16 = next(r for r in compare.experiment()["reports"] if r["model"] == "EmbeddingBag PyTorch")
+    finally:
+        compare.EMBEDDING_DIM = 64
+        compare.experiment.cache_clear()
+
+    hits_64 = round(rep_64["accuracy"] * rep_64["test_size"])
+    hits_16 = round(rep_16["accuracy"] * rep_16["test_size"])
+    diff_pp = round((rep_16["accuracy"] - rep_64["accuracy"]) * 100, 1)
+    print(f"EMBEDDING_DIM=64: accuracy={rep_64['accuracy']} ({hits_64}/14), macro_f1={rep_64['macro_f1']}, confusion={rep_64['confusion']}")
+    print(f"EMBEDDING_DIM=16: accuracy={rep_16['accuracy']} ({hits_16}/14), macro_f1={rep_16['macro_f1']}, confusion={rep_16['confusion']}")
+    print(f"roznica: {hits_16 - hits_64:+d} trafien ({diff_pp:+.1f} p.p.)")
+
+
 if __name__ == "__main__":
     zadanie1()
     zadanie2()
-    zadanie3_api()
+    zadanie4_dim16()

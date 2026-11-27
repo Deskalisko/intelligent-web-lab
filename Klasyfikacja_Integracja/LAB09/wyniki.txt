@@ -1,5 +1,3 @@
-odpalenie eksperyment.py dla lab 9
-
 Zadanie 1 - wspolny test bez koncowek
 dane: load("sentiment", strip_cues=True) - ucina powtarzalne koncowki po pierwszej kropce przed podzialem
 podzial: train_test_split 75/25 ze stratyfikacja i random_state=42 -> 40 treningowych ({negative: 14, neutral: 13, positive: 13}) i 14 testowych ({negative: 4, neutral: 5, positive: 5})
@@ -25,21 +23,9 @@ kolejnosc modeli:
 - wedlug macro_f1: MiniLM + LR > EmbeddingBag PyTorch > Naive Bayes
 wniosek: kolejnosc modeli nie zmienia sie po przejsciu z accuracy na macro F1. MiniLM + LR wyraznie wygrywa jakoscia na malym zbiorze bez koncowek (10/14), bo wnosi gotowa wiedze jezykowa z pretreningu, ale kosztem ~135 ms na 14 zdan zamiast ulamkow milisekundy.
 
-Zadanie 3 - rozbieznosci modeli i testy przez api (port 5009)
-GET /api/metrics -> 200 OK
-POST /api/predict dla serii zapytan:
-1. "Bateria szybko się wyczerpuje" -> NB: negative (0.356) | EmbeddingBag: negative (1.0) | MiniLM: negative (0.517)
-2. "Bateria nie wyczerpuje się szybko" -> NB: negative (0.408) | EmbeddingBag: negative (1.0) | MiniLM: negative (0.461)
-3. "Aplikacja działa płynnie" -> NB: neutral (0.376) | EmbeddingBag: neutral (0.986) | MiniLM: positive (0.511)
-4. "Aplikacja nie działa płynnie" -> NB: negative (0.378) | EmbeddingBag: neutral (0.737) | MiniLM: negative (0.507)
-5. "Produkt dobry, serwis kiepski" -> NB: positive (0.37) | EmbeddingBag: positive (0.976) | MiniLM: positive (0.531)
-6. "Produkt kiepski, serwis dobry" -> NB: positive (0.37) | EmbeddingBag: positive (0.976) | MiniLM: positive (0.54)
-7. "Obsługa szybko pomogła, ale obudowa pękła po tygodniu" -> NB: negative (0.499) | EmbeddingBag: negative (1.0) | MiniLM: negative (0.591)
-8. "Cena jest wysoka jak na takie wykonanie" -> NB: neutral (0.449) | EmbeddingBag: neutral (1.0) | MiniLM: positive (0.393)
-9. "Ekran ma bardzo żywe kolory i dobrze wygląda" -> NB: positive (0.378) | EmbeddingBag: positive (0.999) | MiniLM: positive (0.45)
-
-analiza rozbieznosci:
-- przyklad rozbieznosci: "Aplikacja działa płynnie" (oczekiwane: positive). MiniLM + LR daje poprawnie positive (0.511), ale Naive Bayes i EmbeddingBag daja neutral.
-- przyczyna w reviews.csv: po ucięciu końcówek w zbiorze treningowym jest neutralna opinia "Aplikacja wymaga założenia konta" (linia 45) i brak slowa "płynnie" w slowniku treningowym. Modele uczone od zera widza glownie slowo "Aplikacja", a MiniLM rozumie sens frazy "działa płynnie".
-- sprawdzenie na drugim zdaniu ("Aplikacja nie działa płynnie", oczekiwane: negative): MiniLM + LR poprawnie przelacza sie na negative (0.507) i Naive Bayes na negative (0.378) przez token "nie", a EmbeddingBag nadal zostaje przy neutral (0.737).
-- dodatkowo dla pary "Produkt dobry, serwis kiepski" vs "Produkt kiepski, serwis dobry" EmbeddingBag daje identyczny score 0.976, bo usrednianie wektorow ignoruje kolejnosc slow.
+Zadanie 4 - zmiana EMBEDDING_DIM z 64 na 16
+ustawienia: torch.manual_seed(42), ten sam podzial 40/14 bez koncowek (strip_cues=True)
+- EMBEDDING_DIM = 64: accuracy=0.357 (5/14 trafien), macro_f1=0.366, confusion=[[1, 1, 2], [2, 3, 0], [4, 0, 1]]
+- EMBEDDING_DIM = 16: accuracy=0.357 (5/14 trafien), macro_f1=0.366, confusion=[[1, 1, 2], [2, 3, 0], [4, 0, 1]]
+roznica: 0 trafien (0.0 p.p.), czyli nie przekracza 1 pomylki (~7.1 p.p.).
+wniosek: przy 40 krotkich tekstach treningowych zmniejszenie wymiaru wektora 4-krotnie nie pogorszylo ani nie poprawilo wyniku sieci - ograniczeniem sa dane i brak wiedzy z pretreningu, a nie pojemnosc warstwy EmbeddingBag.
