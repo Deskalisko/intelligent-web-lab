@@ -5,3 +5,16 @@ podzial: train_test_split 75/25 ze stratyfikacja i random_state=42 przed fit TF-
 - sentiment: 54 opinie -> train=40 ({negative: 14, neutral: 13, positive: 13}), test=14 ({negative: 4, neutral: 5, positive: 5}), slownik TF-IDF z train = 454 cechy (unigramy + bigramy)
 - spam: 40 wiadomosci -> train=30 ({ham: 15, spam: 15}), test=10 ({ham: 5, spam: 5}), slownik TF-IDF z train = 302 cechy
 wniosek: slownik TF-IDF jest budowany wylacznie na czesci treningowej, dzieki czemu dane testowe nie wplywaja na wagi i slownik przed ewaluacja.
+
+Zadanie 2 - porownanie trzech modeli
+sentiment (test_size=14, klasy: negative, neutral, positive):
+Naive Bayes: accuracy=0.929, macro_f1=0.922, confusion=[[3, 0, 1], [0, 5, 0], [0, 0, 5]]
+Logistic Regression: accuracy=0.929, macro_f1=0.922, confusion=[[3, 0, 1], [0, 5, 0], [0, 0, 5]]
+Linear SVM: accuracy=0.929, macro_f1=0.922, confusion=[[3, 0, 1], [0, 5, 0], [0, 0, 5]]
+
+spam (test_size=10, klasy: ham, spam):
+Naive Bayes: accuracy=0.8, macro_f1=0.8, confusion=[[4, 1], [1, 4]]
+Logistic Regression: accuracy=0.8, macro_f1=0.8, confusion=[[4, 1], [1, 4]]
+Linear SVM: accuracy=0.8, macro_f1=0.8, confusion=[[4, 1], [1, 4]]
+
+wniosek: na tych malych zbiorach wszystkie 3 modele osiagaja identyczne wyniki (13/14 dla sentiment i 8/10 dla spam).

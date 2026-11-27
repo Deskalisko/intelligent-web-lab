@@ -41,5 +41,18 @@ def zadanie1():
         )
 
 
+def zadanie2():
+    #porownanie accuracy, macro_f1 i macierzy pomylek dla 3 klasyfikatorow
+    print("\nzadanie 2 - porownanie trzech modeli")
+    for task in ("sentiment", "spam"):
+        print(f"[{task}]")
+        for row in reports[task]:
+            print(
+                f"{row['model']}: accuracy={row['accuracy']}, macro_f1={row['macro_f1']}, "
+                f"test_size={row['test_size']}, confusion={row['confusion']}"
+            )
+
+
 if __name__ == "__main__":
     zadanie1()
+    zadanie2()
