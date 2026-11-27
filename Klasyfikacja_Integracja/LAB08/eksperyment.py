@@ -53,6 +53,29 @@ def zadanie2():
             )
 
 
+def find_csv_line(task, text_fragment):
+    #szukanie numeru linii w pliku csv dla konkretnego tekstu
+    with FILES[task].open(encoding="utf-8", newline="") as f:
+        for idx, row in enumerate(csv.DictReader(f), start=2):
+            if text_fragment in row["text"]:
+                return idx
+    return None
+
+
+def zadanie3():
+    #odczytanie pomylek poza przekatna macierzy dla Logistic Regression
+    print("\nzadanie 3 - pomylki poza przekatna macierzy (Logistic Regression)")
+    for task in ("sentiment", "spam"):
+        lr = next(r for r in reports[task] if r["model"] == "Logistic Regression")
+        print(f"[{task}] labels={lr['labels']} confusion={lr['confusion']}")
+        for err in lr["errors"]:
+            line_no = find_csv_line(task, err["text"])
+            print(
+                f"linia_csv={line_no} | true={err['true_label']} -> pred={err['predicted_label']} | text={err['text']}"
+            )
+
+
 if __name__ == "__main__":
     zadanie1()
     zadanie2()
+    zadanie3()

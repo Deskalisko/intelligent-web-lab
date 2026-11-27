@@ -18,3 +18,14 @@ Logistic Regression: accuracy=0.8, macro_f1=0.8, confusion=[[4, 1], [1, 4]]
 Linear SVM: accuracy=0.8, macro_f1=0.8, confusion=[[4, 1], [1, 4]]
 
 wniosek: na tych malych zbiorach wszystkie 3 modele osiagaja identyczne wyniki (13/14 dla sentiment i 8/10 dla spam).
+
+Zadanie 3 - pomylki z macierzy (Logistic Regression)
+sentiment:
+- komorka poza przekatna: wiersz 'negative', kolumna 'positive' = 1 (macierz [[3, 0, 1], [0, 5, 0], [0, 0, 5]])
+- przyklad (reviews.csv linia 32): "Aktualizacja zepsuła działającą wcześniej funkcję. Oceniam zakup negatywnie."
+  true_label: negative | predicted_label: positive
+  dlaczego: model pomylil skrajne klasy (slowo "Aktualizacja" wystapilo tez w pozytywnych i neutralnych opiniach, np. "Aktualizacja naprawiła zgłaszany błąd")
+
+spam:
+- komorka [ham -> spam] = 1 (falszywy alarm), przyklad (emails.csv linia 32): "Nowa wersja umowy czeka na komentarze" (true_label: ham | predicted_label: spam)
+- komorka [spam -> ham] = 1 (przeoczony spam), przyklad (emails.csv linia 3): "Odbierz darmowy bon po wpłacie opłaty aktywacyjnej" (true_label: spam | predicted_label: ham)
