@@ -33,5 +33,21 @@ def zadanie1():
         print(f"{r['model']}: test_size={r['test_size']}")
 
 
+def zadanie2():
+    #zestawienie accuracy, macro_f1, macierzy pomylek i czasu predykcji dla 3 modeli
+    print("\nzadanie 2 - wyniki 3 modeli i czas predykcji")
+    reports = compare.experiment()["reports"]
+    for r in reports:
+        print(
+            f"{r['model']}: accuracy={r['accuracy']}, macro_f1={r['macro_f1']}, "
+            f"inference_ms={r['inference_ms']}, confusion={r['confusion']}"
+        )
+    by_acc = [r["model"] for r in sorted(reports, key=lambda x: x["accuracy"], reverse=True)]
+    by_f1 = [r["model"] for r in sorted(reports, key=lambda x: x["macro_f1"], reverse=True)]
+    print(f"kolejnosc accuracy: {by_acc}")
+    print(f"kolejnosc macro_f1: {by_f1}")
+
+
 if __name__ == "__main__":
     zadanie1()
+    zadanie2()
