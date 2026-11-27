@@ -1,5 +1,3 @@
-odpalenie eksperyment.py dla lab 7
-
 doslowne bm25: [(1, 10.5742)]
 doslowne minilm: [(1, 0.7825)]
 parafraza bm25: [(24, 3.8377)]

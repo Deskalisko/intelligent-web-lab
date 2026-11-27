@@ -1,5 +1,3 @@
-odpalenie eksperyment.py dla lab 9
-
 Zadanie 1 - wspolny test bez koncowek
 dane: load("sentiment", strip_cues=True) - ucina powtarzalne koncowki po pierwszej kropce przed podzialem
 podzial: train_test_split 75/25 ze stratyfikacja i random_state=42 -> 40 treningowych ({negative: 14, neutral: 13, positive: 13}) i 14 testowych ({negative: 4, neutral: 5, positive: 5})

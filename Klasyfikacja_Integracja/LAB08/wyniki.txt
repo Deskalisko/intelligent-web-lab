@@ -1,5 +1,3 @@
-odpalenie eksperyment.py dla lab 8
-
 Zadanie 1 - przygotowanie danych i podzial train/test
 podzial: train_test_split 75/25 ze stratyfikacja i random_state=42 przed fit TF-IDF (brak wycieku danych)
 - sentiment: 54 opinie -> train=40 ({negative: 14, neutral: 13, positive: 13}), test=14 ({negative: 4, neutral: 5, positive: 5}), slownik TF-IDF z train = 454 cechy (unigramy + bigramy)
