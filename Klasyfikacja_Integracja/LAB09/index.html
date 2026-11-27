@@ -1,0 +1,290 @@
+<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lab 09 · Co pamięta model? · ISI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=optional" rel="stylesheet">
+<style>
+:root{--dark:#152322;--mint:#ccf1ce;--orange:#fb653c;--practice-accent:#0f6b56;--cream:#f4f3e9;--disp:'Anton',Impact,sans-serif;--mono:'DM Mono',monospace}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--cream);color:var(--dark);font-family:'Space Grotesk',Arial,sans-serif;font-size: 19px;line-height:1.7}a{color:inherit}button,textarea{font:inherit}button{cursor:pointer}.wrap{width:min(1140px,92vw);margin:auto}nav{position:sticky;top:0;z-index:5;background:var(--dark);color:white;display:flex;justify-content:space-between;gap:16px;padding:16px max(4vw,calc((100vw - 1140px)/2));font:17px 'DM Mono',monospace}nav a{text-decoration:none;margin-left:20px}.hero{background:var(--mint);min-height:650px;padding:80px 0;overflow:hidden}.hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;align-items:center;gap:40px}.stamp{font:17px 'DM Mono',monospace;border:1px solid var(--dark);padding:8px 12px;display:inline-block}.hero h1{font-family:var(--disp);font-weight:400;font-size:clamp(65px,8vw,124px);line-height:.88;letter-spacing:-.02em;margin:40px 0}.hero h1 span{color:var(--orange)}.hero p{font-size: 20px;max-width:620px;line-height:1.55}.layers{position:relative;height:470px}.layer{position:absolute;width:90%;height:180px;border:3px solid var(--dark);box-shadow:10px 10px 0 var(--dark);display:flex;align-items:center;justify-content:center;font-size: 23px;font-weight:700;transform:rotate(-8deg)}.layer:nth-child(1){top:20px;left:0;background:var(--cream)}.layer:nth-child(2){top:145px;left:8%;background:var(--orange);transform:rotate(5deg)}.layer:nth-child(3){top:270px;left:3%;background:#effdf0;transform:rotate(-3deg)}section{padding:90px 0;border-bottom:1px solid #cdd2c9}.eyebrow{font:17px 'DM Mono',monospace;letter-spacing:.1em;text-transform:uppercase}h2{font-family:var(--disp);font-weight:400;font-size:clamp(40px,5vw,66px);line-height:.95;letter-spacing:-.015em;margin:15px 0 28px}.lead{font-size: 19px;line-height:1.65;max-width:800px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.card{border:2px solid var(--dark);padding:27px;background:#fff}.card h3{font-size: 23px;margin:7px 0}.card p,li{line-height:1.65}.card small{font:17px 'DM Mono',monospace;color:#46615e}.bench{background:var(--dark);color:white}.bench .grid{margin:28px 0;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))}.bench .card{background:#253937;color:white;border-color:#668077}.bench .card small{color:var(--mint)}.metric{font-size: 55px;letter-spacing:-.07em;font-weight:700;color:var(--mint)}.matrix{width:100%;border-collapse:collapse;font:12px/1.5 'DM Mono',monospace;color:#e4ece3}.matrix caption{text-align:left;margin-bottom:10px}.matrix th,.matrix td{border:1px solid #668077;padding:5px;text-align:center}.matrix .hit{background:#34594a}.matrix .mistake{background:#733c2f}textarea{width:100%;min-height:110px;padding:17px;border:2px solid var(--dark);background:white}.bench textarea{border-color:var(--mint);background:#f4fff5}.solid{border:0;background:var(--orange);color:var(--dark);padding:14px 20px;font-weight:700;margin:10px 0}.feedback{font:16px 'DM Mono',monospace;line-height:1.6;white-space:pre-wrap}.steps{display:grid;grid-template-columns:220px 1fr;gap:30px;padding:25px 0;border-top:1px solid #cdd2c9}.steps h3{font-size: 22px;margin:0}.steps p{margin:0;line-height:1.7}pre{background:#20332f;color:#e4fce5;padding:20px;overflow:auto;font:16px/1.6 'DM Mono',monospace}.challenge{background:var(--orange)}.challenge ol{max-width:850px}.links{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.links a{background:white;border:2px solid var(--dark);text-decoration:none;padding:23px}.links b,.links span{display:block}.links span{font-size: 16px;margin-top:7px}.checks label{display:block;background:white;border:1px solid #bcc6bc;padding:12px 15px;margin:8px 0}.checks input{accent-color:var(--orange)}.q{padding:18px 0;border-top:1px solid #bbc6bd}.q button{background:white;border:1px solid var(--dark);padding:10px;margin:6px 5px 0 0}.q small{display:block;margin-top:8px}footer{background:var(--dark);color:white;padding:35px 0;font:17px 'DM Mono',monospace}footer .wrap{display:flex;justify-content:space-between}@media(max-width:800px){.hero .wrap,.grid,.links{grid-template-columns:1fr}.layers{height:380px}.layer{height:135px}.layer:nth-child(2){top:120px}.layer:nth-child(3){top:220px}.steps{grid-template-columns:1fr;gap:8px}nav .navlinks{display:none}}
+@media(max-width:600px){.bench .card{padding:12px}.matrix th,.matrix td{padding:5px 3px}}
+</style><style data-ill="1">
+/* ---------- rytm pionowy + ilustracja · wzorzec lab2 ---------- */
+section > * + * { margin-top: 0; }
+.lead + * { margin-top: 8px; }
+.steps { margin-top: 28px; }
+h3.sub-title { font-size: 23px; margin: 40px 0 14px; letter-spacing: -.01em; }
+h3.sub-title:first-child { margin-top: 8px; }
+.fig-ill { margin: 40px 0 12px; max-width: 960px; }
+.fig-ill img { display: block; width: 100%; height: auto; border-radius: 22px; border: 3px solid var(--dark); box-shadow: 10px 10px 0 var(--dark); }
+.ill-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 6px; }
+.ill-tab { font-family: 'DM Mono', monospace; font-size: 16px; font-weight: 500; letter-spacing: .04em; padding: 9px 16px; border-radius: 999px; border: 2px solid var(--dark); background: #fff; color: var(--dark); cursor: pointer; transition: all .2s; }
+.ill-tab:hover { border-color: var(--orange); color: var(--orange); }
+.ill-tab[aria-pressed="true"] { background: var(--dark); color: var(--mint); border-color: var(--dark); }
+.ill-note { margin: 10px 0 4px; padding: 14px 18px; border-left: 4px solid var(--orange); background: #fff; border-radius: 0 12px 12px 0; border-top: 2px solid var(--dark); border-right: 2px solid var(--dark); border-bottom: 2px solid var(--dark); font-size: 19px; min-height: 3.2em; }
+#own-trial { padding: 90px 0; }
+#own-trial .trial-card { border: 3px solid var(--dark); border-radius: 14px; background: var(--mint); box-shadow: 10px 10px 0 var(--dark); padding: 30px 32px; margin-top: 8px; }
+#own-trial .trial-card h2 { margin-top: 0; }
+#own-trial .trial-card p + p { margin-top: 14px; }
+.trial-card.reveal { transition: opacity .7s ease, transform .7s ease; }
+.trial-card.reveal.in { opacity: 1; transform: none; }
+</style><link rel="icon" href="../assets/favicon.svg">
+<style data-typo="1">:root{--acc:#fb653c;--acc2:#0f6b56}
+strong{color:var(--acc);font-weight:700}
+em{color:var(--acc2);font-style:italic}
+code{font-family:'DM Mono',monospace;background:#ffe7df;color:#b83c14;padding:.1em .45em;border-radius:6px}
+.lead{font-size:1.1rem;line-height:1.8}
+p+p{margin-top:16px}
+.steps p+p{margin-top:16px}
+.steps p+p{margin-top:16px}
+.card p,.steps p{line-height:1.8}
+.challenge li{margin-bottom:16px;line-height:1.8}</style><link rel="stylesheet" href="../assets/responsive.css">
+<link rel="stylesheet" href="../assets/code.css">
+<link rel="stylesheet" href="../assets/tab-icons.css">
+<script src="../assets/highlight.min.js" defer></script>
+<script src="../assets/code.js" defer></script>
+<style>.start-tasks a{font-weight:700;text-decoration:underline;text-underline-offset:.18em}.start-tasks li+li{margin-top:.6em}.start-note{border-top:1px solid currentColor;padding-top:.7em}section[id]{scroll-margin-top:64px}</style>
+
+<style>.hero h1>span{color:#9c381e}</style>
+<link rel="stylesheet" href="../assets/praktyka.css">
+</head><body>
+<nav><span>ISI / 09 / MODEL ROOM</span><span class="navlinks"><a href="#problem">Problem</a><a href="#bench">Porównanie</a><a href="#kod">Kod</a><a href="#kontrola">Kontrola</a></span><span>B.4 + B.5</span></nav>
+<header class="hero"><canvas id="nn-fx" aria-hidden="true"></canvas><div class="wrap"><div><span class="stamp">54 OPINIE / 3 PODEJŚCIA / 14 TESTÓW</span><h1>Co pamięta<br><span>model?</span></h1><p>Ten sam tekst trafia do klasycznego modelu, małej sieci neuronowej i gotowego Transformera. Porównasz wyniki i sprawdzisz, ile tekstów testowych stoi za każdą liczbą.</p><div class="ill-tabs" role="group" aria-label="Kliknij etap schematu"><button class="ill-tab" data-ill="0" aria-pressed="true"><svg class="tab-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9M9 19V5M14 19v-6M19 19V3"/></svg>1 · BAYES</button><button class="ill-tab" data-ill="1" aria-pressed="false"><svg class="tab-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="7" r="2"/><circle cx="18" cy="7" r="2"/><circle cx="12" cy="18" r="2"/><path d="M8 7h8M7 8.6l4 7.6M17 8.6l-4 7.6"/></svg>2 · SIEĆ</button><button class="ill-tab" data-ill="2" aria-pressed="false"><svg class="tab-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="4" rx="1"/><rect x="4" y="10" width="16" height="4" rx="1"/><rect x="4" y="16" width="16" height="4" rx="1"/></svg>3 · TRANSFORMER</button></div><p class="ill-note" id="illNote">BAYES: liczy wagi słów z treningu. Szybki punkt odniesienia. Sprawdź, co wygrywa po treningu na 40 tekstach.</p></div><div class="layers" aria-hidden="true"><div class="layer">TF-IDF → Bayes</div><div class="layer">tokeny → embedding → sieć</div><div class="layer">tekst → MiniLM → LR</div></div></div></header>
+<main><aside class="course-start" aria-label="Jak pracować z laboratorium">
+<h2>Lab 09: od czego zacząć</h2>
+<p>Porównasz jakość i koszt trzech modeli na tym samym podziale opinii.</p>
+<div class="first-try" style="--term-accent:#8a97a0"><h3>Rozgrzewka z Lab 08 · Macierz pomyłek</h3><p class="try-question">Dlaczego samo accuracy nie wystarcza i co robi macro F1? Odpowiedz z pamięci, potem sprawdź.</p><details><summary>Sprawdź odpowiedź</summary><p>Accuracy myli przy nierównych klasach: model zgadujący większość ma wysokie accuracy. Macro F1 liczy F1 (precyzja i czułość) dla każdej klasy i uśrednia, dając każdej klasie równą wagę.</p></details></div>
+<div class="first-try" style="--term-accent:#4f9e94"><h3>Co model zapamięta z kolejności słów?</h3><p><dfn>Embedding</dfn> to wektor, czyli lista liczb opisujących słowo lub tekst. W tej małej sieci EmbeddingBag bierze wektor każdego znanego słowa i oblicza średnią.</p><figure class="lab-sketch"><figcaption>Co zmienia kolejność słów?</figcaption><svg viewBox="0 0 320 132" role="img" aria-label="Dwa zdania zawierają te same cztery słowa. Zamieniono miejscami przymiotniki dobry i kiepski."><text x="12" y="22" class="key">OPINIA A</text><text x="12" y="49" class="">produkt dobry · serwis kiepski</text><path d="M12 65 L308 65" class="ink-line"/><text x="12" y="89" class="key">OPINIA B</text><text x="12" y="116" class="">produkt kiepski · serwis dobry</text></svg></figure><p class="try-question">Czy „produkt dobry, serwis kiepski” i „produkt kiepski, serwis dobry” dadzą różne średnie wektorów słów?</p><details><summary>Sprawdź odpowiedź</summary><p>Nie. W obu zdaniach występują te same słowa, więc EmbeddingBag obliczy taką samą średnią. Model wykorzystujący kolejność słów może odróżnić te dwa zdania. To przykład działania warstwy, a nie ocena jakości na opiniach. <a href="#bench">Porównaj przewidywania modeli</a>.</p></details></div>
+<div class="start-tasks">
+<h3>Zadania do wykonania</h3>
+<ol>
+<li><a href="#kod">Przygotuj wspólny test.</a> Użyj opinii bez powtarzalnych końcówek (w <code>compare.py</code> odpowiada za to <code>strip_cues=True</code>). We wszystkich trzech metodach zachowaj ten sam podział. Sprawdź w raporcie, że każda metoda ocenia 14 tekstów.</li>
+<li><a href="#bench">Zapisz wyniki.</a> Dla Naive Bayes, sieci EmbeddingBag i MiniLM z regresją logistyczną podaj accuracy (dokładność), macro F1, macierz pomyłek i czas predykcji. Zanotuj, które operacje obejmuje pomiar czasu każdej metody.</li>
+<li><a href="#bench">Znajdź rozbieżność.</a> Podaj wszystkim modelom tę samą opinię przez formularz „Własna opinia do trzech modeli”. Zapisz przewidywania i własną etykietę. Jeśli modele się różnią, zaproponuj wyjaśnienie i sprawdź je na drugim zdaniu.</li>
+<li><a href="#eksperyment">Zmień rozmiar wektora.</a> W pliku <code>compare.py</code> ustaw <code>EMBEDDING_DIM = 16</code> zamiast 64 i ponownie uruchom skrypt. Zachowaj pozostałe ustawienia. Porównaj liczbę trafień sieci. Jedna poprawna odpowiedź na 14 prób zmienia accuracy o około 7 punktów procentowych.</li>
+<li><a href="#kod">Sprawdź walidację.</a> Wyślij pusty tekst do <code>/api/predict</code>, a potem tekst o długości 4001 znaków. Zapisz kody odpowiedzi i porównaj je z oczekiwanymi wartościami 400 i 413.</li>
+</ol>
+<p class="start-note">Do oddania przygotuj <code>compare.py</code>, <code>app.py</code> i tabelę wyników z planem większego testu.</p>
+</div>
+<p>Pobierz cały kurs i rozpakuj archiwum. W katalogu <code>lab9</code> zainstaluj zależności poleceniem <code>py -m pip install -r requirements.txt</code>. Następnie uruchom <code>py app.py</code> i otwórz <code>http://127.0.0.1:5009/</code>. Formularze korzystają z tego serwera. </p>
+<div class="files"><a href="../lab8/reviews.csv" download>reviews.csv</a> <a href="compare.py" download>compare.py</a> <a href="app.py" download>app.py</a> <a href="requirements.txt" download>requirements.txt</a> <a href="../kurs.zip" download>Pobierz cały kurs (ZIP)</a> <a href="../requirements.txt" download>Zależności podstawowe</a> <a href="../index.html#laby">Wszystkie laboratoria</a></div>
+<p><a href="#dodatkowe-przyklady">Przejdź do dodatkowych przykładów</a></p>
+</aside>
+<section id="problem"><div class="wrap"><p class="eyebrow">01 / zlecenie</p><h2>Większy model to hipoteza.</h2><p class="lead">Zespół obsługi chce automatycznie oznaczać opinie klientów. W Lab 8 powtarzalne końcówki podnosiły wynik do 0,929. Tutaj celowo usuwamy te końcówki przed podziałem danych. Wszystkie trzy metody dostają dokładnie tę samą próbkę testową. Na 14 tekstach jedna pomyłka przesuwa accuracy o ponad 7 punktów procentowych.</p><div class="grid"><div class="card"><small>BAZA</small><h3>Naive Bayes</h3><p>TF-IDF waży słowo: częstość w opinii razy rzadkość w całym zbiorze treningowym. Do tego pary sąsiednich słów. Szybki punkt odniesienia z Lab 8.</p></div><div class="card"><small>SIEĆ</small><h3>EmbeddingBag w PyTorch</h3><p>Tokeny (tu: słowa) wyznacza wzorzec regex <code>\w+</code> po zamianie tekstu na małe litery, więc interpunkcja znika, a „nie” zostaje osobnym tokenem. Słownik mapuje je na liczby. Sieć uczy się embeddingów, uśrednia tokeny i używa warstw Dense (zwykłych warstw liniowych). Trenujemy ją od zera.</p></div><div class="card"><small>KONTEKST</small><h3>MiniLM + LR</h3><p>Gotowy, wstępnie wytrenowany Transformer tworzy embedding całego zdania. Uczymy tylko głowicę (końcowy klasyfikator) Logistic Regression; nie dostrajamy MiniLM.</p></div></div></div></section>
+
+<section id="bench" class="bench"><div class="wrap"><p class="eyebrow">02 / stanowisko testowe</p><h2>Otwórz raport,<br>potem sprawdź tekst.</h2><p>Uruchom <code>py app.py</code> w <code>lab9</code>. Pierwszy raport ładuje ten sam wielojęzyczny model co Lab 7. Pierwsze uruchomienie pobiera model z Hugging Face; bez pobranych wag (zapisanych parametrów modelu) raport nie powstanie, a błąd przyjdzie z ładowania modelu, nie z walidacji tekstu. Wyniki zależą od wersji bibliotek; czytaj je z uruchomionego kodu. Czas predykcji 14 tekstów jest orientacyjny i zapisany w polu <code>inference_ms</code>. Dla MiniLM obejmuje kodowanie i klasyfikację, dla Bayesa i małej sieci tylko predykcję po przygotowaniu cech. Nie obejmuje pobrania ani pierwszego ładowania modeli.</p><button class="solid" id="load">Pokaż raport →</button><p id="status" class="feedback" role="status">Raport czeka na uruchomienie.</p><div class="grid" id="reports"></div><label for="opinion">Własna opinia do trzech modeli:</label><textarea id="opinion">Bateria szybko się wyczerpuje.</textarea><button class="solid" id="predict">Porównaj etykiety →</button><div id="prediction" class="grid" aria-live="polite"></div><p>Score (wynik modelu) to najwyższe oszacowanie prawdopodobieństwa zwrócone przez dany model. Nie jest skalibrowane (dopasowane do rzeczywistej trafności), więc nie traktuj go jak miary pewności na nowych opiniach. Nie porównuj tych wartości liczbowo między metodami. Gdy modele są zgodne, nie oznacza to automatycznie poprawności. Przeczytaj opinię, sprawdź klasę i znajdź podobny tekst w danych treningowych.</p></div></section>
+<section id="kod"><div class="wrap"><p class="eyebrow">03 / ścieżka danych</p><h2>Zajrzyj<br>pod każdą warstwę.</h2><details class="expl"><summary>Po co usuwać końcówkę „… polecam”</summary><div>
+<p>Powtarzalne końcówki podpowiadały modelowi etykiety. Poprawiały wynik na podobnych przykładach, ale nie sprawdzały, czy model rozpozna sentyment (wydźwięk) innej opinii. Z <code>strip_cues=True</code> tekst jest ucinany na pierwszej kropce, więc końcówka znika przed podziałem na trening i test. W Lab 8 accuracy regresji logistycznej spadła wtedy z 0,929 do 0,286. To usuwa jedną łatwą wskazówkę, lecz nie zastępuje testu na nowych, niezależnie zebranych opiniach.</p>
+<p>Słowniki i wektory TF-IDF budujemy wyłącznie z treningu. Uczenie słownika i IDF na teście byłoby przeciekiem danych: zmieniłoby reprezentację pod wpływem zbioru, który ma służyć wyłącznie ocenie. Może to zniekształcić wynik.</p></div></details>
+<details class="expl"><summary>Dlaczego sieć nie widzi kolejności słów</summary><div>
+<p>Sieć widzi worek słów (zbiór tokenów bez kolejności), a nie zdanie. <code>EmbeddingBag</code> z <code>mode="mean"</code> uśrednia wektory tokenów. „Dobry produkt” i „produkt dobry” dadzą ten sam wynik, bo zawierają te same tokeny. Dodanie znanego tokenu „nie” może zmienić wynik. Sieć nadal nie rozpoznaje, do którego słowa odnosi się przeczenie. To ograniczenie architektury, nie błąd danych.</p>
+<p>Nieznane słowo dostaje id 0, a <code>padding_idx=0</code> wyklucza go ze średniej. Sam model obliczy wynik nawet dla pustego tekstu dzięki wyrazom wolnym (bias); API odrzuca taki tekst statusem 400. Sieć nigdy nie przyzna się, że nie wie.</p></div></details>
+<details class="expl"><summary>Co zamraża kłódka (czyli zamrożone wagi)</summary><div>
+<p>MiniLM zamienia opinię na wektor o stałym rozmiarze. Ten encoder (część modelu zamieniająca tekst na wektor) zwraca wektor 384 liczb i domyślnie obcina wejście do 128 tokenów tokenizatora, razem z tokenami specjalnymi. Limit 4000 znaków API nie gwarantuje więc przeczytania całej opinii przez MiniLM. To gotowa funkcja: jego wag w tym ćwiczeniu nie zmieniamy. Dzięki temu możemy sprawdzić jakość gotowej reprezentacji na małym zbiorze.</p>
+<p>Uczymy tylko głowicę <code>LogisticRegression</code>. Zmiana rozmiaru wektorów z 64 na 16 dotyczy małej sieci uczonej od zera, a nie zamrożonego MiniLM. Sprawdź, jak wpływa na wynik tej sieci.</p></div></details>
+<details class="expl"><summary>Czy trzy modele mają równe szanse</summary><div>
+<p>Ten sam podział i ta sama próbka testowa, ale nie identyczny przepis. Bayes dostaje tokeny z sklearn (słowa krótsze niż dwie litery wypadają) i bigramy (pary sąsiednich słów); sieć bierze wszystkie tokeny <code>\w+</code> i uśrednia je bez bigramów. MiniLM przyszedł z zewnętrznym treningiem, a dwa pozostałe modele uczą się od zera.</p>
+<p>Hiperparametry (ustawienia uczenia) są ustalone z góry: sieć ma 60 epok (przejść przez cały trening) i lr 0,01 (krok uczenia), a Logistic Regression <code>max_iter=1000</code>. Nikt ich nie stroi pod test. To porównanie trzech przepisów na jednych danych, nie izolacja jednej zmiennej. Wynik mówi, co udało się osiągnąć tym przepisom, a nie który model jest lepszy w ogóle.</p>
+</div>
+</details>
+<div class="steps"><h3 class="sub-title">01 · Usuń skrót</h3><div><p><code>load("sentiment", strip_cues=True)</code> ucina opinię na pierwszej kropce, więc powtarzalna końcówka znika. Potem dzielimy train/test, a słownika uczymy tylko na train (jak w lab8).</p><pre data-language="python">texts, labels = load("sentiment", strip_cues=True)
+x_train, x_test, y_train, y_test = train_test_split(
+    texts, labels, test_size=.25, random_state=42, stratify=labels)</pre></div></div><div class="steps"><h3 class="sub-title">02 · Ucz małą sieć</h3><div><p>Słownik powstaje wyłącznie z treningu. Warstwa <code>EmbeddingBag</code> uśrednia uczone wektory tokenów, a warstwy Dense przypisują jedną z trzech klas. Adam (algorytm aktualizacji wag) aktualizuje wagi przez 60 epok. Przy 40 tekstach treningowych sieć może zapamiętać szczegóły, których nie zobaczy ponownie.</p><p>Wszystkie 40 tekstów treningowych tworzy jedną paczkę (batch); 14 tekstów testowych nie uczestniczy w aktualizacji wag.</p>
+<p>Wywołanie forward daje trzy logity (surowe wyniki sieci, po jednym na klasę). Do funkcji straty (mierzy pomyłki sieci) podajemy surowe wyniki, bo <code>CrossEntropyLoss</code> sam liczy log-softmax. Metoda zero_grad usuwa stare gradienty (wskazówki, jak zmienić wagi), backward liczy nowe, a step aktualizuje wagi. Softmax (zamiana wyników na prawdopodobieństwa) pojawia się dopiero przy prezentacji predykcji. <a href="https://docs.pytorch.org/docs/2.14/generated/torch.nn.CrossEntropyLoss.html" target="_blank" rel="noopener">Dokumentacja CrossEntropyLoss</a>.</p><p>„Dobry produkt” i „produkt dobry” dają tę samą średnią. W „dobry dobry produkt” wektor „dobry” wnosi dwa składniki, a „produkt” jeden. Nieznane tokeny mają <code>id = 0</code> i są pomijane przez <code>padding_idx=0</code>. Sieć zwraca wynik nawet bez znanych słów. Pusty tekst API odrzuca kodem 400. <a href="https://docs.pytorch.org/docs/2.14/generated/torch.nn.EmbeddingBag.html" target="_blank" rel="noopener">Dokumentacja EmbeddingBag</a></p><pre data-language="python">embedding = torch.nn.EmbeddingBag(len(vocabulary) + 1, EMBEDDING_DIM, mode="mean", padding_idx=0)
+head = torch.nn.Sequential(torch.nn.Linear(EMBEDDING_DIM, 64),
+                           torch.nn.ReLU(), torch.nn.Linear(64, len(LABELS)))</pre></div></div><div class="steps"><h3 class="sub-title">03 · Zamroź encoder</h3><div><p>MiniLM zamienia opinie w wektory. To model wstępnie wytrenowany; na naszych danych uczymy wyłącznie Logistic Regression. Porównanie mówi coś o reprezentacji tekstu, nie o pełnym fine-tuningu (douczaniu całego modelu) Transformera.</p><pre data-language="python">train_vectors = encoder.encode_document(x_train, normalize_embeddings=True)
+head = LogisticRegression(max_iter=1000).fit(train_vectors, y_train)</pre><figure class="enc-demo" role="img" aria-label="Idea frozen encoder: MiniLM jest zamrożony i jego wagi nie zmieniają się podczas uczenia; trenowane są wyłącznie wagi Logistic Regression."><div class="enc-frozen"><span class="enc-lock" aria-hidden="true"><svg width="12" height="14" viewBox="0 0 12 14" fill="none"><path d="M2.5 6V4a3.5 3.5 0 0 1 7 0v2" stroke="currentColor" stroke-width="1.8"/><rect x="1" y="6" width="10" height="7" rx="1.5" fill="currentColor"/></svg></span><b>MiniLM · encoder</b><small>wagi zamrożone, nie uczą się</small></div><span class="enc-arrow" aria-hidden="true">→ wektory →</span><div class="enc-learn"><b>Logistic Regression</b><span class="enc-weights" aria-hidden="true"><i class="enc-weight"></i><i class="enc-weight"></i><i class="enc-weight"></i><i class="enc-weight"></i><i class="enc-weight"></i></span><small>te wagi uczą się na 40 tekstach</small></div><figcaption>Zamrożony encoder MiniLM (kłódka) tylko liczy wektor zdania. Jego wag nie ruszamy. Uczy się wyłącznie mała Logistic Regression na górze, więc trening jest tani, a encodera używamy jak gotowej funkcji.</figcaption></figure></div></div><div class="steps"><h3 class="sub-title">04 · Odczytaj pomyłki</h3><div><p>W macierzy pomyłek wiersze odpowiadają rzeczywistym etykietom, a kolumny etykietom przewidzianym przez model. W raporcie /api/metrics każdy model ma listę errors z text, true_label i predicted_label. Wybierz jedną pomyłkę i powiąż ją z komórką macierzy; tekst jest już bez syntetycznej końcówki. Nie oceniaj metody tylko po accuracy; przy trzech klasach porównaj macro F1.</p><pre data-language="bash">py compare.py
+curl.exe http://127.0.0.1:5009/api/metrics</pre></div></div></div></section>
+<section id="eksperyment" class="challenge"><div class="wrap"><p class="eyebrow">04 / eksperyment</p><h2>Policz koszt jednej decyzji.</h2><ol><li><p>Zapisz accuracy, macro F1, czas predykcji 14 tekstów (pole <code>inference_ms</code>) i pełną macierz trzech metod. Czy kolejność metod od najlepszej do najgorszej zmienia się po przejściu z accuracy na F1?</p><p>Czasy nie mają identycznego zakresu: Bayes pomija obliczenie TF-IDF, sieć pomija tokenizację, a MiniLM + LR obejmuje kodowanie testowych tekstów. To jeden pomiar z jednego uruchomienia. Pokazuje orientacyjny czas wskazanego fragmentu kodu, a nie pełnego żądania API. Do pomiaru pełnej ścieżki uwzględnij reprezentację oraz predict, rozgrzej modele (wykonaj kilka prób przed pomiarem) i wykonaj kilka powtórzeń.</p></li><li>Znajdź opinię, dla której modele zwracają różne etykiety. Poszukaj w <code>reviews.csv</code> podobnych opinii i wyjaśnij możliwą przyczynę różnicy.</li><li>Zmień jedynie stałą EMBEDDING_DIM z 64 na 16, uruchom skrypt z tym samym ziarnem losowym (<code>torch.manual_seed(42)</code> w <code>compare.py</code>) i sprawdź, czy różnica jest większa niż jedna pomyłka na teście.</li><li>Przygotuj plan większego testu: osobne źródło opinii, nowe produkty, liczebność na klasę i metryka ważna dla zespołu obsługi.</li></ol><p><b>Opcjonalnie:</b> zamień zamrożony encoder na inny model wielojęzyczny i zmierz czas odpowiedzi oraz rozmiar pobrania.</p></div></section>
+<section><div class="wrap"><p class="eyebrow">05 / źródła</p><h2>Dokumentacja do decyzji.</h2><div class="links"><a href="https://docs.pytorch.org/tutorials/beginner/basics/buildmodel_tutorial.html" target="_blank" rel="noopener"><b>PyTorch: budowanie modelu</b><span>Warstwy, forward i parametry.</span></a><a href="https://docs.pytorch.org/tutorials/beginner/basics/optimization_tutorial.html" target="_blank" rel="noopener"><b>PyTorch: optymalizacja</b><span>Funkcja straty, backward i optymalizator.</span></a><a href="https://www.sbert.net/docs/sentence_transformer/usage/usage.html" target="_blank" rel="noopener"><b>Sentence Transformers</b><span>Embedding zdań i dokumentów.</span></a><a href="https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2" target="_blank" rel="noopener"><b>MiniLM: karta modelu</b><span>384 wymiary i limit 128 tokenów.</span></a><a href="https://scikit-learn.org/stable/modules/generated/sklearn.metrics.f1_score.html" target="_blank" rel="noopener"><b>scikit-learn: F1</b><span>Uśrednianie po klasach (macro) i interpretacja.</span></a></div></div></section>
+<section class="practice-lab" id="dodatkowe-przyklady" aria-labelledby="praktyka-title">
+<h2 id="praktyka-title">Dodatkowe przykłady</h2>
+<p>Przewidź wynik przed otwarciem odpowiedzi. Podpowiedź możesz odsłonić osobno.</p>
+<details class="practice-case"><summary>Czy zysk jest wart opóźnienia?</summary>
+<p>Na wspólnym teście model A ma macro-F1 = 0,80 i czas 40 ms, model B ma 0,82 i 140 ms. Jeśli limit to 100 ms w tym samym pomiarze, który model spełnia warunek?</p>
+<ol class="practice-flow" aria-label="Kolejne etapy przykładu">
+<li>Ten sam zbiór testowy</li>
+<li>Macro-F1 i czas</li>
+<li>Wybór według limitu</li>
+</ol>
+<details><summary>Podpowiedź</summary><p>Sprawdź oba czasy względem limitu, zanim porównasz metryki.</p></details>
+<details><summary>Odpowiedź</summary><p>A. B poprawia macro-F1 o 0,02, ale przekracza limit o 40 ms. Podaj warunki pomiaru i rodzaj czasu, np. medianę pojedynczego zapytania.</p></details>
+</details>
+<details class="practice-case"><summary>Jedna zmiana w zdaniu</summary>
+<p>Porównaj „Aplikacja działa płynnie” i „Aplikacja nie działa płynnie”. Co zapisać, jeśli modele zwrócą tę samą etykietę?</p>
+<details><summary>Podpowiedź</summary><p>Dopisałeś tylko negację. Porównaj decyzje z etykietami ustalonymi wcześniej.</p></details>
+<details><summary>Odpowiedź</summary><p>Zapisz oba zdania, oczekiwane etykiety i wyniki modeli. To konkretny przypadek błędu do raportu. W tym labie podobnie sprawdzisz, czy modele oparte na słowach wychwytują zmianę sensu.</p></details>
+</details>
+<details class="practice-case"><summary>Słownik z niewłaściwej części danych</summary>
+<p>Zespół dopasował TF-IDF przed podziałem danych. Jak naprawić eksperyment?</p>
+<details><summary>Podpowiedź</summary><p>Wagi słów zależą od dokumentów użytych przy fit.</p></details>
+<details><summary>Odpowiedź</summary><p>Najpierw podziel dane. Dopasuj TF-IDF na treningu. W teście użyj tylko transform, żeby test nie wpływał na słownik i wagi.</p></details>
+</details>
+</section>
+<section id="own-trial"><div class="wrap"><div class="trial-card reveal"><h2>Własna próba</h2><p>Wymyślcie dwa zdania różniące się przeczeniem, np. „Bateria szybko się wyczerpuje” i „Bateria nie wyczerpuje się szybko”. Zapiszcie swoje przewidywane etykiety, wyślijcie oba zdania do trzech modeli w formularzu i porównajcie odpowiedzi. Potem zamieńcie się rolami.</p></div></div></section>
+<section id="kontrola" class="checks"><div class="wrap"><p class="eyebrow">06 / odbiór · bilet wyjściowy</p><h2>Umiesz obronić wynik?</h2><div id="checks"><label><input type="checkbox">Wszystkie metody mają ten sam podział train/test.</label><label><input type="checkbox">Powtarzalne końcówki usunięte przed porównaniem.</label><label><input type="checkbox">Macierze pomyłek i macro F1 odczytane.</label><label><input type="checkbox">Wiem, które parametry są uczone od zera, a które pozostają zamrożone.</label><label><input type="checkbox">Mam przykład rozbieżności i plan większego testu.</label></div><p id="progress" class="eyebrow">0 / 5</p><div class="q"><b>1. Czy w tym labie dostrajamy MiniLM?</b><div data-answer="1" data-note="Encoder jest zamrożony; uczymy tylko Logistic Regression."><button>Tak</button><button>Nie</button></div><small></small></div><div class="q"><b>2. Ile waży jedna pomyłka na 14 tekstach?</b><div data-answer="0" data-note="1/14 = około 7,1 punktu procentowego accuracy."><button>Około 7 p.p.</button><button>Mniej niż 1 p.p.</button></div><small></small></div><div class="q"><b>3. Co robi macro F1?</b><div data-answer="1" data-note="Liczy F1 każdej klasy i uśrednia bez ważenia liczebnością."><button>Sumuje trafienia</button><button>Uśrednia F1 klas</button></div><small></small></div><p id="score" class="eyebrow">Wynik: 0 / 3</p><label for="notes">Bilet wyjściowy: dwa zdania z przeczeniem, etykiety trzech modeli i pytanie: gdzie model tylko zapamiętał przykłady, zamiast je rozumieć. Pokaż raport z trzech modeli i wytłumacz, który koszt (czas predykcji) widzisz w raporcie.</label><textarea id="notes" placeholder="Najważniejsza pomyłka…"></textarea><p id="saved" class="eyebrow" aria-live="polite"></p></div></section></main>
+<footer><div class="wrap"><span>ISI / AW / LAB 09 / B.4-B.5</span><span><a href="../lab8/index.html">← Lab 8</a> &nbsp; <a href="../lab10/index.html">Lab 10 →</a> &nbsp; <a href="../index.html">Hub kursu</a></span></div></footer>
+<script>
+const $=s=>document.querySelector(s);
+function reportCard(row){
+  const card=document.createElement('article');card.className='card';
+  const name=document.createElement('small');name.textContent=row.model;
+  const accuracy=document.createElement('p');accuracy.textContent='Accuracy (udział trafień)';
+  const metric=document.createElement('div');metric.className='metric';metric.textContent=String(row.accuracy);
+  const f=document.createElement('p');f.textContent='macro F1: '+row.macro_f1+' · test: '+row.test_size;
+  const t=document.createElement('p');t.textContent='Pomiar '+row.test_size+' tekstów: '+row.inference_ms+' ms (zakres zależy od metody)';
+  const m=document.createElement('table');m.className='matrix';
+  const caption=m.createCaption();caption.textContent='Liczba tekstów. Wiersze: prawdziwa klasa. Kolumny: przewidziana klasa.';
+  const labels=['negative','neutral','positive'];
+  const header=m.createTHead().insertRow();
+  ['prawda ↓',...labels].forEach(label=>{
+    const cell=document.createElement('th');cell.scope='col';cell.textContent=label;header.append(cell);
+  });
+  const body=m.createTBody();
+  row.confusion.forEach((values,i)=>{
+    const line=body.insertRow();
+    const label=document.createElement('th');label.scope='row';label.textContent=labels[i];line.append(label);
+    values.forEach((value,j)=>{
+      const cell=line.insertCell();cell.textContent=value;
+      if(i===j)cell.className='hit';
+      else if(value)cell.className='mistake';
+    });
+  });
+  card.append(name,accuracy,metric,f,t,m);return card;
+}
+$('#load').addEventListener('click',async()=>{const status=$('#status');status.textContent='Ładuję model i liczę raport…';try{const response=await fetch('api/metrics');const data=await response.json();if(!response.ok)throw Error(data.error||'Błąd serwera');const host=$('#reports');host.replaceChildren(...data.reports.map(reportCard));status.textContent=data.note}catch(error){status.textContent=error.message}});
+$('#predict').addEventListener('click',async()=>{const target=$('#prediction');target.textContent='Liczenie…';try{const response=await fetch('api/classify/deep',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:$('#opinion').value})});const data=await response.json();if(!response.ok)throw Error(data.error);target.replaceChildren(...['Naive Bayes','EmbeddingBag PyTorch','MiniLM + LR'].map(name=>[name,data.predictions[name]]).map(([name,result])=>{const card=document.createElement('article');card.className='card';const title=document.createElement('small');title.textContent=name;const label=document.createElement('h3');label.textContent=result.label;const score=document.createElement('p');score.textContent='score modelu: '+result.score;card.append(title,label,score);return card}))}catch(error){target.textContent=error.message}});
+const key='isi-lab9',boxes=[...document.querySelectorAll('#checks input')],notes=$('#notes');try{const data=JSON.parse(localStorage.getItem(key)||'{}');boxes.forEach((x,i)=>x.checked=!!data.checks?.[i]);notes.value=data.notes||''}catch{}function save(){localStorage.setItem(key,JSON.stringify({checks:boxes.map(x=>x.checked),notes:notes.value}));$('#progress').textContent=boxes.filter(x=>x.checked).length+' / 5';$('#saved').textContent='Zapisano lokalnie'}boxes.forEach(x=>x.addEventListener('change',save));notes.addEventListener('input',save);$('#progress').textContent=boxes.filter(x=>x.checked).length+' / 5';
+let score=0;document.querySelectorAll('.q [data-answer]').forEach(group=>[...group.querySelectorAll('button')].forEach((button,i)=>button.addEventListener('click',()=>{const first=!group.dataset.done,good=i===Number(group.dataset.answer);group.dataset.done='1';group.parentElement.querySelector('small').textContent=(good?'Dobrze. ':'Sprawdź: ')+group.dataset.note;if(first&&good)score++;$('#score').textContent='Wynik: '+score+' / 3'})));
+</script><style>
+/* FX 09: siec neuronowa w hero, pasek postepu, reveal */
+.hero{position:relative;overflow:hidden}
+#nn-fx{position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:.8}
+.hero .wrap{position:relative;z-index:1}
+#read-progress{position:fixed;top:0;left:0;height:4px;width:0;background:#fb653c;box-shadow:0 0 14px #fb653c;z-index:100}
+.fx main section,.fx body>section{opacity:0;transform:translateY(28px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+.fx section.in{opacity:1;transform:none}
+
+/* FX 09b: warstwy ze hero plywaja, metryki sie palpa, wyjasnienia sie rozwijaja */
+.layer{animation:layerFloat 7s ease-in-out infinite}
+.layer:nth-child(2){animation-delay:-2.3s;animation-duration:8s}
+.layer:nth-child(3){animation-delay:-4.6s;animation-duration:7.6s}
+@keyframes layerFloat{0%,100%{transform:rotate(-8deg) translateY(0)}50%{transform:rotate(-4deg) translateY(-14px)}}
+.layer:nth-child(2){animation-name:layerFloat2}
+@keyframes layerFloat2{0%,100%{transform:rotate(5deg) translateY(0)}50%{transform:rotate(9deg) translateY(-16px)}}
+.layer:nth-child(3){animation-name:layerFloat3}
+@keyframes layerFloat3{0%,100%{transform:rotate(-3deg) translateY(0)}50%{transform:rotate(1deg) translateY(-12px)}}
+.eyebrow{animation:blip 3.4s ease-in-out infinite}
+@keyframes blip{0%,100%{opacity:1}50%{opacity:.55}}
+.card{transition:transform .3s cubic-bezier(.2,.9,.3,1),box-shadow .3s}
+.card:hover{transform:translate(-3px,-3px);box-shadow:13px 13px 0 var(--dark)}
+.solid{position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
+.solid:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--dark)}
+.solid::after{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.45) 50%,transparent 65%);transform:translateX(-120%);animation:sheen 4.2s ease-in-out infinite}
+@keyframes sheen{0%,55%{transform:translateX(-120%)}80%,100%{transform:translateX(120%)}}
+details.expl{background:#fff;border:2px solid var(--dark);box-shadow:6px 6px 0 var(--dark);padding:0 20px;margin:16px 0}
+details.expl summary{cursor:pointer;font:600 19px 'DM Mono',monospace;padding:15px 0;list-style:none;display:flex;align-items:center;gap:11px}
+details.expl summary::-webkit-details-marker{display:none}
+details.expl summary::before{content:'▸';color:var(--orange);transition:transform .25s}
+details.expl[open] summary::before{transform:rotate(90deg)}
+details.expl[open] summary{color:var(--orange)}
+details.expl > p,details.expl > div{padding:2px 0 18px;line-height:1.8}
+details.expl p+p{margin-top:14px}
+details.expl[open]{animation:dropIn .35s cubic-bezier(.2,.9,.3,1)}
+@keyframes dropIn{from{opacity:.4;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.metric{animation:countIn .8s cubic-bezier(.2,.9,.3,1) backwards}
+@keyframes countIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+input:checked + span{animation:pop .3s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{50%{transform:scale(1.25)}}
+.q button{transition:transform .2s,border-color .2s,background .2s}
+.q button:hover{border-color:var(--orange);transform:translateY(-2px)}
+@media(prefers-reduced-motion:no-preference){.q button.ok{animation:pop .3s}}
+.q button.ok{background:var(--dark);color:var(--mint);border-color:var(--dark)}
+.q button.bad{background:#ffe0d6;border-color:var(--orange)}
+/* sekcje wchodza plynniej */
+.fx section.in{animation:secIn .6s cubic-bezier(.2,.8,.2,1)}
+@keyframes secIn{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+
+</style>
+<div id="read-progress" aria-hidden="true"></div>
+<script>
+/* FX 09: trzy warstwy neuronow, impulsy na krawedziach */
+(function(){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const cv=document.getElementById('nn-fx');if(!cv)return;
+  const ctx=cv.getContext('2d');
+  let W,H,layers=[],edges=[],pulses=[];
+  function resize(){
+    W=cv.width=cv.offsetWidth;H=cv.height=cv.offsetHeight;
+    const counts=[5,7,4],cx=[.55,.72,.9];
+    layers=counts.map((n,i)=>Array.from({length:n},(_,j)=>({x:W*cx[i],y:H*(.16+.68*(j+.5)/n)})));
+    edges=[];
+    for(let i=0;i<layers.length-1;i++)for(const a of layers[i])for(const b of layers[i+1])edges.push([a,b]);
+    pulses=Array.from({length:14},()=>({e:Math.floor(Math.random()*edges.length),t:Math.random(),s:.004+Math.random()*.006}));
+  }
+  resize();addEventListener('resize',resize);
+  function tick(){
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='rgba(204,241,206,.08)';ctx.lineWidth=1;
+    for(const [a,b] of edges){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
+    for(const p of pulses){
+      p.t+=p.s;if(p.t>1){p.t=0;p.e=Math.floor(Math.random()*edges.length);}
+      const [a,b]=edges[p.e],x=a.x+(b.x-a.x)*p.t,y=a.y+(b.y-a.y)*p.t;
+      ctx.fillStyle='rgba(251,101,60,.85)';ctx.beginPath();ctx.arc(x,y,2.2,0,6.28);ctx.fill();
+    }
+    layers.flat().forEach(n=>{ctx.fillStyle='rgba(204,241,206,.9)';ctx.beginPath();ctx.arc(n.x,n.y,3.4,0,6.28);ctx.fill();});
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+(function(){
+  document.documentElement.classList.add('fx');
+  const bar=document.getElementById('read-progress');
+  addEventListener('scroll',()=>{const m=document.documentElement.scrollHeight-innerHeight;bar.style.width=(m>0?scrollY/m*100:0)+'%';},{passive:true});
+  const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.08});
+  document.querySelectorAll('main section, body > section').forEach(s=>io.observe(s));
+})();
+</script><script>
+/* ilustracja: klikane etapy BAYES / SIEĆ / TRANSFORMER (wzorzec lab2) */
+(function(){
+  var ILL = [
+    "<strong>BAYES:</strong> liczy wagi słów z treningu. Szybki punkt odniesienia. Sprawdź, co wygrywa po treningu na 40 tekstach.",
+    "<strong>SIEĆ:</strong> uczy się embeddingów od zera i uśrednia tokeny. Kolejność słów znika, nieznane tokeny ignoruje. 60 epok na 40 tekstach łatwo zapamiętuje.",
+    "<strong>TRANSFORMER:</strong> zamrożony MiniLM liczy wektor zdania (kłódka), uczy się tylko mała Logistic Regression. Porównujesz reprezentację, nie pełny fine-tuning."
+  ];
+  var note = document.getElementById("illNote");
+  var tabs = Array.prototype.slice.call(document.querySelectorAll(".ill-tab"));
+  if (note && tabs.length) {
+    tabs.forEach(function(btn){
+      btn.addEventListener("click", function(){
+        tabs.forEach(function(b){ b.setAttribute("aria-pressed", b === btn ? "true" : "false"); });
+        note.innerHTML = ILL[+btn.dataset.ill] || ILL[0];
+      });
+    });
+  }
+  var io = new IntersectionObserver(function(es){ es.forEach(function(en){ if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); } }); }, { threshold: .12 });
+  document.querySelectorAll(".trial-card.reveal").forEach(function(el){ io.observe(el); });
+})();
+</script><script data-pi="1">
+(function(){
+var SEL='.question[data-answer],fieldset.question[data-answer],.q [data-answer],.quiz-pytanie[data-poprawna],.answers[data-correct],.answers[data-answer]';
+var PROMPT='Głos wstępny zapisany, wynik jeszcze nie został oceniony. Omów odpowiedź z drugą osobą (około 3 minut). Następnie kliknij wybraną odpowiedź ponownie, aby ją zatwierdzić, nawet jeśli jej nie zmieniasz.';
+function fb(group){
+return group.querySelector('.feedback')||(group.parentElement&&group.parentElement.querySelector('.feedback,small,.quiz-wyjasnienie,.quiz-feedback'))||group.querySelector('small,.quiz-wyjasnienie,.quiz-feedback');
+}
+document.querySelectorAll(SEL).forEach(function(group){
+if(group.dataset.piOn)return;group.dataset.piOn='1';
+group.addEventListener('click',function(e){
+var btn=e.target.closest?e.target.closest('button'):null;
+if(!btn||!group.contains(btn))return;
+var buttons=group.querySelectorAll('button');
+if(!group.dataset.piSolo){
+e.preventDefault();e.stopPropagation();
+buttons.forEach(function(b){b.style.outline='';b.classList.remove('pi-solo');});
+btn.classList.add('pi-solo');btn.style.outline='3px dashed currentColor';btn.style.outlineOffset='2px';
+group.dataset.piSolo='1';
+var f=fb(group);if(f)f.textContent=PROMPT;
+}else{
+buttons.forEach(function(b){b.style.outline='';b.classList.remove('pi-solo');});
+delete group.dataset.piSolo;
+}
+},true);
+});
+})();
+</script>
+</body></html>

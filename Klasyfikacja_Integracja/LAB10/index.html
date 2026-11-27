@@ -1,0 +1,230 @@
+<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lab 10 · Połącz system · ISI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Chivo:wght@700;900&family=DM+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=optional" rel="stylesheet">
+<style>
+:root{--ink:#081e2c;--sky:#a6e8f5;--pink:#ff6f9a;--practice-accent:#0b6175;--paper:#f7f8f3;--line:#b4c9ce;--disp:'Chivo','IBM Plex Sans',Arial,sans-serif;--mono:'DM Mono',monospace}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:'IBM Plex Sans',Arial,sans-serif;font-size: 19px;line-height:1.7}a{color:inherit}button,input,select,textarea{font:inherit}button{cursor:pointer}.wrap{width:min(1180px,92vw);margin:auto}nav{position:sticky;top:0;z-index:5;background:var(--ink);color:white;display:flex;justify-content:space-between;gap:12px;padding:14px max(4vw,calc((100vw - 1180px)/2));font:17px 'DM Mono',monospace}nav a{text-decoration:none;margin-left:20px}.hero{background:var(--sky);border-bottom:4px solid var(--ink);padding:85px 0 105px}.hero .wrap{display:grid;grid-template-columns:1.4fr .6fr;gap:50px}.eyebrow{font:17px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.11em}.hero h1{font-family:var(--disp);font-weight:900;font-size:clamp(74px,10vw,148px);line-height:.88;letter-spacing:-.045em;margin:28px 0 40px}.hero h1 em{font-style:normal;color:var(--pink);-webkit-text-stroke:2px var(--ink)}.hero p{font-size: 22px;line-height:1.5;max-width:710px}.ticket{border:3px solid var(--ink);background:var(--paper);padding:22px;align-self:end;box-shadow:12px 12px 0 var(--pink);transform:rotate(4deg)}.ticket strong{display:block;font-size: 52px;line-height:1}.ticket span{font:17px 'DM Mono',monospace}section{padding:90px 0;border-bottom:1px solid var(--line)}h2{font-family:var(--disp);font-weight:900;font-size:clamp(40px,5vw,65px);letter-spacing:-.03em;line-height:1.02;margin:15px 0 28px}.lead{font-size: 19px;line-height:1.65;max-width:850px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.service{border:2px solid var(--ink);background:white;padding:25px;box-shadow:6px 6px 0 var(--ink)}.service header{display:flex;justify-content:space-between;gap:10px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:15px}.service h3{font-size: 24px;margin:0}.service small{font:17px 'DM Mono',monospace}.service p,li{line-height:1.6}.service form{display:flex;gap:8px;flex-wrap:wrap}.service input,.service select,.service textarea{background:var(--paper);border:1px solid var(--ink);padding:12px;min-width:0;flex:1}.service textarea{width:100%;min-height:85px;flex-basis:100%}.service button,.solid{background:var(--pink);border:2px solid var(--ink);padding:11px 15px;font-weight:700}.output{background:#f2f8f7;border-left:4px solid var(--ink);padding:15px;min-height:75px;margin-top:15px;white-space:pre-wrap;font:17px/1.6 'DM Mono',monospace;overflow:auto}.arch{background:var(--ink);color:white}.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin:35px 0}.flow div{border:1px solid var(--sky);padding:24px 15px;min-height:105px;font:16px/1.5 'DM Mono',monospace}.flow div:first-child,.flow div:last-child{background:var(--sky);color:var(--ink)}.steps{display:grid;grid-template-columns:240px 1fr;gap:30px;padding:23px 0;border-top:1px solid var(--line)}.steps h3{font-size: 21px;margin:0}.steps p{margin:0;line-height:1.65}pre{background:var(--ink);color:#d9faff;padding:19px;overflow:auto;font:17px/1.6 'DM Mono',monospace}.challenge{background:var(--pink)}.challenge ol{max-width:850px}.challenge li{line-height:1.7;margin:10px 0}.links{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.links a{background:white;border:2px solid var(--ink);padding:22px;text-decoration:none}.links b,.links span{display:block}.links span{font-size: 16px;margin-top:5px}.checks label{display:block;background:white;border:1px solid var(--line);padding:13px;margin:8px 0}.checks input{accent-color:var(--pink)}.q{border-top:1px solid var(--line);padding:16px 0}.q button{border:1px solid var(--ink);background:white;padding:9px;margin:6px 6px 0 0}.q small{display:block;margin-top:6px}textarea.notes{width:100%;min-height:110px;padding:14px;border:2px solid var(--ink)}footer{background:var(--ink);color:white;padding:35px 0;font:17px 'DM Mono',monospace}footer .wrap{display:flex;justify-content:space-between}@media(max-width:800px){.hero .wrap,.grid,.links,.flow{grid-template-columns:1fr}.hero h1{font-size: 76px}.ticket{max-width:230px}.steps{grid-template-columns:1fr;gap:5px}nav .navlinks{display:none}}
+.arch-anim{overflow-x:auto;margin-top:24px}.arch-anim svg{display:block;width:100%;min-width:600px}.arch-node{fill:#123746;stroke:#90dbe5}.arch-node-hot{fill:#ff82ac;stroke:#ff82ac}.arch-label{fill:#fff;font:600 14px var(--mono)}.arch-node-hot + .arch-label{fill:#08212b}.arch-wire{fill:none;stroke:#90dbe5;stroke-width:2}.arch-dot{fill:#ff82ac}
+</style><style data-ill="1">
+/* ---------- rytm pionowy + ilustracja · wzorzec lab2 ---------- */
+section > * + * { margin-top: 0; }
+.lead + * { margin-top: 8px; }
+.steps { margin-top: 28px; }
+h3.sub-title { font-size: 24px; margin: 40px 0 14px; letter-spacing: -.04em; }
+h3.sub-title:first-child { margin-top: 8px; }
+.fig-ill { margin: 40px 0 12px; max-width: 960px; }
+.fig-ill img { display: block; width: 100%; height: auto; border-radius: 22px; border: 3px solid var(--ink); box-shadow: 8px 8px 0 var(--pink); }
+.ill-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 6px; }
+.ill-tab { font-family: 'DM Mono', monospace; font-size: 16px; font-weight: 500; letter-spacing: .04em; padding: 9px 16px; border-radius: 999px; border: 2px solid var(--ink); background: #fff; color: var(--ink); cursor: pointer; transition: all .2s; }
+.ill-tab:hover { border-color: var(--pink); color: var(--pink); }
+.ill-tab[aria-pressed="true"] { background: var(--ink); color: var(--sky); border-color: var(--ink); }
+.ill-note { margin: 10px 0 4px; padding: 14px 18px; border-left: 4px solid var(--pink); background: #fff; border-radius: 0 12px 12px 0; border-top: 2px solid var(--ink); border-right: 2px solid var(--ink); border-bottom: 2px solid var(--ink); font-size: 19px; min-height: 3.2em; box-shadow: 5px 5px 0 var(--sky); }
+#own-trial { padding: 90px 0; }
+#own-trial .trial-card { border: 3px solid var(--ink); border-radius: 14px; background: #fff; box-shadow: 8px 8px 0 var(--pink); padding: 30px 32px; margin-top: 8px; }
+#own-trial .trial-card h2 { margin-top: 0; }
+#own-trial .trial-card p + p { margin-top: 14px; }
+.trial-card.reveal { transition: opacity .7s ease, transform .7s ease; }
+.trial-card.reveal.in { opacity: 1; transform: none; }
+/* --- checkpoint koncowy CP-3 --- */
+.ckpt .ckpt-banner { border:3px solid var(--ink); background:var(--pink); color:var(--ink);
+  font-family:var(--mono); font-weight:700; letter-spacing:.06em; padding:15px 20px; margin-top:20px;
+  box-shadow:8px 8px 0 var(--ink); }
+.ckpt .ckpt-demo { border:3px solid var(--ink); background:#fff; padding:24px 26px; margin-top:26px;
+  box-shadow:8px 8px 0 var(--sky); }
+.ckpt .ckpt-demo h3 { font-size:24px; margin:0 0 8px; }
+.ckpt .ckpt-demo ol { margin:12px 0; padding-left:24px; }
+.ckpt .ckpt-demo li { margin-bottom:7px; }
+.ckpt h3 { font-size:24px; margin-top:36px; }
+.ckpt details.ckpt-q { border:2px solid var(--ink); background:#fff; border-radius:10px;
+  padding:14px 18px; margin-top:12px; }
+.ckpt .ckpt-q summary { cursor:pointer; font-weight:700; }
+.ckpt .ckpt-q summary::marker { color:var(--pink); }
+.ckpt .ckpt-q p { margin-top:10px; color:#3d5566; }
+.ckpt .ckpt-criteria { border:3px solid var(--ink); background:#fff; margin-top:14px;
+  padding:18px 24px 8px; box-shadow:8px 8px 0 var(--sky); }
+.ckpt-criteria dt { font-family:var(--mono); font-weight:700; font-size:15.5px; margin-top:14px; }
+.ckpt-criteria dd { margin:6px 0 10px; color:#3d5566; }
+.ckpt .ckpt-repo { margin-top:14px; padding-left:24px; }
+.ckpt-repo li { margin-bottom:8px; }
+.ckpt-final { display:inline-block; margin-top:28px; background:var(--ink); color:var(--pink);
+  font-family:var(--mono); font-weight:700; padding:14px 20px; border-radius:10px; }
+</style><link rel="icon" href="../assets/favicon.svg">
+<style data-typo="1">:root{--acc:#ff6f9a;--acc2:#0b6f86}
+strong{color:#c80046;font-weight:700}
+em{color:var(--acc2);font-style:italic}
+code{font-family:'DM Mono',monospace;background:#ffe9ef;color:#a8003f;padding:.1em .45em;border-radius:6px}
+.lead{font-size:1.1rem;line-height:1.8}
+p+p{margin-top:16px}
+.service p,.flow div{line-height:1.75}
+.challenge li{margin-bottom:16px;line-height:1.8}</style><link rel="stylesheet" href="../assets/responsive.css">
+<link rel="stylesheet" href="../assets/code.css">
+<link rel="stylesheet" href="../assets/tab-icons.css">
+<script src="../assets/highlight.min.js" defer></script>
+<script src="../assets/code.js" defer></script>
+<style>.start-tasks a{font-weight:700;text-decoration:underline;text-underline-offset:.18em}.start-tasks li+li{margin-top:.6em}.start-note{border-top:1px solid currentColor;padding-top:.7em}section[id]{scroll-margin-top:64px}</style>
+
+<style>.hero h1 em{color:#963054}</style>
+<link rel="stylesheet" href="../assets/praktyka.css">
+</head><body>
+<nav><span>ISI / 10 / INTEGRACJA</span><span class="navlinks"><a href="#problem">Problem</a><a href="#services">Moduły</a><a href="#arch">Architektura</a><a href="#kontrola">Odbiór</a></span><span>B.5 · EK_05</span></nav>
+<header class="hero"><div class="bus-fx" aria-hidden="true"><svg viewBox="0 0 520 420" fill="none"><g class="bus-links"><path d="M120 90 L300 210"/><path d="M120 330 L300 210"/><path d="M470 110 L300 210"/><path d="M470 310 L300 210"/></g><g class="bus-nodes"><rect x="30" y="62" width="94" height="52" rx="9"/><rect x="30" y="306" width="94" height="52" rx="9"/><rect x="424" y="82" width="94" height="52" rx="9"/><rect x="424" y="282" width="94" height="52" rx="9"/><rect class="hub" x="252" y="176" width="100" height="66" rx="12"/></g><g class="bus-labels"><text x="77" y="94">LAB 02</text><text x="77" y="338">LAB 03</text><text x="471" y="114">LAB 06</text><text x="471" y="314">LAB 08</text><text x="302" y="214">API</text></g><g class="bus-leds"><circle cx="112" cy="74" r="4"/><circle cx="112" cy="318" r="4"/><circle cx="436" cy="94" r="4"/><circle cx="436" cy="294" r="4"/></g></svg></div><div class="wrap"><div><span class="eyebrow">Laboratorium finałowe / wersja działająca</span><h1>Połącz<br><em>system.</em></h1><p>Rekomendacje, wyszukiwarka i klasyfikator były osobnymi ćwiczeniami. Teraz mają wspólny interfejs i jedno API. Twoim zadaniem jest sprawdzić granice między modułami, a potem rozszerzyć produkt bez zgadywania, skąd wziął się wynik.</p><div class="ill-tabs" role="group" aria-label="Kliknij etap schematu"><button class="ill-tab" data-ill="0" aria-pressed="true"><svg class="tab-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><circle cx="5" cy="5" r="1.8"/><circle cx="19" cy="5" r="1.8"/><circle cx="5" cy="19" r="1.8"/><circle cx="19" cy="19" r="1.8"/><path d="M6.3 6.3 10 10M17.7 6.3 14 10M6.3 17.7 10 14M17.7 17.7 14 14"/></svg>1 · REKOMENDACJE</button><button class="ill-tab" data-ill="1" aria-pressed="false"><svg class="tab-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="5.5"/><path d="M15 15l5 5"/></svg>2 · WYSZUKIWANIE</button><button class="ill-tab" data-ill="2" aria-pressed="false"><svg class="tab-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h8l7 7-7 7H4z"/><path d="M9 12l2 2 4-4"/></svg>3 · KLASYFIKACJA</button></div><p class="ill-note" id="illNote">REKOMENDACJE: filmy podobne do tytułu albo dobrane do ocen. Sprawdź, skąd moduł bierze dane.</p></div><div class="ticket"><span>ODBIÓR TECHNICZNY</span><strong>04</strong><span>MODUŁY · JEDEN SERWER<br>24 FILMY · 40 ARTYKUŁÓW</span></div></div></header>
+<main><aside class="course-start" aria-label="Jak pracować z laboratorium">
+<h2>Lab 10: od czego zacząć</h2>
+<p>Sprawdzisz cztery moduły za jednym API i dodasz własną zmianę.</p>
+<div class="first-try" style="--term-accent:#8a97a0"><h3>Rozgrzewka z Lab 09 · Zamrożony encoder</h3><p class="try-question">Które wagi są zamrożone w MiniLM, a które uczone od zera? Odpowiedz z pamięci, potem sprawdź.</p><details><summary>Sprawdź odpowiedź</summary><p>Encoder MiniLM jest zamrożony: zwraca gotowe wektory zdań. Uczona jest tylko głowica Logistic Regression na górze. Mała sieć EmbeddingBag uczy się embeddingów od zera.</p></details></div>
+<div class="first-try" style="--term-accent:#bd528b"><h3>Co mówi kod odpowiedzi API?</h3><p><dfn>Endpoint</dfn> to miejsce w API określone przez metodę HTTP i adres. Na przykład <code>GET /api/recommend/content</code> przyjmuje tytuł filmu i zwraca rekomendacje.</p><figure class="lab-sketch"><figcaption>Dwa żądania do tego samego modułu</figcaption><svg viewBox="0 0 320 132" role="img" aria-label="Porównaj brak parametru title z przekazaniem tytułu filmu spoza katalogu."><text x="12" y="23" class="key">GET /api/recommend/content</text><path d="M12 36 L308 36" class="ink-line"/><text x="12" y="65" class="">A</text><text x="47" y="65" class="">bez parametru title</text><text x="12" y="99" class="">B</text><text x="47" y="99" class="">title = film spoza katalogu</text></svg></figure><p class="try-question">Które żądanie dostanie 404: bez tytułu czy z tytułem filmu spoza katalogu?</p><details><summary>Sprawdź odpowiedź</summary><p>Film spoza katalogu daje 404. Żądanie bez tytułu daje 400, bo brakuje wymaganego parametru. W obu przypadkach w odpowiedzi JSON znajdziesz pole <code>error</code> z wyjaśnieniem. <a href="#kod">Wyślij oba żądania</a>.</p></details></div>
+<div class="start-tasks">
+<h3>Zadania do wykonania</h3>
+<ol>
+<li><a href="#kod">Uruchom serwer.</a> W katalogu <code>lab10</code> wykonaj <code>py app.py</code>. Sprawdź <code>/api/health</code>, a z <code>/api/catalog</code> wybierz istniejący tytuł i użytkownika do następnej próby.</li>
+<li><a href="#services">Przetestuj cztery formularze.</a> Poleć film podobny do wybranego tytułu, a potem film dla wybranego użytkownika (na podstawie jego ocen). Wyszukaj artykuł i sklasyfikuj własną opinię. Dla każdego formularza zapisz wejście i jeden wynik.</li>
+<li><a href="#kod">Sprawdź błędne dane wejściowe.</a> Porównaj pusty tytuł (400) z nieznanym filmem (404). Osobno sprawdź <code>top_n=0</code>, uszkodzony JSON i zapytanie dłuższe niż 200 znaków (400). Dla opinii o długości 4001 znaków oczekuj kodu 413. Zapisz status i komunikat.</li>
+<li><a href="#rozszerzenie">Wprowadź jedną zmianę.</a> Wybierz filtr działu, uzasadnienie rekomendacji, klasyfikację spamu albo testy API. Przed edycją opisz w <code>PLAN.md</code> próbę, po której druga para rozpozna, że zmiana działa.</li>
+<li><a href="#checkpoint-modul">Przygotuj obronę CP-3.</a> Dołącz diagram, zrzut działającej ścieżki, trzy ograniczenia i uwagi drugiej pary. Podczas pięciominutowego pokazu prześledź jedno żądanie od formularza do odpowiedzi JSON.</li>
+</ol>
+<p class="start-note">Do oddania przygotuj działający system, <code>PLAN.md</code>, diagram, zrzut, trzy ograniczenia i demo.</p>
+</div>
+<p>Pobierz cały kurs i rozpakuj archiwum. W katalogu <code>lab10</code> zainstaluj zależności poleceniem <code>py -m pip install -r requirements.txt</code>. Następnie uruchom <code>py app.py</code> i otwórz <code>http://127.0.0.1:5010/</code>. Formularze korzystają z tego serwera. </p>
+<div class="files"><a href="README.md" download>README.md</a> <a href="PLAN.md" download>PLAN.md</a> <a href="app.py" download>app.py</a> <a href="requirements.txt" download>requirements.txt</a> <a href="../kurs.zip" download>Pobierz cały kurs (ZIP)</a> <a href="../requirements.txt" download>Zależności podstawowe</a> <a href="../index.html#laby">Wszystkie laboratoria</a></div>
+<p><a href="#dodatkowe-przyklady">Przejdź do dodatkowych przykładów</a></p>
+</aside>
+<section id="problem"><div class="wrap"><p class="eyebrow">01 / brief produktu</p><h2>Jedno miejsce,<br>cztery pytania.</h2><p class="lead">Prototyp portalu ma polecić film podobny do wybranego tytułu, polecić film na podstawie ocen użytkownika, znaleźć artykuł i oznaczyć opinię. Każda odpowiedź powinna mieć czytelną drogę od żądania HTTP do danych i modelu. Gdy klient poda błędne dane, API ma odpowiedzieć jasnym komunikatem, a nie błędem serwera.</p></div></section>
+
+<section id="services"><div class="wrap"><p class="eyebrow">02 / działający prototyp</p><h2>Przeklikaj wszystkie ścieżki.</h2><p>Uruchom <code>py app.py</code> w katalogu <code>lab10</code>, następnie otwórz <code>http://127.0.0.1:5010/</code>. Wszystkie odpowiedzi poniżej pochodzą z API tego serwera.</p><div class="grid">
+<article class="service"><header><h3>Film podobny do filmu</h3><small>LAB 02 / TF-IDF</small></header><p>Opis filmu zamieniamy na wektor TF-IDF i szukamy najbliższych opisów (podobieństwo kosinusowe). Zmiana tytułu zmienia punkt odniesienia.</p><form id="content"><input name="title" aria-label="Tytuł filmu" value="Inception" required><button>Poleć →</button></form><div class="output" data-code-output id="content-out" role="status">Czeka na zapytanie.</div></article>
+<article class="service"><header><h3>Film dla użytkownika</h3><small>LAB 03 / OCENY</small></header><p>Model szuka użytkowników o podobnych ocenach (sąsiedzi w macierzy ocen) i na ich podstawie typuje filmy. Film już oceniony przez wybranego użytkownika nie wraca do listy; nie przechowujemy historii oglądania.</p><form id="collaborative"><input name="user" aria-label="Użytkownik" value="Ania" required><button>Poleć →</button></form><div class="output" data-code-output id="collaborative-out" role="status">Czeka na zapytanie.</div></article>
+<article class="service"><header><h3>Artykuł z archiwum</h3><small>LAB 06 / BM25</small></header><p>Zapytanie przechodzi przez indeks odwrócony, czyli mapę słów na artykuły. Wyniki punktuje wzór BM25; każdy ma tytuł i score (wynik dopasowania).</p><form id="search"><input name="q" aria-label="Szukaj artykułu" value="procesor laptopów" required><button>Szukaj →</button></form><div class="output" data-code-output id="search-out" role="status">Czeka na zapytanie.</div></article>
+<article class="service"><header><h3>Opinia klienta</h3><small>LAB 08 / KLASYFIKACJA</small></header><p>Regresja logistyczna (Logistic Regression) zwraca etykietę. Oszacowanie prawdopodobieństwa nie jest obietnicą pewności.</p><form id="feedback"><textarea name="text" aria-label="Tekst opinii" required>Produkt działa szybko i stabilnie.</textarea><button>Oznacz →</button></form><div class="output" data-code-output id="feedback-out" role="status">Czeka na zapytanie.</div></article>
+</div></div></section>
+<section id="arch" class="arch"><div class="wrap"><p class="eyebrow">03 / architektura</p><h2>Znajdź granicę każdego modułu.</h2><div class="flow"><div>Przeglądarka<br>formularz + fetch</div><div>Flask<br>walidacja</div><div>Adapter endpointu<br>parametry i status</div><div>Lab 2 / 3 / 6 / 8<br>model lub indeks</div><div>JSON<br>wynik + błąd</div></div><figure class="arch-anim" role="img" aria-label="Animowany schemat architektury: żądanie klienta przepływa przez API Flask, moduł i model, a odpowiedź JSON wraca do klienta."><svg viewBox="0 0 680 150" aria-hidden="true" focusable="false"><path class="arch-wire" d="M65 76 Q133 22 201 76 T337 76 T473 76 T609 76"/><g><rect class="arch-node" x="6" y="52" width="118" height="48" rx="8"/><text class="arch-label" x="65" y="80" text-anchor="middle">KLIENT</text></g><g><rect class="arch-node" x="142" y="52" width="118" height="48" rx="8"/><text class="arch-label" x="201" y="80" text-anchor="middle">API · FLASK</text></g><g><rect class="arch-node" x="278" y="52" width="118" height="48" rx="8"/><text class="arch-label" x="337" y="80" text-anchor="middle">MODUŁ</text></g><g><rect class="arch-node-hot" x="414" y="52" width="118" height="48" rx="8"/><text class="arch-label" x="473" y="80" text-anchor="middle">MODEL</text></g><g><rect class="arch-node" x="550" y="52" width="118" height="48" rx="8"/><text class="arch-label" x="609" y="80" text-anchor="middle">JSON</text></g><circle class="arch-dot" r="5"><animateMotion dur="7s" repeatCount="indefinite" path="M65 76 Q133 22 201 76 T337 76 T473 76 T609 76"/></circle><circle class="arch-dot" r="5"><animateMotion dur="7s" begin="-1.75s" repeatCount="indefinite" path="M65 76 Q133 22 201 76 T337 76 T473 76 T609 76"/></circle><path class="arch-wire" d="M609 118 H65"/><circle class="arch-dot" r="5"><animateMotion dur="7s" begin="3.5s" repeatCount="indefinite" path="M609 118 H65"/></circle><circle class="arch-dot" r="5"><animateMotion dur="7s" begin="5.25s" repeatCount="indefinite" path="M609 118 H65"/></circle><circle class="arch-dot" r="5"><animateMotion dur="7s" begin="-3.5s" repeatCount="indefinite" path="M65 76 Q133 22 201 76 T337 76 T473 76 T609 76"/></circle><circle class="arch-dot" r="5"><animateMotion dur="7s" begin="-5.25s" repeatCount="indefinite" path="M65 76 Q133 22 201 76 T337 76 T473 76 T609 76"/></circle></svg><figcaption>Na wąskim ekranie przesuń schemat w bok, aby zobaczyć wszystkie etapy. Punkty to żądania w locie: API waliduje, moduł dobiera dane, model liczy, odpowiedź wraca jako JSON.</figcaption></figure><p>To integracja istniejących funkcji. <code>app.py</code> nie liczy modeli: importuje funkcje z Lab 2, 3, 6 i 8, a sam sprawdza parametry i zamienia wynik na JSON. Dane są lokalne, syntetyczne, bez logowania i trwałego zapisu opinii. Jeśli rozbudujesz produkt, opisz, gdzie pojawi się baza danych, monitoring oraz ochrona danych użytkownika.</p></div></section>
+<section id="kod"><div class="wrap"><p class="eyebrow">04 / wykonanie</p><h2>Śledź żądanie<br>aż do źródła.</h2><div class="steps"><h3 class="sub-title">01 · Sprawdź zdrowie</h3><div><p>Otwórz <code>/api/health</code> i sprawdź liczbę załadowanych rekordów: filmów, użytkowników i artykułów. Katalog podaje tytuły filmów i nazwy użytkowników, których możesz użyć w formularzach.</p><pre data-language="bash">curl.exe http://127.0.0.1:5010/api/health
+curl.exe http://127.0.0.1:5010/api/catalog</pre></div></div><div class="steps"><h3 class="sub-title">02 · Powiąż endpoint z modułem</h3><div><p>W <a href="app.py" download><code>app.py</code></a> znajdź cztery importy. Narysuj tabelę: endpoint, parametr wejściowy, plik danych, funkcja i typ wyniku. W szczególności rozróżnij dane filmu od ocen użytkowników.</p><pre data-language="http">GET /api/recommend/content?title=Inception
+
+GET /api/recommend/collaborative?user=Ania
+
+GET /api/search?q=procesor
+
+POST /api/feedback  {"text": "..."}</pre></div></div><div class="steps"><h3 class="sub-title">03 · Zepsuj wejście</h3><div><p>Wyślij pusty tytuł, nieznanego użytkownika, zły JSON, zbyt długą opinię i <code>top_n=0</code>. Zanotuj statusy 400, 404 i 413 oraz treść błędów. Puste i nieznane wartości powtórz w przeglądarce i sprawdź, czy widzisz informację dla człowieka.</p>
+<pre data-language="bash">curl.exe -i "http://127.0.0.1:5010/api/recommend/content?title="
+curl.exe -i "http://127.0.0.1:5010/api/recommend/content?title=Nieznany"
+curl.exe -i "http://127.0.0.1:5010/api/recommend/content?title=Inception&amp;top_n=0"
+py -c "from app import app; c=app.test_client(); print(c.post('/api/feedback', data='{', content_type='application/json').status_code)"
+py -c "from app import app; c=app.test_client(); print(c.post('/api/feedback', json={'text': 'x'*4001}).status_code)"</pre><p>Formularz nie ma własnego limitu czasu. Jeśli serwer nie odpowiada, zostaje w stanie „Ładowanie”, dopóki przeglądarka nie zgłosi błędu sieci.</p></div></div><div class="steps"><h3 class="sub-title">04 · Rozszerz świadomie</h3><div><p>Wybierz jedno z zadań poniżej i dodaj małą zmianę od danych po interfejs (UI: formularz na stronie). Po zmianie pokaż jedno poprawne i jedno błędne żądanie. W krótkim opisie nazwij ograniczenie modelu, którego ta zmiana nie usuwa.</p></div></div></div></section>
+<section id="rozszerzenie" class="challenge"><div class="wrap"><p class="eyebrow">05 / zadanie zespołowe</p><h2>Wybierz jedną ścieżkę rozwoju.</h2><ol><li><b>Wyszukiwanie:</b> dodaj filtr działu artykułu w UI i API. Połącz go z filtrem w <a href="../lab6/search_engine.py" download><code>lab6/search_engine.py</code></a>, sprawdź przypadek z wynikami i z pustą listą.</li><li><b>Rekomendacje:</b> pokaż w UI uzasadnienie „bo ocenili” z Lab 3 albo filtr gatunku z Lab 2. Sprawdź, co pokaże interfejs, gdy zbyt wąski filtr nie zwróci filmu.</li><li><b>Obsługa klienta:</b> dodaj endpoint do oznaczania spamu z Lab 8 i osobny formularz. Nie mieszaj etykiet <code>spam/ham</code> (ham: wiadomość zwykła) z <code>positive/neutral/negative</code>.</li><li><b>Jakość produktu:</b> przygotuj 5 ręcznych przypadków API obejmujących sukces i błędy (np. poprawny tytuł, nieznany film, <code>top_n=0</code>). Uruchom je po zmianie i dołącz wyniki.</li></ol><p><b>Przed zmianą:</b> uzupełnij <a href="PLAN.md" download>PLAN.md</a>: wpisz role, wybory modeli i metryki w miejsce pól […], dopisz kryterium działania. Po zmianie poproś drugą parę o przegląd kodu: mapowanie endpoint → moduł, statusy błędów, brak sekretów i ścieżek lokalnych w repo. Zapisz jedną poprawkę po uwagach.</p>
+<p><b>Przekazanie:</b> adres lokalnego serwera, krótki diagram przepływu, jeden zrzut działania, lista trzech ograniczeń i informacja, gdzie AI pomogło oraz co zostało sprawdzone ręcznie.</p></div></section>
+<section><div class="wrap"><p class="eyebrow">06 / dokumentacja</p><h2>Pliki projektu i dokumentacja.</h2><div class="links"><a href="README.md" download><b>README projektu</b><span>Uruchomienie, API, architektura i ograniczenia.</span></a><a href="PLAN.md" download><b>PLAN.md</b><span>Podział pracy i kryteria odbioru własnej zmiany.</span></a><a href="https://flask.palletsprojects.com/en/stable/quickstart/" target="_blank" rel="noopener"><b>Flask Quickstart</b><span>Routing, request, response, JSON.</span></a><a href="https://flask.palletsprojects.com/en/stable/errorhandling/" target="_blank" rel="noopener"><b>Obsługa błędów Flask</b><span>Statusy 400/404/413 i JSON zamiast HTML.</span></a><a href="https://flask.palletsprojects.com/en/stable/testing/" target="_blank" rel="noopener"><b>Testowanie Flask</b><span>Klient testowy bez serwera zewnętrznego.</span></a><a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch" target="_blank" rel="noopener"><b>Fetch API</b><span>Żądania przeglądarki i błędy sieci.</span></a><a href="https://scikit-learn.org/stable/common_pitfalls.html" target="_blank" rel="noopener"><b>Pułapki ML</b><span>Przeciek danych i ocena modeli.</span></a></div></div></section>
+<section class="practice-lab" id="dodatkowe-przyklady" aria-labelledby="praktyka-title">
+<h2 id="praktyka-title">Dodatkowe przykłady</h2>
+<p>Przewidź wynik przed otwarciem odpowiedzi. Podpowiedź możesz odsłonić osobno.</p>
+<details class="practice-case"><summary>Od błędnego parametru do dobrej diagnozy</summary>
+<p>Wyślij GET /api/search?q=python&amp;top_n=0, a potem to samo z top_n=3. Co porównasz?</p>
+<ol class="practice-flow" aria-label="Kolejne etapy przykładu">
+<li>Parametry zapytania</li>
+<li>Walidacja top_n od 1 do 10</li>
+<li>400 albo 200 z wynikami</li>
+</ol>
+<details><summary>Podpowiedź</summary><p>Sprawdź zakres dopuszczalnych wartości w top_n().</p></details>
+<details><summary>Odpowiedź</summary><p>Pierwsze żądanie dostanie 400 i opis poprawnego zakresu. Drugie dostanie 200 z tablicą results, która może być pusta. To dwie różne ścieżki interfejsu.</p></details>
+</details>
+<details class="practice-case"><summary>Zielony health, zepsuty formularz</summary>
+<p>GET /api/health odpowiada 200, ale klient wysyła POST /api/feedback z pustym tekstem. Jak potwierdzisz, co działa?</p>
+<details><summary>Podpowiedź</summary><p>W tym prototypie health nie wysyła opinii do klasyfikatora.</p></details>
+<details><summary>Odpowiedź</summary><p>Sprawdź odpowiedź 400 dla pustego tekstu. Wyślij również poprawną niepustą opinię i sprawdź, czy otrzymasz wynik klasyfikacji. To osobne próby odczytu stanu i działania funkcji.</p></details>
+</details>
+<details class="practice-case"><summary>Zmiana kontraktu bez psucia klienta</summary>
+<p>Frontend renderuje dane z pola results. Chcesz dodać opis modelu. Jak to zrobisz, żeby klient dalej widział listę?</p>
+<details><summary>Podpowiedź</summary><p>Zachowaj dotychczasową nazwę i typ pola.</p></details>
+<details><summary>Odpowiedź</summary><p>Zachowaj results jako tablicę i dodaj obok nowe pole, np. model. W teście nadal sprawdź odpowiedź dla pustej oraz niepustej listy.</p></details>
+</details>
+</section>
+<section id="own-trial"><div class="wrap"><div class="trial-card reveal"><h2>Własna próba</h2><p>Partner wybiera jeden moduł i błędne dane wejściowe, których nie użyto w demo. Przewidź status HTTP i komunikat w UI, sprawdź oba, po czym prześledź parametr od formularza do funkcji modelu.</p><p>Zapisz przewidywanie i wynik. Jeśli wynik różni się od przewidywania, wyjaśnij dlaczego. Potem zamieńcie się rolami.</p></div></div></section>
+<section id="checkpoint-modul" class="ckpt"><div class="wrap"><p class="eyebrow">07 / finał · zaliczenie laboratoryjne</p><h2>Checkpoint CP-3 · obrona projektu</h2><div class="ckpt-banner">CHECKPOINT KOŃCOWY CP-3 · FINAŁ PROJEKTU · INTELIGENTNY SYSTEM INTERNETOWY</div><div class="ckpt-demo"><h3>Wasze 5 minut demo</h3><p>Pokażcie całość w akcji: po jednym żądaniu klienta do każdego modułu, od formularza do modelu:</p><ol><li>Rekomendacja content-based (Lab 02): film podobny do wybranego tytułu.</li><li>Rekomendacja collaborative (Lab 03): film dla użytkownika z macierzy ocen.</li><li>Wyszukiwanie (Lab 06): artykuł z archiwum po zapytaniu klienta.</li><li>Klasyfikacja opinii (Lab 08): opinia oznaczona etykietą.</li></ol><p>W trakcie demo obsłużcie jeden przypadek błędnych danych (np. nieznany film → 404) i uzasadnijcie wybór modeli metrykami (accuracy / macro F1 z wcześniejszych raportów).</p>
+<p>Cały kurs uruchomisz z katalogu głównego: <code>py app.py</code>, potem <code>http://127.0.0.1:8000/lab10/index.html</code>. API tego labu działa wtedy pod <code>/lab10/api/</code>.</p></div><h3>Pytania na obronę ustną (sylabus)</h3><details class="ckpt-q"><summary>1. Dlaczego akurat te modele, a nie inne?</summary><p>Każdy moduł ma najprostszy model uzasadniony danymi: TF-IDF i cosinus przy braku ocen (Lab 02), macierz ocen tam, gdzie oceny są (Lab 03), BM25 dla słów kluczowych (Lab 06), Logistic Regression dla etykiet (Lab 08). Na małych, syntetycznych danych prostszy model łatwiej obronić i zdiagnozować.</p></details><details class="ckpt-q"><summary>2. Co się stanie przy 10× większym ruchu?</summary><p>Modele i indeks powstają przy starcie każdego procesu. Zmierz osobno pamięć i czas odpowiedzi pod obciążeniem, zanim dobierzesz serwer WSGI, limity lub cache. Trening uruchamiaj poza obsługą żądania.</p></details><details class="ckpt-q"><summary>3. Jak oceniasz jakość rekomendacji bez ocen użytkowników?</summary><p>Spośród dwóch pokazanych tu modułów rekomendacji bez ocen użytkowników działa content-based. Inne systemy mogą używać także kliknięć, zakupów lub popularności, ale tych danych tutaj nie mamy.</p>
+<p>Bez realnych użytkowników mierzymy zastępcze wskaźniki: pokrycie katalogu (jaką część filmów system w ogóle poleca), różnorodność wyników i spójność z opisem. Test A/B (porównanie dwóch wersji na losowych grupach użytkowników) można przeprowadzić, gdy pojawią się realni użytkownicy. Jedna dobra rekomendacja nie dowodzi jakości systemu.</p></details><details class="ckpt-q"><summary>4. Gdzie system się myli i dlaczego?</summary><p>Nieznane słowa i krótkie teksty osłabiają TF-IDF i BM25, zimny start (cold start: nowy użytkownik lub film bez ocen) blokuje collaborative, a powtarzalne końcówki w danych potrafią zawyżyć wynik klasyfikacji (Lab 8: 0,929 → 0,286). Na obronę wskażecie konkretną pomyłkę z raportu i jej przyczynę w danych.</p></details><details class="ckpt-q"><summary>5. Co zmienisz przy większym budżecie danych?</summary><p>Usuwanie duplikatów i podział z proporcjami klas (stratified split), zbiór testowy z innego źródła niż treningowy, większa próba na klasę, ewentualnie dostrajanie encodera zamiast samej głowicy LR oraz kalibracja oszacowań prawdopodobieństwa. Więcej danych nie naprawia złego podziału. Najpierw napraw podział i duplikaty, potem zwiększaj zbiór.</p></details><details class="ckpt-q"><summary>6. Czego dowodzi demo, a czego nie?</summary><p>Demo dowodzi, że ścieżki od żądania do odpowiedzi działają jako całość. Nie dowodzi jakości na populacji użytkowników. Do tego potrzebny jest zestaw ręcznych przypadków, metryki offline (liczone na zapisanych danych, bez udziału użytkowników) i opis ograniczeń.</p></details><h3>Kryteria zaliczenia (sylabus)</h3><dl class="ckpt-criteria"><dt>EK_03: projektowanie systemu</dt><dd>Pokazujecie architekturę, źródła danych i przepływ żądania przez interfejs, API oraz moduły.</dd><dt>EK_04: dobór i implementacja algorytmów</dt><dd>Uzasadniacie wybór modeli metrykami i ograniczeniami danych. Obie osoby pokazują własną próbę, zmianę od danych po UI oraz wyjaśnienie jednej decyzji modelu.</dd><dt>EK_05: dokumentacja projektu</dt><dd>PLAN.md z harmonogramem i schematem blokowym, diagram przepływu żądania, opis ograniczeń oraz obrona ustna.</dd></dl><h3>Co ląduje w repo</h3><ul class="ckpt-repo"><li>Działający system: <code>py verify_labs.py</code> przechodzi dla wszystkich modułów; brakujące zależności, np. <code>torch</code> w Lab 9, dają pominięcie z komunikatem, nie błąd.</li><li><a href="PLAN.md" download>PLAN.md</a> z harmonogramem prac i schematem blokowym architektury.</li><li>Opis roli każdej osoby z pary: kto co zrobił i co sprawdził samodzielnie.</li></ul><p class="ckpt-final">Bez CP-3 nie ma zaliczenia laboratorium.</p></div></section>
+<section id="kontrola" class="checks"><div class="wrap"><p class="eyebrow">08 / odbiór · bilet wyjściowy</p><h2>System działa jako całość?</h2><div id="checks"><label><input type="checkbox">Cztery moduły odpowiadają w jednym interfejsie.</label><label><input type="checkbox">Wiem, które dane czyta każdy moduł.</label><label><input type="checkbox">Statusy 400, 404 i 413 sprawdzone.</label><label><input type="checkbox">Jedna zmiana od API do UI dodana.</label><label><input type="checkbox">Mam PLAN.md, diagram, zrzut, trzy ograniczenia i uwagi drugiej pary.</label></div><p id="progress" class="eyebrow">0 / 5</p><div class="q"><b>1. Co zwraca API przy nieznanym filmie?</b><div data-answer="1" data-note="Endpoint zwraca 404 z błędem JSON."><button>200 i pusty wynik</button><button>404</button></div><small></small></div><div class="q"><b>2. Która usługa korzysta z ocen użytkowników?</b><div data-answer="0" data-note="Collaborative filtering z Lab 3 korzysta z macierzy ocen."><button>Collaborative</button><button>Content-based</button></div><small></small></div><div class="q"><b>3. Czy jedna dobra rekomendacja dowodzi jakości systemu?</b><div data-answer="1" data-note="Potrzebny jest zestaw przypadków i ocena na danych spoza demonstracji."><button>Tak</button><button>Nie</button></div><small></small></div><p id="score" class="eyebrow">Wynik: 0 / 3</p><label for="notes">Bilet wyjściowy: wskaż moduł, sprawdzone błędne dane wejściowe, otrzymany status HTTP i komunikat w interfejsie. Pokaż na diagramie, gdzie dane zostały odrzucone, oraz dołącz zrzut odpowiedzi. Zapisz jedno ograniczenie, które nadal pozostaje w systemie.</label><textarea class="notes" id="notes" placeholder="Nasza zmiana…"></textarea><p id="saved" class="eyebrow" aria-live="polite"></p></div></section></main>
+<footer><div class="wrap"><span>ISI / AW / LAB 10 / B.5</span><span><a href="../lab9/index.html">← Lab 9</a> &nbsp; <a href="../index.html">Hub kursu</a> &nbsp; KONIEC CYKLU</span></div></footer>
+<script>
+const $=s=>document.querySelector(s);function format(data,status=200){if(data.error)return 'BŁĄD HTTP '+status+': '+data.error;if(data.results)return data.results.length?data.results.map((x,i)=>String(i+1)+'. '+x.title+(x.score!==undefined?' · score '+x.score:'')+(x.predicted!==undefined?' · przewidywana ocena '+x.predicted:'' )).join('\n'):'Brak wyników dla tego zapytania.';return 'Etykieta: '+data.label+' · estymata: '+data.probability_estimate}
+async function get(form,path,param){const output=$(form+'-out');output.textContent='Ładowanie…';try{const value=$(form+' [name='+param+']').value.trim();const response=await fetch(path+'?'+param+'='+encodeURIComponent(value));const data=await response.json();output.textContent=format(data,response.status)}catch(error){output.textContent='Błąd połączenia: '+error.message}}
+[['content','api/recommend/content','title'],['collaborative','api/recommend/collaborative','user'],['search','api/search','q']].forEach(([name,path,param])=>$('#'+name).addEventListener('submit',event=>{event.preventDefault();get('#'+name,path,param)}));
+$('#feedback').addEventListener('submit',async event=>{event.preventDefault();const output=$('#feedback-out');output.textContent='Ładowanie…';try{const response=await fetch('api/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:$('#feedback textarea').value})});output.textContent=format(await response.json(),response.status)}catch(error){output.textContent='Błąd połączenia: '+error.message}});
+const key='isi-lab10',boxes=[...document.querySelectorAll('#checks input')],notes=$('#notes');try{const state=JSON.parse(localStorage.getItem(key)||'{}');boxes.forEach((x,i)=>x.checked=!!state.checks?.[i]);notes.value=state.notes||''}catch{}function save(){localStorage.setItem(key,JSON.stringify({checks:boxes.map(x=>x.checked),notes:notes.value}));$('#progress').textContent=boxes.filter(x=>x.checked).length+' / 5';$('#saved').textContent='Zapisano lokalnie'}boxes.forEach(x=>x.addEventListener('change',save));notes.addEventListener('input',save);$('#progress').textContent=boxes.filter(x=>x.checked).length+' / 5';
+let score=0;document.querySelectorAll('.q [data-answer]').forEach(group=>[...group.querySelectorAll('button')].forEach((button,i)=>button.addEventListener('click',()=>{const first=!group.dataset.done,correct=i===Number(group.dataset.answer);group.dataset.done='1';group.parentElement.querySelector('small').textContent=(correct?'Dobrze. ':'Sprawdź: ')+group.dataset.note;if(first&&correct)score++;$('#score').textContent='Wynik: '+score+' / 3'})));
+</script><style>
+/* FX 10: magistrala systemowa w hero, pasek postepu, reveal */
+.hero{position:relative;overflow:hidden}
+.hero .wrap{position:relative;z-index:1}
+.bus-fx{position:absolute;inset:0;display:grid;place-items:center;justify-items:end;pointer-events:none;z-index:0;opacity:.42;padding-right:2%}
+.bus-fx svg{width:min(88%,600px);max-height:90%}
+.bus-links path{stroke:#a6e8f5;stroke-width:2;stroke-dasharray:10 12;animation:flow 1.6s linear infinite;opacity:.7}
+.bus-links path:nth-child(2){animation-delay:-.4s}.bus-links path:nth-child(3){animation-delay:-.8s}.bus-links path:nth-child(4){animation-delay:-1.2s}
+@keyframes flow{to{stroke-dashoffset:-22}}
+.bus-nodes rect{fill:rgba(166,232,245,.07);stroke:#a6e8f5;stroke-width:1.6}
+.bus-nodes .hub{fill:rgba(255,111,154,.12);stroke:#ff6f9a;stroke-width:2.2;filter:drop-shadow(0 0 18px rgba(255,111,154,.45))}
+.bus-labels text{fill:#a6e8f5;font:700 16px 'DM Mono',monospace;text-anchor:middle}
+.bus-labels text:last-child{fill:#ff6f9a;font-size: 17px}
+.bus-leds circle{fill:#a6e8f5;animation:led 2.2s infinite}
+.bus-leds circle:nth-child(2){animation-delay:.5s}.bus-leds circle:nth-child(3){animation-delay:1s}.bus-leds circle:nth-child(4){animation-delay:1.5s}
+@keyframes led{0%,100%{opacity:1}50%{opacity:.15}}
+#read-progress{position:fixed;top:0;left:0;height:4px;width:0;background:#ff6f9a;box-shadow:0 0 14px #ff6f9a;z-index:100}
+.fx main section,.fx body>section{opacity:0;transform:translateY(28px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+.fx section.in{opacity:1;transform:none}
+@media(max-width:800px){.bus-fx{opacity:.3}}
+
+</style>
+<div id="read-progress" aria-hidden="true"></div>
+<script>
+(function(){
+  document.documentElement.classList.add('fx');
+  const bar=document.getElementById('read-progress');
+  addEventListener('scroll',()=>{const m=document.documentElement.scrollHeight-innerHeight;bar.style.width=(m>0?scrollY/m*100:0)+'%';},{passive:true});
+  const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.08});
+  document.querySelectorAll('main section, body > section').forEach(s=>io.observe(s));
+})();
+</script><script>
+/* ilustracja: klikane etapy REKOMENDACJE / WYSZUKIWANIE / KLASYFIKACJA (wzorzec lab2) */
+(function(){
+  var ILL = [
+    "<strong>REKOMENDACJE:</strong> filmy podobne do tytułu albo dobrane do ocen. Sprawdź, skąd moduł bierze dane.",
+    "<strong>WYSZUKIWANIE:</strong> zapytanie trafia do indeksu BM25 i wraca z tytułem oraz score. Pusty wynik też jest odpowiedzią.",
+    "<strong>KLASYFIKACJA:</strong> opinia dostaje etykietę z estymatą, nie obietnicą pewności. Błędne wejście daje 400/404/413, nie wyjątek serwera."
+  ];
+  var note = document.getElementById("illNote");
+  var tabs = Array.prototype.slice.call(document.querySelectorAll(".ill-tab"));
+  if (note && tabs.length) {
+    tabs.forEach(function(btn){
+      btn.addEventListener("click", function(){
+        tabs.forEach(function(b){ b.setAttribute("aria-pressed", b === btn ? "true" : "false"); });
+        note.innerHTML = ILL[+btn.dataset.ill] || ILL[0];
+      });
+    });
+  }
+  var io = new IntersectionObserver(function(es){ es.forEach(function(en){ if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); } }); }, { threshold: .12 });
+  document.querySelectorAll(".trial-card.reveal").forEach(function(el){ io.observe(el); });
+})();
+</script><script data-pi="1">
+(function(){
+var SEL='.question[data-answer],fieldset.question[data-answer],.q [data-answer],.quiz-pytanie[data-poprawna],.answers[data-correct],.answers[data-answer]';
+var PROMPT='Głos wstępny zapisany, wynik jeszcze nie został oceniony. Omów odpowiedź z drugą osobą (około 3 minut). Następnie kliknij wybraną odpowiedź ponownie, aby ją zatwierdzić, nawet jeśli jej nie zmieniasz.';
+function fb(group){
+return group.querySelector('.feedback')||(group.parentElement&&group.parentElement.querySelector('.feedback,small,.quiz-wyjasnienie,.quiz-feedback'))||group.querySelector('small,.quiz-wyjasnienie,.quiz-feedback');
+}
+document.querySelectorAll(SEL).forEach(function(group){
+if(group.dataset.piOn)return;group.dataset.piOn='1';
+group.addEventListener('click',function(e){
+var btn=e.target.closest?e.target.closest('button'):null;
+if(!btn||!group.contains(btn))return;
+var buttons=group.querySelectorAll('button');
+if(!group.dataset.piSolo){
+e.preventDefault();e.stopPropagation();
+buttons.forEach(function(b){b.style.outline='';b.classList.remove('pi-solo');});
+btn.classList.add('pi-solo');btn.style.outline='3px dashed currentColor';btn.style.outlineOffset='2px';
+group.dataset.piSolo='1';
+var f=fb(group);if(f)f.textContent=PROMPT;
+}else{
+buttons.forEach(function(b){b.style.outline='';b.classList.remove('pi-solo');});
+delete group.dataset.piSolo;
+}
+},true);
+});
+})();
+</script>
+</body></html>

@@ -1,0 +1,521 @@
+<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Laboratorium 8: klasyfikacja opinii i spamu, trzy modele, macierz pomyłek oraz pułapka powtarzalnych zwrotów."><title>Lab 08 · Sortownia wiadomości · ISI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=DM+Mono:wght@400;500&family=Nunito+Sans:wght@400;600;700;800&display=optional" rel="stylesheet">
+<style>
+:root{--peach:#ffe0c4;--paper:#fff8ef;--blue:#293c88;--coral:#f6623f;--practice-accent:#293c88;--yellow:#ffcd40;--green:#4c9d7d;--ink:#232e4b;--line:#b8b3ad;--head:'Barlow Condensed',Impact,sans-serif;--mono:'DM Mono',monospace;--body:'Nunito Sans',sans-serif}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:19px/1.65 var(--body)}a{color:var(--blue)}button,input,select,textarea{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--blue);outline-offset:3px}::selection{background:var(--yellow)}.wrap{max-width:1180px;margin:auto}.top{background:var(--blue);color:white}.top .wrap{padding:14px 22px;display:flex;justify-content:space-between;align-items:center;gap:20px}.top a{color:white;text-decoration:none;font:500 15px var(--mono)}.top nav{display:flex;gap:19px}.top nav a:hover{text-decoration:underline}
+.hero{background:var(--peach);border-bottom:7px solid var(--blue);position:relative;overflow:hidden}.hero::before{content:'';position:absolute;right:-120px;top:30px;width:620px;height:620px;border:22px solid rgba(41,60,136,.09);border-radius:50%;box-shadow:0 0 0 70px rgba(41,60,136,.045),0 0 0 140px rgba(41,60,136,.035)}.hero .wrap{padding:80px 22px 110px;position:relative}.code{font:500 15px var(--mono);letter-spacing:.12em;text-transform:uppercase}.hero h1{font:900 clamp(78px,13vw,175px)/.79 var(--head);letter-spacing:-.03em;text-transform:uppercase;color:var(--blue);margin:33px 0 32px;max-width:1030px}.hero h1 span{color:var(--coral)}.hero p{max-width:650px;font-size:21px}.hero .badge{position:absolute;right:45px;top:80px;background:var(--yellow);color:var(--ink);border:3px solid var(--blue);padding:15px;transform:rotate(11deg);box-shadow:8px 8px 0 var(--blue);font:700 16px var(--mono)}.conveyor{height:44px;background:var(--yellow);border-bottom:3px solid var(--blue);display:flex;align-items:center;overflow:hidden;white-space:nowrap;font:700 14px var(--mono);color:var(--blue)}.conveyor span{display:inline-block;animation:move 25s linear infinite}@keyframes move{to{transform:translateX(-50%)}}
+section{padding:82px 22px;border-bottom:2px solid var(--blue)}.eyebrow{font:500 15px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--coral);margin:0 0 13px}.title{font:800 clamp(48px,7vw,90px)/.93 var(--head);text-transform:uppercase;color:var(--blue);margin:0 0 23px;max-width:900px}.lede{font-size:20px;max-width:820px;margin:0 0 30px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}.card{background:white;border:3px solid var(--blue);padding:25px;box-shadow:8px 8px 0 var(--peach)}.card h3{font:800 31px var(--head);color:var(--blue);text-transform:uppercase;margin:0 0 8px}.card p{margin:0}.card .num{font:900 70px/.9 var(--head);color:var(--coral)}.mission{background:#fff2e4}.mission blockquote{margin:0;font:600 28px/1.3 var(--body);max-width:900px;padding:30px;border-left:8px solid var(--coral);background:white}.postmark{font:500 15px var(--mono);text-transform:uppercase;color:var(--blue);letter-spacing:.12em;margin-top:16px}
+.demo{background:var(--blue);color:white}.demo .title{color:var(--yellow)}.demo .eyebrow{color:var(--yellow)}.demo .lede{color:#ebeeff}.demo-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:24px}.panel{background:var(--paper);color:var(--ink);padding:24px;border:3px solid var(--ink);box-shadow:8px 8px 0 var(--coral)}.panel h3{font:800 30px var(--head);text-transform:uppercase;color:var(--blue);margin:0 0 12px}.panel textarea{width:100%;min-height:130px;border:2px solid var(--blue);background:white;padding:13px;resize:vertical}.panel select{border:2px solid var(--blue);padding:7px;background:white}.panel button{background:var(--coral);color:white;border:2px solid var(--ink);padding:11px 16px;font:700 15px var(--mono);text-transform:uppercase}.panel button:hover{background:var(--yellow);color:var(--ink)}.panel pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#fff0dc;border:1px solid var(--line);padding:16px;min-height:120px;font:16px/1.7 var(--mono)}.matrix{display:grid;grid-template-columns:110px repeat(3,1fr);max-width:650px;gap:4px;font:15px var(--mono);text-align:center;margin:16px 0}.matrix span{background:#e8e8ec;padding:12px 6px}.matrix .head{background:var(--blue);color:white}.matrix .cell{background:#fff8db;font:700 23px var(--head)}.matrix .off{background:#ffcec4}.matrix-note{font-size:16px}.tabs{display:flex;gap:8px;flex-wrap:wrap}.tabs button{border:2px solid var(--blue);background:white;padding:8px 12px;color:var(--blue);font:700 15px var(--mono)}.tabs button.active{background:var(--blue);color:white}
+.steps{display:grid;gap:28px}.step{display:grid;grid-template-columns:75px 1fr;gap:16px}.step>b{font:900 58px/.9 var(--head);color:var(--coral)}.step .content{border-top:3px solid var(--blue);padding-top:13px}.step h3{font:800 30px var(--head);text-transform:uppercase;margin:0 0 8px;color:var(--blue)}.step p{margin:0 0 14px;max-width:850px}.codebar{background:var(--blue);color:white;display:flex;justify-content:space-between;padding:8px 12px;font:14px var(--mono)}.codebar button{background:none;color:white;border:1px solid white;padding:2px 7px;font:600 15px var(--mono)}.codeblock{background:#1d2860;color:#f8f4df;margin:0;padding:18px;overflow:auto;font:16px/1.7 var(--mono)}.step details{padding:12px 15px;background:#fff0dc;border-left:5px solid var(--coral);margin-top:14px}.step summary{cursor:pointer;font-weight:800}.trap{background:var(--yellow)}.trap .title{max-width:1000px}.trap .grid{grid-template-columns:1fr 1fr}.trap .card{box-shadow:9px 9px 0 var(--coral)}.trap .score{font:900 85px/.9 var(--head);color:var(--coral)}.trap .score small{font:500 15px var(--mono);display:block;color:var(--ink);margin-top:10px}.trap .card p{margin-top:14px}.trap ol li{margin:8px 0}
+.links{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.links a{display:block;text-decoration:none;color:var(--ink);border:3px solid var(--blue);background:white;padding:20px}.links a:hover{transform:translate(-3px,-3px);box-shadow:5px 5px 0 var(--coral)}.links b{display:block;font:800 24px var(--head);text-transform:uppercase;color:var(--blue)}.links span{display:block;font-size:16px}.checks{background:#fff2e4}.checks label{display:block;padding:11px 0;border-bottom:1px solid var(--line)}.checks input{accent-color:var(--coral);margin-right:10px}.meter{height:14px;background:white;border:2px solid var(--blue);margin:20px 0}.meter div{height:100%;width:0;background:var(--coral)}.question{border-top:2px solid var(--blue);padding:18px 0}.question h3{font:800 22px var(--head);text-transform:uppercase;color:var(--blue);margin:0 0 11px}.answers{display:flex;gap:8px;flex-wrap:wrap}.answers button{background:white;border:2px solid var(--blue);padding:8px 12px}.answers button.good{background:#a4d9b8}.answers button.bad{background:#ffb7a7}.feedback{font-size:16px;min-height:24px}.notes{width:100%;min-height:145px;border:2px solid var(--blue);padding:15px;resize:vertical;background:white}footer{background:var(--blue);color:white;padding:25px 22px;font:15px var(--mono)}footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}footer a{color:white}
+@media(max-width:800px){.top nav{display:none}.hero h1{font-size:clamp(70px,19vw,130px)}.hero .badge{display:none}.grid,.demo-grid,.trap .grid,.links{grid-template-columns:1fr}.step{grid-template-columns:1fr;gap:0}.matrix{grid-template-columns:110px repeat(3,1fr)}section{padding:60px 20px}}@media print{.top,.conveyor,.demo,.codebar button{display:none}.hero{min-height:0}section{padding:18px 0;break-inside:avoid}}
+.panel button{color:#101b30}
+.eyebrow{color:#842810}
+.matrix-explanation{max-width:85ch;margin-top:2.5rem}
+.matrix-explanation h3.sub-title,.matrix-explanation em,.demo .lede em{color:#fff}
+</style><style data-ill="1">
+/* ---------- rytm pionowy + ilustracja (wzorzec lab2, kolory lab8) ---------- */
+section > * + * { margin-top: 0; }
+.sec-head + .sec-lead { margin-top: 18px; }
+h3.sub-title { font: 800 30px var(--head); text-transform: uppercase; color: var(--blue); margin: 56px 0 18px; }
+h3.sub-title:first-child { margin-top: 8px; }
+.fig-ill { margin: 40px 0 12px; max-width: 960px; }
+.fig-ill img { display: block; width: 100%; height: auto; border-radius: 22px; border: 3px solid var(--blue); box-shadow: 8px 8px 0 var(--peach); }
+.ill-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 6px; }
+.ill-tab { font-family: var(--mono); font-size: 14px; font-weight: 700; letter-spacing: .06em; padding: 9px 16px; border-radius: 999px; border: 2px solid var(--blue); background: #fff; color: var(--blue); cursor: pointer; transition: all .2s; }
+.ill-tab:hover { background: var(--yellow); }
+.ill-tab[aria-pressed="true"] { background: var(--blue); color: #fff; }
+.ill-note { margin: 10px 0 4px; padding: 14px 18px; border-left: 5px solid var(--coral); background: #fff; border-radius: 0 12px 12px 0; color: var(--ink); font-size: 17px; min-height: 3.2em; }
+.ill-note strong { color: var(--blue); }
+#own-trial { padding: 0; }
+#own-trial .trial-card { border: 3px solid var(--blue); border-radius: 14px; background: #fff; padding: 30px 32px; margin-top: 8px; box-shadow: 8px 8px 0 var(--peach); }
+#own-trial .trial-card h2 { font: 800 clamp(30px,4vw,46px) var(--head); text-transform: uppercase; color: var(--blue); margin: 0 0 16px; }
+#own-trial .trial-card p { color: var(--ink); font-size: 18px; }
+#own-trial .trial-card p + p { margin-top: 14px; }
+#own-trial .trial-card code { font-family: var(--mono); background: #fff0dc; color: var(--blue); padding: 1px 7px; border-radius: 5px; }
+</style><link rel="icon" href="../assets/favicon.svg">
+<style data-typo="1">:root{--acc:#f6623f;--acc2:#293c88}
+strong{color:var(--acc);font-weight:700}
+em{color:var(--acc2);font-style:italic}
+code{font-family:var(--mono);background:#ffe9dd;color:#a3330f;padding:.1em .45em;border-radius:6px}
+.lead{font-size:1.1rem;line-height:1.8}
+p+p{margin-top:16px}
+.card p,.out p{line-height:1.75}
+.challenge li{margin-bottom:16px;line-height:1.8}</style><style data-fx="8">
+/* ---------- Lab 8: wyjasnienia, widgety, animacje ---------- */
+.prose8{max-width:1000px;margin:36px 0 0}
+.prose8 h3.sub-title{margin-top:40px}
+.prose8 h3.sub-title:first-child{margin-top:0}
+.prose8 p{margin:0 0 20px;max-width:none}
+.prose8 p:last-child{margin-bottom:0}
+.prose8 .cue-lead{margin:0 0 18px}
+/* --- potok klasyfikacji (flow-pipe) --- */
+.flow-pipe{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:36px 0 26px}
+.flow-pipe figcaption{grid-column:1/-1;margin-top:8px;font-size:16px;color:var(--ink);line-height:1.7;max-width:960px}
+.flow-step{position:relative;border:3px solid var(--blue);background:#fff;padding:16px 18px;box-shadow:6px 6px 0 var(--peach);animation:stepIn .6s cubic-bezier(.2,.9,.2,1) backwards}
+.flow-step:nth-child(1){animation-delay:.05s}
+.flow-step:nth-child(2){animation-delay:.2s}
+.flow-step:nth-child(3){animation-delay:.35s}
+.flow-step:nth-child(4){animation-delay:.5s}
+.flow-step:not(:last-child)::after{content:'\2192';position:absolute;right:-15px;top:50%;transform:translateY(-50%);font:800 22px var(--mono);color:var(--coral)}
+.flow-step b{display:block;font:800 20px var(--head);text-transform:uppercase;color:var(--coral)}
+.flow-step small{display:block;margin-top:6px;font:15px/1.5 var(--body);color:var(--ink)}
+/* --- klikalna macierz pomylek --- */
+.matrix .cell{cursor:pointer;animation:cellFill .5s cubic-bezier(.2,.9,.2,1) both}
+.matrix .cell:hover{box-shadow:inset 0 0 0 3px var(--blue)}
+.matrix .cell.sel{box-shadow:inset 0 0 0 3px var(--coral)}
+.cell-info{border:3px solid var(--blue);background:#fff;padding:16px 18px;margin:16px 0 0;box-shadow:6px 6px 0 var(--peach)}
+.cell-info h4{margin:0 0 8px;font:800 22px var(--head);text-transform:uppercase;color:var(--blue)}
+.cell-info p{margin:0 0 10px;font-size:17px;line-height:1.7}
+.cell-info p:last-child{margin-bottom:0}
+.cell-info .err{border-left:5px solid var(--coral);background:#fff0dc;padding:10px 12px;margin:0 0 8px;font:15px/1.6 var(--body);animation:cardIn .4s ease-out both}
+.cell-info .err b{font-family:var(--mono);font-size:13.5px;color:var(--coral);text-transform:uppercase;letter-spacing:.04em}
+.cell-hint{margin:10px 0 0;font:14.5px var(--mono);color:var(--ink)}
+/* --- przyklady do formularza --- */
+.presets{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0 0;font:14.5px var(--mono)}
+.presets button{border:2px solid var(--blue);background:#fff;color:var(--blue);padding:6px 10px;font:700 14px var(--mono)}
+.presets button:hover{background:var(--yellow)}
+/* --- lab: koncowki vs strip_cues --- */
+.cue-lab{margin:30px 0 0;border:3px solid var(--blue);background:#fff;padding:24px;box-shadow:9px 9px 0 var(--coral)}
+.cue-switch{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 20px}
+.cue-btn{border:3px solid var(--blue);background:#fff;color:var(--blue);padding:10px 16px;font:700 15px var(--mono);text-transform:uppercase}
+.cue-btn:hover{background:var(--yellow)}
+.cue-btn[aria-pressed="true"]{background:var(--blue);color:#fff}
+.cue-two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:20px}
+.cue-card{border:2px solid var(--blue);padding:20px;background:var(--paper);transition:background .3s ease}
+.cue-card h4{margin:0 0 10px;font:800 24px var(--head);text-transform:uppercase;color:var(--blue)}
+.cue-num{font:900 82px/.9 var(--head);color:var(--coral);animation:numPop .55s cubic-bezier(.2,1.4,.3,1) both}
+.cue-lab.stripped .cue-num{color:var(--blue)}
+.cue-card p{margin:12px 0 0;font-size:16.5px;line-height:1.65}
+.cue-bar{height:16px;background:#fff;border:2px solid var(--blue);margin-top:14px;overflow:hidden}
+.cue-bar i{display:block;height:100%;width:93%;background:var(--coral);transition:width .8s cubic-bezier(.2,.9,.2,1),background .3s ease}
+.cue-lab.stripped .cue-bar i{width:29%;background:var(--blue)}
+.cue-list{margin:0;padding:0;list-style:none;display:grid;gap:12px}
+.cue-list li{border-left:6px solid var(--green);background:#fff;padding:10px 12px;font-size:17px;line-height:1.7}
+.cue-list li.neg{border-left-color:var(--coral)}
+.cue-list li.neu{border-left-color:var(--blue)}
+.cue-body{background:var(--yellow);box-shadow:inset 0 -3px 0 var(--coral);padding:0 4px;transition:opacity .45s ease,transform .45s ease;display:inline-block}
+.cue-lab.stripped .cue-body{opacity:.16;transform:scale(.96);box-shadow:none}
+.cue-tag{display:block;margin-top:6px;font:700 13px var(--mono);text-transform:uppercase;color:var(--coral);letter-spacing:.05em}
+.cue-list li.neu .cue-tag{color:var(--blue)}
+.cue-note{margin:0 0 14px;font-size:16.5px;line-height:1.65}
+.cue-foot{margin:16px 0 0;padding:12px 14px;border-left:6px solid var(--yellow);background:#fff0dc;font-size:16.5px;animation:cueOut .5s ease both}
+/* --- animacje --- */
+@keyframes cellFill{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes stepIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes numPop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+@keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes cueOut{from{opacity:.15;transform:translateY(-5px)}to{opacity:1;transform:none}}
+/* --- obecne na stronie --- */
+.card{transition:transform .18s ease,box-shadow .18s ease}
+.card:hover{transform:translate(-3px,-3px);box-shadow:12px 12px 0 var(--coral)}
+.links a{transition:transform .18s ease,box-shadow .18s ease}
+.step .content h3{animation:stepIn .55s cubic-bezier(.2,.9,.2,1) backwards}
+@media(max-width:800px){
+.flow-pipe{grid-template-columns:1fr}
+.flow-step:not(:last-child)::after{content:'\2193';right:50%;top:auto;bottom:-18px;transform:translateX(50%)}
+.cue-two{grid-template-columns:1fr}
+.cue-num{font-size:62px}
+.cell-info{padding:14px}
+}
+</style>
+<link rel="stylesheet" href="../assets/responsive.css">
+<link rel="stylesheet" href="../assets/code.css">
+<link rel="stylesheet" href="../assets/tab-icons.css">
+<script src="../assets/highlight.min.js" defer></script>
+<script src="../assets/code.js" defer></script>
+<style>.start-tasks a{font-weight:700;text-decoration:underline;text-underline-offset:.18em}.start-tasks li+li{margin-top:.6em}.start-note{border-top:1px solid currentColor;padding-top:.7em}section[id]{scroll-margin-top:64px}</style>
+
+<style>
+  .hero h1>span, .step>b, .cue-num{color:#a73926}
+  .cue-list li .cue-tag{color:#246c54}
+  .cue-list li.neg .cue-tag{color:#a73926}
+</style>
+<link rel="stylesheet" href="../assets/praktyka.css">
+</head><body>
+<header class="top"><div class="wrap"><a href="../index.html">ISI / 08 / SORTOWNIA</a><nav aria-label="Na tej stronie"><a href="#problem">Problem</a><a href="#demo">Testuj</a><a href="#kod">Kod</a><a href="#pulapka">Pułapka</a><a href="#kontrola">Kontrola</a></nav><span class="code">B.4 · EK_04</span></div></header>
+<div class="hero"><div class="sort-fx" aria-hidden="true"><i class="letter s">SPAM</i><i class="letter h">HAM</i><i class="letter n">NEG</i><i class="letter p">POS</i><i class="letter s2">SPAM</i></div><div class="wrap"><p class="code">Dwie kolejki wiadomości / trzy klasyfikatory / jeden raport</p><h1>Sortownia<br><span>wiadomości.</span></h1><p>Opinie klientów i spam wpadają do tej samej skrzynki. Wytrenujesz model, który rozdziela je po tekście. Potem sprawdzisz, czy jego świetny wynik nie jest tylko <em>sztuczką powtarzalnych zwrotów</em>.</p><div class="ill-tabs" role="group" aria-label="Kliknij etap schematu"><button class="ill-tab" data-ill="0" aria-pressed="true"><svg class="tab-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h9l5 5v11H5z"/><path d="M14 4v5h5"/><path d="M8 13h8M8 17h6"/></svg>1 · TEKST</button><button class="ill-tab" data-ill="1" aria-pressed="false"><svg class="tab-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16l-6 7v6l-4 2v-8z"/></svg>2 · KLASYFIKATOR</button><button class="ill-tab" data-ill="2" aria-pressed="false"><svg class="tab-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h8l7 7-7 7H4z"/><path d="M9 12l2 2 4-4"/></svg>3 · ETYKIETA</button></div><p class="ill-note" id="illNote">TEKST: zwykła wiadomość, np. „Produkt działa szybko”. Model widzi tylko słowa, nie Twoje intencje.</p><div class="badge" aria-hidden="true">92,9%? <br>SPRAWDŹ<br>BŁĘDY</div></div></div><div class="conveyor" aria-hidden="true"><span>HAM → SPAM → NEGATIVE → NEUTRAL → POSITIVE → HAM → SPAM → NEGATIVE → NEUTRAL → POSITIVE → HAM → SPAM → NEGATIVE → NEUTRAL → POSITIVE → &nbsp;</span></div>
+<main><aside class="course-start" aria-label="Jak pracować z laboratorium">
+<h2>Lab 08: od czego zacząć</h2>
+<p>Rozpoznasz spam i sentyment opinii (pozytywny, neutralny albo negatywny), a potem przeanalizujesz pomyłki modeli.</p>
+<div class="first-try" style="--term-accent:#8a97a0"><h3>Rozgrzewka z Lab 07 · Słowo czy sens</h3><p class="try-question">Czym różni się wyszukiwanie po słowach (BM25) od semantycznego (embeddingi)? Odpowiedz z pamięci, potem sprawdź.</p><details><summary>Sprawdź odpowiedź</summary><p>BM25 dopasowuje dokładne tokeny: literówka daje zero trafień bez fuzziness. Embeddingi porównują znaczenie (wektory), więc znajdują parafrazy bez wspólnych słów, ale mogą podsunąć tekst luźno związany z pytaniem.</p></details></div>
+<div class="first-try" style="--term-accent:#bd6242"><h3>Jak odczytać pomyłkę modelu?</h3><p><dfn>Etykieta</dfn> to klasa przypisana przykładowi, np. „spam”. W macierzy pomyłek wiersz wskazuje prawdziwą klasę, a kolumna przewidywanie modelu. Trafienia leżą na przekątnej.</p><figure class="lab-sketch"><figcaption>Jak czytać macierz pomyłek?</figcaption><svg viewBox="0 0 320 132" role="img" aria-label="Kolumny wskazują przewidywania, wiersze prawdziwą klasę. Na przekątnej są trafienia."><text x="120" y="18" class="key">MODEL</text><text x="117" y="40" class="">zwykła</text><text x="223" y="40" class="">spam</text><text x="8" y="57" class="key">FAKT</text><text x="8" y="80" class="">zwykła</text><rect x="115" y="59" width="86" height="28" rx="5" class="ink-on"/><text x="123" y="79" class="">trafienie</text><rect x="211" y="59" width="86" height="28" rx="5" class="ink-box"/><text x="219" y="79" class="">pomyłka</text><text x="8" y="112" class="">spam</text><rect x="115" y="91" width="86" height="28" rx="5" class="ink-box"/><text x="123" y="111" class="">pomyłka</text><rect x="211" y="91" width="86" height="28" rx="5" class="ink-on"/><text x="219" y="111" class="">trafienie</text></svg></figure><p class="try-question">Model oznaczył zwykłą wiadomość jako spam. W której komórce macierzy znajdzie się ta wiadomość?</p><details><summary>Sprawdź odpowiedź</summary><p>W wierszu zwykłych wiadomości i kolumnie spamu. To fałszywy alarm. Accuracy liczy wszystkie poprawne odpowiedzi, a w macro F1 każda klasa ma równą wagę, nawet jeśli przykładów spamu jest mało. <a href="#demo">Odczytaj komórkę macierzy</a>.</p></details></div>
+<div class="start-tasks">
+<h3>Zadania do wykonania</h3>
+<ol>
+<li><a href="#kod">Przygotuj dane.</a> Dla spamu i opinii odłóż 25% przykładów na test. Zachowaj proporcje klas. Słownik TF-IDF, czyli zamianę tekstu na liczby, zbuduj wyłącznie na części treningowej.</li>
+<li><a href="#kod">Porównaj trzy modele.</a> Uruchom <code>py classifier.py</code>. Dla każdego zbioru zapisz accuracy (dokładność) i macro F1 trzech klasyfikatorów. Przy każdej parze wyników podaj liczbę przykładów testowych.</li>
+<li><a href="#demo">Odczytaj pomyłkę.</a> Wybierz komórkę poza przekątną macierzy z liczbą większą od zera. W raporcie znajdź przykład o tych samych etykietach. Zapisz tekst, prawdziwą klasę i przewidywanie modelu.</li>
+<li><a href="#pulapka">Sprawdź wpływ końcówek.</a> Porównaj accuracy regresji logistycznej dla pełnych opinii i dla tekstów uciętych po pierwszej kropce. Przelicz obie wartości na liczbę trafień z 14 prób. Wskaż frazę, która mogła ułatwiać rozpoznanie klasy.</li>
+<li><a href="#demo">Przetestuj API.</a> Pobierz metryki (<code>/api/metrics</code>) i wyślij własny tekst do klasyfikacji (<code>/api/classify/spam</code>). Powtórz próbę z pustym tekstem (HTTP 400), nieznanym zadaniem (404) i tekstem o długości 4001 znaków (413).</li>
+</ol>
+<p class="start-note">Do oddania przygotuj <code>classifier.py</code>, <code>app.py</code> i raport z metrykami oraz wnioskiem o danych.</p>
+</div>
+<p>Pobierz cały kurs i rozpakuj archiwum. W katalogu <code>lab8</code> zainstaluj zależności poleceniem <code>py -m pip install -r ../requirements.txt</code>. Następnie uruchom <code>py app.py</code> i otwórz <code>http://127.0.0.1:5008/</code>. Formularze korzystają z tego serwera. </p>
+<div class="files"><a href="emails.csv" download>emails.csv</a> <a href="reviews.csv" download>reviews.csv</a> <a href="classifier.py" download>classifier.py</a> <a href="app.py" download>app.py</a> <a href="../kurs.zip" download>Pobierz cały kurs (ZIP)</a> <a href="../requirements.txt" download>Zależności podstawowe</a> <a href="../index.html#laby">Wszystkie laboratoria</a></div>
+<p><a href="#dodatkowe-przyklady">Przejdź do dodatkowych przykładów</a></p>
+</aside>
+<section id="problem" class="mission"><div class="wrap"><p class="eyebrow">01 / nowe zgłoszenie</p><h2 class="title">Skrzynka pęka w szwach</h2><blockquote>„Dział wsparcia potrzebuje dwóch filtrów: spam albo zwykła wiadomość oraz opinia pozytywna, neutralna albo negatywna. Chcę widzieć pomyłki modelu, nie tylko jedną ładną liczbę”.</blockquote><p class="postmark">Dane ćwiczeniowe: <a href="emails.csv" download>40 wiadomości</a> i <a href="reviews.csv" download>54 opinie</a>. Mały syntetyczny zbiór do nauki procesu, <em>nie do wdrożenia</em>.</p><div class="grid" style="margin-top:28px"><article class="card"><span class="num">02</span><h3>Zadania</h3><p>Spam/ham (ham: wiadomość zwykła) i trzy klasy opinii. Każde ma osobny podział danych i osobny raport.</p></article><article class="card"><span class="num">03</span><h3>Modele</h3><p>MultinomialNB, LogisticRegression i LinearSVC. Wspólna reprezentacja TF-IDF ułatwia porównanie. <em>Naiwny Bayes zakłada warunkową niezależność cech</em>. Mimo to działa jako punkt odniesienia.</p></article></div>
+<h3 class="sub-title">Co właściwie uczy klasyfikator?</h3>
+<p>Model nie rozumie tekstu i nie zna tematu. Uczy się czegoś znacznie skromniejszego: wag dla słów. Reprezentacja TF-IDF zamienia wiadomość na wektor: po jednej liczbie dla każdego słowa i pary słów ze słownika. Model dostaje ten wektor razem z etykietą i przesuwa wagi tak, by jak najczęściej przewidywać poprawną etykietę.</p>
+<p>Regresja logistyczna liczy ważone sumy cech. Dla dwóch klas przekształca wynik funkcją sigmoid (ściska wynik do zakresu 0-1), a dla trzech klas w tym ćwiczeniu używa softmax (zamienia wyniki na prawdopodobieństwa klas). API zwraca oszacowanie dla wybranej klasy w polu <code>probability_estimate</code>. MultinomialNB uczy się, jak często cechy występują w każdej klasie, i na tej podstawie oblicza wynik dla każdej klasy. Oba modele opierają decyzję na cechach wyuczonych z treningu.</p>
+<p>Dlaczego „naiwny”? Bo model zakłada, że słowa są <em>warunkowo niezależne</em>: po ustaleniu klasy tekstu każde słowo dokłada osobny kawałek dowodu, niezależnie od pozostałych słów. Założenie jest fałszywe: „nie polecam” to nie dwa osobne słowa, tylko jedna całość, która po rozdzieleniu traci sens.</p>
+<p>Mimo to podejście działa jako punkt odniesienia i pozwala szybko sprawdzić, ile da się uzyskać z prostych cech tekstu. I dopiero gdy prosty model okazuje się za słaby, ma sens próba czegoś trudniejszego.</p>
+<p>Niezależnie od założenia Bayesa wszystkie trzy modele mają tu dwa ograniczenia, które sprawdzisz w ćwiczeniu. Po pierwsze, klasyfikator jest tak dobry, jak dane, na których się uczył: słowa spoza słownika treningowego nie tworzą cech, więc model je pomija.</p>
+<p>Po drugie, widzi tylko to, co zostało zapisane. Powtarzalną końcówkę potraktuje równie poważnie co treść. Pierwsza sprawa wraca w Lab 9, gdzie ten sam zbiór opinii uczy sieć neuronową; druga czeka w sekcji <em>Pułapka</em> na dole tej strony.</p>
+<details><summary>Czym jest bigram i dlaczego potok używa ngram_range=(1, 2)?</summary><p><code>TfidfVectorizer(ngram_range=(1, 2))</code> tworzy cechy nie tylko z pojedynczych słów, ale też z par słów stojących obok siebie. Dzięki temu model może nauczyć się „nie polecam” jako jednej cechy, a nie tylko „nie” i „polecam” osobno. Bigram zachowuje kolejność dwóch słów, ale nie reprezentuje kolejności całych zdań.</p>
+<p>Takich par jest dużo, a wiele z nich występuje rzadko. Wybór cech sprawdzaj na walidacji (części treningu odłożonej do sprawdzania) lub przez walidację krzyżową (kilka takich podziałów po kolei). Końcowy test zachowaj do oceny wybranej konfiguracji.</p></details>
+</div></section>
+
+<section id="demo" class="demo"><div class="wrap"><p class="eyebrow">02 / sprawdź własne zdanie</p><h2 class="title">Próba na żywo</h2><p class="lede">Uruchom <code>py app.py</code> w katalogu lab8 i otwórz <code>http://127.0.0.1:5008/</code>. Otwierając HTML dwuklikiem, zobaczysz macierz i instrukcje, <em>ale formularz nie połączy się z API</em>. Klikalne komórki i przełącznik końcówek działają także bez serwera.</p><div class="demo-grid"><div class="panel"><h3>Tekst do klasyfikacji</h3><label for="task">Zadanie</label> <select id="task"><option value="sentiment">Opinia</option><option value="spam">Spam</option></select><label for="text" style="display:block;margin-top:14px">Wiadomość</label><textarea id="text">Produkt działa szybko i stabilnie</textarea><button id="classify" type="button">Wyślij do modelu</button><pre id="prediction" data-code-output role="status" data-language="json">Odpowiedź pojawi się tutaj.</pre><p style="font-size:15px">Wartość <code>probability_estimate</code> pochodzi z małego modelu logistycznego. Nie jest skalibrowana (dopasowana do rzeczywistej trafności), więc nie traktuj jej jak pewności dla prawdziwej skrzynki.</p>
+<div class="presets"><span aria-hidden="true">Przykłady:</span><button type="button" data-fill="Produkt działa szybko i stabilnie. Polecam ten zakup.">opinia z końcówką</button><button type="button" data-fill="Produkt działa szybko i stabilnie">ta sama opinia bez końcówki</button><button type="button" data-fill="Kliknij link i podaj hasło">wiadomość-spam</button><button type="button" data-fill="Wysyłka potrwa trzy dni robocze">informacja bez oceny</button></div></div><div class="panel"><h3>Macierz pomyłek</h3><div class="tabs"><button type="button" class="active" data-task="sentiment">Opinie</button><button type="button" data-task="spam">Spam</button></div><p style="font-size:15px">Wiersze: prawdziwa klasa. Kolumny: przewidziana. Wynik regresji logistycznej (Logistic Regression) na zbiorze testowym.</p><div class="matrix" id="matrix" aria-live="polite"></div><p class="matrix-note" id="matrix-note"></p><div class="cell-info" id="cell-info" aria-live="polite"><h4>Kliknij komórkę macierzy</h4><p>Wiersz to prawdziwa klasa, kolumna to klasa przewidziana przez model. Kliknięcie pokaże, ile tekstów trafiło do tej komórki i co ona znaczy. A po uruchomieniu serwera także same teksty pomyłek z pola <code>errors</code> w <code>/api/metrics</code>.</p></div></div>
+</div>
+<div class="matrix-explanation">
+<h3 class="sub-title">Jak czytać macierz pomyłek</h3>
+<p>Wiersze odpowiadają prawdziwym klasom, a kolumny klasom przewidzianym przez model. Po przekątnej leżą trafienia, poza nią pomyłki, a każda komórka odpowiada na pytanie „ile tekstów o prawdziwej klasie X model nazwał Y”.</p>
+<p>Dla zbioru opinii (czternaście tekstów testowych, Logistic Regression) wygląda to tak: trzy negatywne trafiły do negative i jedno poszło do positive, pięć neutralnych trafiło do neutral i pięć pozytywnych do positive. Czyli pomyłka jest dokładnie <em>jedna</em>, ale trzeba wiedzieć, która: model myli negative z positive, czyli najdalej od siebie leżące klasy.</p>
+<p>Kliknij dowolną komórkę, żeby zobaczyć, ile tekstów do niej trafiło i co to znaczy.</p>
+<p>Accuracy to za mało. To jedna liczba: trafione podzielone przez wszystkie teksty. Przy trzech klasach o zbliżonej liczebności model, który każdą opinię nazywa positive, ma accuracy 5/14 ≈ 0,36 i pomija dwie trzecie zbioru. Przy nierównych klasach bywa gorzej: gdy jedna wiadomość na dziesięć to spam, klasyfikator, który wszystko nazywa ham, ma accuracy 0,9 i nie wykrywa spamu.</p>
+<p>Dlatego patrzymy na trzy wskaźniki. Precision (precyzja) mówi, ile z tego, co model nazwał X, naprawdę było X. Recall (czułość) mówi, ile z tego, co było X, model znalazł. Macro F1 uśrednia F1 po klasach i daje każdej klasie tę samą wagę, niezależnie od liczebności.</p>
+<p>Policzmy to dla klasy negative z tej właśnie macierzy: TP=3 (trafione negative), FP=0 (nic innego nie zostało nazwane negative), FN=1 (negative, który poszedł do positive). Precision = 3/3 = 1,0, recall = 3/4 = 0,75, F1 = 2·3 / (2·3 + 0 + 1) = 6/7 ≈ 0,857. Dla positive wychodzi TP=5, FP=1 (ta sama jedna pomyłka), FN=0, więc F1 = 10/11 ≈ 0,909.</p>
+<p>Accuracy wynosi 13/14, lecz wyniki klas są różne: model znalazł wszystkie pozytywne opinie, ale jedną z czterech negatywnych nazwał pozytywną. Macierz jest więc bardziej uczciwą odpowiedzią niż jedna liczba.</p>
+<p>Dla spamu (dziesięć tekstów testowych, po pięć w każdej klasie) macierz pokazuje cztery trafione ham, jeden ham uznany za spam, jeden spam uznany za ham i cztery trafione spamy, razem accuracy 8/10 = 0,8.</p>
+<p>Precision i recall spamu wynoszą po 4/5 = 0,8, więc F1 też 0,8. Tu macierz jest prawie symetryczna, więc model nie faworyzuje żadnej strony, ale przy dziesięciu przykładach jedna zamiana wartości przesuwa wynik o dziesięć punktów procentowych. <em>Im mniejsza próbka, tym większa wariancja</em> (rozrzut wyników między podziałami). I tym mniej znaczy pojedyncza liczba.</p>
+<details><summary>Skąd się biorą rozmiary macierzy i dlaczego zgadzają się z /api/metrics?</summary><p>Kod przekazuje do <code>confusion_matrix</code> pełną listę etykiet przez <code>labels=classes</code>. Dla opinii są to negative, neutral i positive, stąd rozmiar 3×3. Nawet gdyby klasy zabrakło w teście, jej wiersz pozostałby w macierzy i zawierał zera. Gdyby jednak w CSV została tylko jedna klasa albo zero wierszy, trening nie ruszy: regresja logistyczna wymaga co najmniej dwóch klas, a pustego zbioru nie da się podzielić.</p>
+<p>Dlatego numer na stronie trzeba czytać razem z polem <code>test_size</code>, a każdą pomyłkę sprawdzać w liście <code>errors</code> raportu <code>/api/metrics</code>. Tam jest tekst, <code>true_label</code> i <code>predicted_label</code>, czyli dokładnie to, czego brakuje macierzy. Suma wszystkich komórek musi równać się <code>test_size</code>; jeśli nie równa się, macierz jest źle złożona.</p></details>
+</div></div></section>
+<section id="kod"><div class="wrap"><p class="eyebrow">03 / od danych do odpowiedzi</p><h2 class="title">Jak przygotować zbiór treningowy i testowy?</h2><p class="lede">Kod referencyjny jest w <a href="classifier.py" download>classifier.py</a> i <a href="app.py" download>app.py</a>. Każdy krok uruchomisz na komputerze bez GPU.</p><figure class="flow-pipe" role="img" aria-label="Przepływ klasyfikacji w czterech etapach: tekst trafia do tokenizacji, potem do wektora TF-IDF, a model zwraca etykietę. Kolejne etapy zapalają się po sobie."><div class="flow-step"><b>1 · Tekst</b><small>„Produkt działa szybko i stabilnie”</small></div><div class="flow-step"><b>2 · Tokeny</b><small>produkt · działa · szybko · stabilnie</small></div><div class="flow-step"><b>3 · Wektor TF-IDF</b><small>słownik uczony tylko na train</small></div><div class="flow-step"><b>4 · Etykieta</b><small>positive · score modelu</small></div><figcaption>Etap klasyfikacji: tekst rozbieramy na tokeny, tokeny ważymy TF-IDF, a model łączy wagi w etykietę. Błąd łatwiej znaleźć, gdy wiesz, na którym etapie powstał.</figcaption></figure><div class="steps"><article class="step"><b>01</b><div class="content"><h3>Podział przed uczeniem słownika</h3><p>Najpierw podziel teksty z etykietami. Parametr <code>stratify</code> stara się zachować proporcje klas. <em>Nie uruchamiaj fit_transform na pełnym CSV przed podziałem.</em></p><div class="codebar"><span>fragment classifier.py</span><button type="button" data-copy="c1">Kopiuj</button></div><pre class="codeblock" id="c1" data-language="python">x_train, x_test, y_train, y_test = train_test_split(
+    texts, labels, test_size=0.25, random_state=42,
+    stratify=labels
+)</pre><details><summary>Po co stały random_state?</summary><p>Ułatwia odtworzenie tego samego podziału podczas wspólnego szukania błędów. <em>Nie gwarantuje</em>, że 14 opinii testowych reprezentuje przyszłe opinie klientów.</p></details></div></article><article class="step"><b>02</b><div class="content"><h3>Trzy modele, ta sama procedura</h3><p><code>Pipeline</code> uczy TF-IDF tylko na części treningowej. Porównuj <code>macro_f1</code> i macierze pomyłek, zwłaszcza gdy klasy mają różne liczebności.</p><p>Accuracy = liczba trafień / liczba wszystkich tekstów. Dla każdej klasy policz TP (teksty tej klasy trafnie rozpoznane), FP (inne teksty błędnie nazwane tą klasą) i FN (teksty tej klasy nazwane inną klasą): precision = TP/(TP+FP), recall = TP/(TP+FN), F1 = 2TP/(2TP+FP+FN). Liczymy F1 dla każdej klasy osobno i uśredniamy.</p><p>W pokazanej macierzy opinii accuracy = 13/14 ≈ 0,929. F1 klas negative, neutral i positive to odpowiednio 6/7, 1 i 10/11; macro F1 = (6/7+1+10/11)/3 ≈ 0,922. W tym teście są cztery negatywne i po pięć pozostałych opinii. Jedna pomyłka zmienia accuracy o około <em>7,14 punktu procentowego</em>.</p><p>W tym zestawie wszystkie trzy modele dają identyczne liczby: na opiniach accuracy 0,929 i macro F1 0,922, na spamie 0,8 i 0,8. Przy 14 i 10 tekstach testowych jedna pomyłka to cała różnica, więc ten test nie rozstrzyga, który model jest lepszy.</p><p>Jedna uwaga o uczciwości porównania: <code>MultinomialNB</code> zgodnie z dokumentacją zakłada, że cechy są liczbami całkowitymi (licznikami słów), a TF-IDF daje wartości ułamkowe. Dokumentacja dopuszcza ten kompromis, ale osobny <code>CountVectorizer</code> dla NB byłby bliżej jego założeń.</p><div class="codebar"><span>fragment classifier.py</span><button type="button" data-copy="c2">Kopiuj</button></div><pre class="codeblock" id="c2" data-language="python">model = make_pipeline(
+    TfidfVectorizer(ngram_range=(1, 2)),
+    LogisticRegression(max_iter=1000)
+)
+model.fit(x_train, y_train)
+predicted = model.predict(x_test)</pre><details><summary>Dlaczego SVM nie ma tu probability_estimate?</summary><p><code>LinearSVC</code> zwraca etykietę i wynik decyzji, nie prawdopodobieństwo. API demonstracyjne wybiera model logistyczny. <em>Nie traktuj</em> wyniku SVM jak procentu pewności.</p></details></div></article><article class="step"><b>03</b><div class="content"><h3>API i dwie kolejki</h3><p>Endpointy (adresy API) rozdzielają zadania: <code>/api/classify/spam</code> i <code>/api/classify/sentiment</code>. Nieznane zadanie daje 404, pusty tekst 400, a tekst dłuższy niż 4000 znaków 413. Przetestuj wszystkie trzy przed budowaniem interfejsu.</p><div class="codebar"><span>terminal</span><button type="button" data-copy="c3">Kopiuj</button></div><pre class="codeblock" id="c3" data-language="powershell">py -m pip install flask scikit-learn
+py classifier.py
+py app.py
+# w drugim terminalu:
+curl.exe http://127.0.0.1:5008/api/metrics
+$payload = @{ text = &#x27;Kliknij link i podaj hasło&#x27; } | ConvertTo-Json -Compress
+Invoke-RestMethod http://127.0.0.1:5008/api/classify/spam `
+  -Method Post `
+  -ContentType &#x27;application/json; charset=utf-8&#x27; `
+  -Body ([Text.Encoding]::UTF8.GetBytes($payload))</pre><p>To polecenie jest przeznaczone dla PowerShell. Wysyła UTF-8 jako JSON.</p></div></article></div></div></section>
+<section id="pulapka" class="trap"><div class="wrap"><p class="eyebrow">04 / najważniejszy eksperyment</p><h2 class="title">Czy model rozpoznaje opinię po końcówce?</h2><div class="grid"><div class="card"><div class="score">0,929<small>13 poprawnych odpowiedzi na 14 opinii testowych</small></div><p>W naszym CSV opinie mają powtarzalne końcówki typu „Polecam ten zakup” lub „To opis cechy”. <em>Model uczy się tych powtórzeń</em> po obu stronach losowego podziału.</p></div><div class="card"><div class="score">0,286<small>4 poprawne odpowiedzi na te same 14 opinii po usunięciu końcówek</small></div><p>Uruchom <code>py classifier.py</code> i porównaj wyniki z końcówkami oraz po ich usunięciu. W teście z 14 opiniami jedna decyzja to 7,1 punktu procentowego. Wynik 0,286 oznacza cztery trafienia, a zgadywanie jednej z dwóch najliczniejszych klas dałoby pięć (0,357).</p></div></div>
+<h3 class="sub-title">Jaki to „skrót”?</h3>
+<p>Każda opinia w pliku <a href="reviews.csv" download>reviews.csv</a> składa się z dwóch części: zdania o produkcie i powtarzalnej końcówki. Końcówek jest osiem na klasę i nigdy nie mieszają się między klasami. „Polecam ten zakup” i „To była dobra decyzja” występują tylko przy positive, „Nie polecam tego zakupu” i „To był zły wybór” tylko przy negative, a „To opis cechy” i „Podaję informację bez oceny” tylko przy neutral.</p>
+<p>Powtarzalna końcówka jest łatwą wskazówką etykiety. Eksperyment z jej usunięciem sprawdza, jak bardzo wynik zależy od takiej wskazówki.</p>
+<p>Dlaczego taki skrót wygrywa? Słowa i bigramy z końcówek trafiają do słownika TF-IDF. Powtarzają się przy tej samej etykiecie, więc model może użyć ich jako łatwej wskazówki. Spadek wyniku po ich usunięciu pokazuje, że były ważne dla tego eksperymentu; nie wskazuje jeszcze wagi każdego słowa.</p>
+<p>Po losowym podziale ten sam zestaw końcówek występuje i w train, i w teście, co ułatwia odgadnięcie etykiety. Nie dowodzi to jednak, że model użył wyłącznie jednego słowa. Funkcja <code>train("sentiment", strip_cues=True)</code> wycina z każdego tekstu wszystko po pierwszej kropce <em>przed</em> podziałem, więc końcówki znikają z obu stron jednocześnie.</p>
+<p>Zostaje pierwsze zdanie, a pierwsze zdania klas są do siebie podobne: „Produkt działa szybko i stabilnie” (positive), „Produkt zawiesza się kilka razy dziennie” (negative) i „Produkt ma trzy dostępne kolory” (neutral) dzielą między sobą większość słów. Model trafia cztery na czternaście, czyli 0,286. Przy czternastu tekstach jeden błąd to około siedmiu punktów procentowych, więc wariancja jest ogromna.</p>
+<p>Spadek accuracy z 0,929 do 0,286 pokazuje silną zależność wyniku od powtarzalnych zakończeń w tym podziale danych. Nie dowodzi, że model ignoruje całą resztę tekstu; do takiego wniosku potrzebna byłaby osobna analiza cech i dodatkowe próby.</p>
+<p>Naprawa nie polega na innym modelu, tylko na innych danych: nowych opiniach, bez powtarzalnych zakończeń, i podziale, który nie rozdziela prawie identycznych tekstów między train a test.</p>
+<div class="cue-lab" id="cue-lab">
+<p class="cue-lead">Przełącznik poniżej robi dokładnie to, co robi <code>strip_cues</code>, ale na trzech prawdziwych opiniach z pliku CSV. Zwróć uwagę, że wszystkie trzy zaczynają się od słowa „Produkt”. Po wycięciu końcówek nadal zostają różnice, np. „działa szybko” i „zawiesza się”, ale model musi nauczyć się je rozpoznawać z niewielu przykładów.</p>
+<div class="cue-switch" role="group" aria-label="Porównanie wyników z końcówkami i bez końcówek">
+<button type="button" class="cue-btn" data-cues="1" aria-pressed="true">Z końcówkami · jak w CSV</button>
+<button type="button" class="cue-btn" data-cues="0" aria-pressed="false">Bez końcówek · strip_cues</button>
+</div>
+<div class="cue-two">
+<div class="cue-card">
+<h4>Wynik na 14 opiniach testowych</h4>
+<div class="cue-num" id="cue-num">0,929</div>
+<div class="cue-bar"><i id="cue-fill"></i></div>
+<p id="cue-cap">Accuracy regresji logistycznej na pełnych tekstach z <a href="reviews.csv" download><code>reviews.csv</code></a>.</p>
+<p id="cue-what">Końcówka występuje po obu stronach podziału, więc model może korzystać z powtarzalnej wskazówki.</p>
+</div>
+<div class="cue-card">
+<h4>Trzy prawdziwe opinie</h4>
+<p class="cue-note">Na żółto zaznaczone są końcówki, które wycina <code>strip_cues</code>. Kolor paska z lewej strony to prawdziwa etykieta.</p>
+<ul class="cue-list">
+<li><span class="cue-head">Produkt działa szybko i stabilnie.</span> <span class="cue-body">„Polecam ten zakup”</span><span class="cue-tag">positive</span></li>
+<li class="neg"><span class="cue-head">Produkt zawiesza się kilka razy dziennie.</span> <span class="cue-body">„Nie polecam tego zakupu”</span><span class="cue-tag">negative</span></li>
+<li class="neu"><span class="cue-head">Produkt ma trzy dostępne kolory.</span> <span class="cue-body">„To opis cechy”</span><span class="cue-tag">neutral</span></li>
+</ul>
+</div>
+</div>
+<p class="cue-foot" id="cue-foot">Z końcówkami: wszystkie 12 różnych zakończeń obecnych w teście występuje też w treningu (24 zakończenia łącznie). Regresja logistyczna trafia 13 z 14 opinii.</p>
+</div>
+<ol><li>Uruchom serwer (<code>py app.py</code>) i otwórz <a href="http://127.0.0.1:5008/api/metrics">raport API /api/metrics</a>, wybierz sentiment oraz Logistic Regression i odczytaj errors: tekst, true_label oraz predicted_label. Powiąż pomyłkę z komórką macierzy i znajdź tekst w reviews.csv. Lista errors zawiera tylko pomyłki z części testowej, a nie wyniki nowych zdań z formularza.</li><li>Porównaj wyniki z końcówkami i bez nich. Który wynik byłby uczciwszą podstawą decyzji o wdrożeniu?</li><li>Zapisz, jak zebrać lepszą próbkę opinii i jak unikać bliskich duplikatów między train i test.</li></ol><p><b>Dla chętnych:</b> porównaj <code>CountVectorizer</code> z TF-IDF na tym samym podziale i sprawdź <code>macro_f1</code>. W tym celu podmień <code>TfidfVectorizer</code> w potoku w funkcji <code>train</code>. Zmiana wektoryzatora nie naprawi źle zebranych danych.</p></div></section>
+<section><div class="wrap"><p class="eyebrow">05 / źródła do pracy z danymi</p><h2 class="title">Czytaj metryki razem z danymi</h2><div class="links"><a href="https://scikit-learn.org/stable/common_pitfalls.html#data-leakage" target="_blank" rel="noopener"><b>Pułapki oceny modeli</b><span>Oficjalny przewodnik o podziale danych i uczeniu transformacji.</span></a><a href="https://scikit-learn.org/stable/modules/generated/sklearn.metrics.classification_report.html" target="_blank" rel="noopener"><b>Precision, recall, F1</b><span>Dokumentacja raportu klasyfikacji.</span></a><a href="https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html" target="_blank" rel="noopener"><b>train_test_split</b><span>Argumenty podziału i stratify.</span></a><a href="https://archive.ics.uci.edu/dataset/228/sms+spam+collection" target="_blank" rel="noopener"><b>Większy zbiór SMS</b><span>Publiczny zbiór tekstów UCI do dalszego porównania. Sprawdź licencję przed użyciem poza ćwiczeniem.</span></a></div></div></section>
+<section class="practice-lab" id="dodatkowe-przyklady" aria-labelledby="praktyka-title">
+<h2 id="praktyka-title">Dodatkowe przykłady</h2>
+<p>Przewidź wynik przed otwarciem odpowiedzi. Podpowiedź możesz odsłonić osobno.</p>
+<details class="practice-case"><summary>Gdy samo accuracy myli</summary>
+<p>W 100 mailach 90 jest zwykłych, a 10 to spam. Model zawsze mówi „zwykły”. Ile wynoszą accuracy i recall spamu?</p>
+<ol class="practice-flow" aria-label="Kolejne etapy przykładu">
+<li>90 zwykłych, 10 spamów</li>
+<li>Model zawsze mówi „zwykły”</li>
+<li>10 przeoczonych spamów</li>
+</ol>
+<details><summary>Podpowiedź</summary><p>Policz wszystkie dobre decyzje i osobno wykryte spamy.</p></details>
+<details><summary>Odpowiedź</summary><p>Accuracy to 90/100 = 90%. Recall spamu to 0/10 = 0%. Model przeoczył wszystkie wiadomości, które miał wyłapać.</p></details>
+</details>
+<details class="practice-case"><summary>Dwa egzemplarze tej samej recenzji</summary>
+<p>Ta sama recenzja wystąpiła w treningu i teście. Jak to wpływa na ocenę?</p>
+<details><summary>Podpowiedź</summary><p>Test ma udawać nowe, wcześniej niewidziane dane.</p></details>
+<details><summary>Odpowiedź</summary><p>Wynik może być zawyżony. Usuń duplikaty albo dziel dane grupami, tak żeby kopie jednej recenzji znalazły się po tej samej stronie podziału.</p></details>
+</details>
+<details class="practice-case"><summary>Próg decyzji dla spamu</summary>
+<p>Zmieniasz regułę z „spam od 0,80” na „spam od 0,60”. Co stanie się z wiadomością z oceną 0,70?</p>
+<details><summary>Podpowiedź</summary><p>Porównaj jedną wartość z oboma progami.</p></details>
+<details><summary>Odpowiedź</summary><p>Przy 0,80 trafi do zwykłej skrzynki, a przy 0,60 do spamu. Na zbiorze walidacyjnym sprawdź, ile dodatkowych spamów wykryjesz i ile zwykłych wiadomości trafia do kwarantanny.</p></details>
+</details>
+</section>
+<section id="own-trial" class="reveal"><div class="wrap"><div class="trial-card"><h2>Własna próba</h2><p>Wymyślcie zdanie bez fraz z CSV i zapiszcie etykietę, którą mu przypisujecie. Wyślijcie zdanie do modelu przez formularz i porównajcie jego odpowiedź z waszą etykietą. Potem <em>zamieńcie się rolami</em>.</p></div></div></section>
+<section id="kontrola" class="checks"><div class="wrap"><p class="eyebrow">06 / przekazanie zmiany · bilet wyjściowy</p><h2 class="title">Co potraficie obronić?</h2><div id="checks"><label><input type="checkbox">Oba zbiory podzielone na train/test przed fit TF-IDF.</label><label><input type="checkbox">Macierz pomyłek dla opinii i spamu sprawdzona.</label><label><input type="checkbox">Wyjaśnię różnicę między accuracy i macro F1.</label><label><input type="checkbox">Oba endpointy API przetestowane poprawnym i błędnym żądaniem JSON.</label><label><input type="checkbox">Wynik bez powtarzalnych końcówek opinii sprawdzony.</label></div><p id="progress" class="code">0 / 5</p><div class="meter"><div id="fill"></div></div><div class="question"><h3>1. Kiedy uczysz słownik TF-IDF?</h3><div class="answers" data-answer="1" data-note="Potok dopasowany na train buduje tam słownik i używa go do transformacji testu."><button type="button">Na pełnym CSV przed podziałem</button><button type="button">Tylko na train</button><button type="button">Dopiero po wyliczeniu F1</button></div><p class="feedback" aria-live="polite"></p></div><div class="question"><h3>2. Czy 0,929 oznacza gotowy model do wdrożenia?</h3><div class="answers" data-answer="2" data-note="Nie. Test ma 14 tekstów i bliskie powtórzenia fraz między train/test; potrzebne są lepsze dane i kontrola błędów."><button type="button">Tak, bo wynik przekracza 90%</button><button type="button">Tak, bo trzy modele się zgadzają</button><button type="button">Nie, próbka i powtórzenia są ograniczeniem</button></div><p class="feedback" aria-live="polite"></p></div><div class="question"><h3>3. Czego brakuje LinearSVC w naszym API?</h3><div class="answers" data-answer="0" data-note="LinearSVC nie daje predict_proba; wynik decyzji nie jest procentem pewności."><button type="button">predict_proba</button><button type="button">predict</button><button type="button">fit</button></div><p class="feedback" aria-live="polite"></p></div><p id="score" class="code">Wynik: 0 / 3</p><label for="notes">Bilet wyjściowy: własne zdanie bez fraz z CSV, etykieta modelu i pytanie: które słowo mogło przechylić wynik.</label><textarea id="notes" class="notes" placeholder="Najbardziej zaskoczyło mnie…"></textarea><p id="saved" class="code" aria-live="polite"></p></div></section></main>
+<footer><div class="wrap"><span>ISI / AW / LAB 08 / B.4</span><span><a href="../lab7/index.html">← Lab 7</a> &nbsp; <a href="../lab9/index.html">Lab 9: model kontekstowy →</a> &nbsp; <a href="../index.html">Hub kursu</a></span></div></footer>
+<script>
+(()=>{const matrices={sentiment:{labels:['negative','neutral','positive'],data:[[3,0,1],[0,5,0],[0,0,5]],size:14},spam:{labels:['ham','spam'],data:[[4,1],[1,4]],size:10}};function render(task){const m=matrices[task],grid=document.getElementById('matrix');grid.style.gridTemplateColumns=`110px repeat(${m.labels.length},1fr)`;grid.replaceChildren();const cell=(text,cl)=>{const el=document.createElement('span');el.className=cl;el.textContent=text;grid.append(el)};cell('prawda ↓','head');m.labels.forEach(l=>cell(l,'head'));m.data.forEach((row,i)=>{cell(m.labels[i],'head');row.forEach((n,j)=>cell(String(n),'cell'+(i===j?'':' off')))});document.getElementById('matrix-note').textContent=`${m.size} tekstów testowych. Na przekątnej są trafienia, poza nią pomyłki.`;document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.task===task))}document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>render(b.dataset.task)));render('sentiment');
+document.getElementById('classify').addEventListener('click',async()=>{const output=document.getElementById('prediction');if(location.protocol==='file:'){output.textContent='Uruchom py app.py i otwórz http://127.0.0.1:5008/';return}try{const task=document.getElementById('task').value,response=await fetch(`api/classify/${task}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:document.getElementById('text').value})});output.textContent=`HTTP ${response.status}\n`+JSON.stringify(await response.json(),null,2)}catch(e){output.textContent='Nie mogę połączyć się z API: '+e.message}});
+document.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(document.getElementById(b.dataset.copy).textContent);b.textContent='Skopiowano'}catch{b.textContent='Zaznacz ręcznie'}setTimeout(()=>b.textContent='Kopiuj',1800)}));const checks=[...document.querySelectorAll('#checks input')];try{const saved=JSON.parse(localStorage.getItem('isi-lab8-checks')||'[]');checks.forEach((c,i)=>c.checked=!!saved[i])}catch{}function update(){const n=checks.filter(c=>c.checked).length;document.getElementById('progress').textContent=`${n} / ${checks.length}`;document.getElementById('fill').style.width=`${100*n/checks.length}%`;try{localStorage.setItem('isi-lab8-checks',JSON.stringify(checks.map(c=>c.checked)))}catch{}}checks.forEach(c=>c.addEventListener('change',update));update();let score=0;document.querySelectorAll('.answers').forEach(group=>group.querySelectorAll('button').forEach((b,i)=>b.addEventListener('click',()=>{if(group.dataset.done)return;group.dataset.done='1';const good=i===+group.dataset.answer;b.classList.add(good?'good':'bad');group.querySelectorAll('button')[+group.dataset.answer].classList.add('good');group.nextElementSibling.textContent=group.dataset.note;if(good)score++;document.getElementById('score').textContent=`Wynik: ${score} / 3`})));const notes=document.getElementById('notes');try{notes.value=localStorage.getItem('isi-lab8-notes')||''}catch{}notes.addEventListener('input',()=>{try{localStorage.setItem('isi-lab8-notes',notes.value);document.getElementById('saved').textContent='Zapisano lokalnie'}catch{document.getElementById('saved').textContent='Zapis lokalny niedostępny'}});
+})();
+</script><style>
+/* FX 08: sortownia - spadajace listy do szuflad, pasek postepu, reveal */
+.hero{position:relative;overflow:hidden}
+.hero .wrap{position:relative;z-index:1}
+.sort-fx{position:absolute;inset:0;pointer-events:none;z-index:0}
+.letter{position:absolute;top:-70px;font:700 14px 'DM Mono',monospace;letter-spacing:.1em;padding:10px 14px;border:2px solid #232e4b;background:#fff8ef;color:#232e4b;box-shadow:5px 5px 0 rgba(35,46,75,.25);animation:drop 7s cubic-bezier(.3,.7,.4,1) infinite;opacity:0}
+.letter.s{right:12%;color:#fff;background:#f6623f;animation-delay:.6s}
+.letter.h{right:26%;background:#4c9d7d;color:#fff;animation-delay:2.2s}
+.letter.n{right:40%;background:#ffcd40;animation-delay:3.8s}
+.letter.p{right:19%;background:#293c88;color:#fff;animation-delay:5.1s}
+.letter.s2{right:33%;background:#f6623f;color:#fff;animation-delay:6.4s}
+@keyframes drop{0%{top:-70px;opacity:0;transform:rotate(-8deg)}8%{opacity:1}38%{top:78%;transform:rotate(3deg)}46%{top:74%;opacity:1}60%,100%{top:76%;opacity:0;transform:rotate(0)}}
+.badge{animation:badgeIn .9s cubic-bezier(.2,1.5,.3,1) .3s backwards,badgeWob 5s ease-in-out 1.4s infinite}
+@keyframes badgeIn{from{transform:scale(.3) rotate(-30deg);opacity:0}to{transform:scale(1) rotate(11deg)}}
+@keyframes badgeWob{0%,100%{transform:rotate(7deg)}50%{transform:rotate(15deg)}}
+#read-progress{position:fixed;top:0;left:0;height:4px;width:0;background:#f6623f;box-shadow:0 0 14px #f6623f;z-index:100}
+.fx main section,.fx body>section{opacity:0;transform:translateY(28px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+.fx section.in{opacity:1;transform:none}
+@media(max-width:800px){.letter.n,.letter.s2{display:none}}
+
+</style>
+<div id="read-progress" aria-hidden="true"></div>
+<script>
+(function(){
+  document.documentElement.classList.add('fx');
+  const bar=document.getElementById('read-progress');
+  addEventListener('scroll',()=>{const m=document.documentElement.scrollHeight-innerHeight;bar.style.width=(m>0?scrollY/m*100:0)+'%';},{passive:true});
+  const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.08});
+  document.querySelectorAll('main section, body > section').forEach(s=>io.observe(s));
+})();
+</script><script data-ill="1">
+(function(){
+var ILL=[
+"<strong>TEKST:</strong> zwyk\u0142a wiadomo\u015b\u0107, np. \u201eProdukt dzia\u0142a szybko\u201d. Model widzi tylko s\u0142owa, nie Twoje intencje.",
+"<strong>KLASYFIKATOR:</strong> TF-IDF + model (NB / regresja / SVC) uczy si\u0119 tylko na train. S\u0142ownik z ca\u0142ego CSV to przeciek danych z testu.",
+"<strong>ETYKIETA:</strong> spam/ham albo positive/neutral/negative. Jedna liczba (np. 0,929) to za ma\u0142o , czytaj macierz pomy\u0142ek."
+];
+var note=document.getElementById("illNote"),tabs=Array.prototype.slice.call(document.querySelectorAll(".ill-tab"));
+if(note&&tabs.length){tabs.forEach(function(b){b.addEventListener("click",function(){tabs.forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false")});note.innerHTML=ILL[+b.dataset.ill]||ILL[0];});});}
+})();
+</script><script data-pi="1">
+(function(){
+var SEL='.question[data-answer],fieldset.question[data-answer],.q [data-answer],.quiz-pytanie[data-poprawna],.answers[data-correct],.answers[data-answer]';
+var PROMPT='Głos wstępny zapisany, wynik jeszcze nie został oceniony. Omów odpowiedź z drugą osobą (około 3 minut). Następnie kliknij wybraną odpowiedź ponownie, aby ją zatwierdzić, nawet jeśli jej nie zmieniasz.';
+function fb(group){
+return group.querySelector('.feedback')||(group.parentElement&&group.parentElement.querySelector('.feedback,small,.quiz-wyjasnienie,.quiz-feedback'))||group.querySelector('small,.quiz-wyjasnienie,.quiz-feedback');
+}
+document.querySelectorAll(SEL).forEach(function(group){
+if(group.dataset.piOn)return;group.dataset.piOn='1';
+group.addEventListener('click',function(e){
+var btn=e.target.closest?e.target.closest('button'):null;
+if(!btn||!group.contains(btn))return;
+var buttons=group.querySelectorAll('button');
+if(!group.dataset.piSolo){
+e.preventDefault();e.stopPropagation();
+buttons.forEach(function(b){b.style.outline='';b.classList.remove('pi-solo');});
+btn.classList.add('pi-solo');btn.style.outline='3px dashed currentColor';btn.style.outlineOffset='2px';
+group.dataset.piSolo='1';
+var f=fb(group);if(f)f.textContent=PROMPT;
+}else{
+buttons.forEach(function(b){b.style.outline='';b.classList.remove('pi-solo');});
+delete group.dataset.piSolo;
+}
+},true);
+});
+})();
+</script>
+<script>
+(function(){
+  /* ---------- 1. klikalne komorki macierzy pomylek ---------- */
+  var matrix=document.getElementById('matrix');
+  var LABELS={sentiment:['negative','neutral','positive'],spam:['ham','spam']};
+  var DATA={sentiment:[[3,0,1],[0,5,0],[0,0,5]],spam:[[4,1],[1,4]]};
+  var metrics=null,selected=null;
+  if(!matrix) return;
+
+  function currentTask(){
+    var b=document.querySelector('.tabs button.active');
+    return (b&&b.dataset.task)||'sentiment';
+  }
+  function markCells(){
+    var task=currentTask(),labels=LABELS[task];
+    var cells=Array.prototype.slice.call(matrix.querySelectorAll('.cell'));
+    cells.forEach(function(cell,i){
+      var row=Math.floor(i/labels.length),col=i%labels.length;
+      cell.dataset.row=labels[row];
+      cell.dataset.col=labels[col];
+      cell.setAttribute('role','button');
+      cell.setAttribute('tabindex','0');
+      cell.setAttribute('aria-label','prawdziwa klasa '+labels[row]+', model powiedział '+labels[col]+', liczba tekstów '+cell.textContent);
+      if(!cell.dataset.timed){cell.dataset.timed='1';cell.style.animationDelay=(i*0.06)+'s';}
+    });
+    if(!matrix.dataset.deleg){
+      matrix.dataset.deleg='1';
+      matrix.addEventListener('click',function(e){
+        var cell=e.target&&e.target.closest?e.target.closest('.cell'):null;
+        if(cell&&matrix.contains(cell)) select(cell);
+      });
+      matrix.addEventListener('keydown',function(e){
+        var cell=e.target&&e.target.closest?e.target.closest('.cell'):null;
+        if(cell&&(e.key==='Enter'||e.key===' ')){e.preventDefault();select(cell);}
+      });
+    }
+  }
+  var info=document.getElementById('cell-info');
+  function line(label,value){
+    var p=document.createElement('p');
+    var b=document.createElement('b');
+    b.textContent=label;
+    p.append(b,document.createTextNode(value));
+    return p;
+  }
+  function many(n,one,few,manyWord){
+    if(n===1) return one;
+    if(n<5) return few;
+    return manyWord;
+  }
+  function select(cell){
+    markCells();
+    var task=currentTask(),labels=LABELS[task];
+    if(labels.indexOf(cell.dataset.row)<0||labels.indexOf(cell.dataset.col)<0) return;
+    if(selected) selected.classList.remove('sel');
+    selected=cell;
+    cell.classList.add('sel');
+    var task=currentTask(),labels=LABELS[task];
+    var rowIndex=labels.indexOf(cell.dataset.row),colIndex=labels.indexOf(cell.dataset.col);
+    var n=DATA[task][rowIndex][colIndex];
+    var diagonal=rowIndex===colIndex;
+    var title=document.createElement('h4');
+    title.textContent=(diagonal?'Trafienie':'Pomyłka')+' · prawda: '+cell.dataset.row+' → model: '+cell.dataset.col;
+    info.replaceChildren(title);
+    info.append(line('Komórka: ','wiersz to prawdziwa klasa, kolumna to klasa przewidziana. W tej komórce stoi '+n+'.'));
+    var meaning=diagonal
+      ? 'Model dobrze rozdzielił '+n+' '+many(n,'tekst','teksty','tekstów')+', które naprawdę należały do '+cell.dataset.row+'. To przekątna macierzy. Ona buduje accuracy.'
+      : 'Model nadał etykietę '+cell.dataset.col+' dla '+n+' '+many(n,'tekstu, który był '+cell.dataset.row,'tekstów, które były '+cell.dataset.row,'tekstów, które były '+cell.dataset.row)+'. To liczba błędów w tej komórce. Accuracy wynosi 1 minus liczba wszystkich pomyłek podzielona przez rozmiar testu.';
+    info.append(line('Co to znaczy: ',meaning));
+    var ask=document.createElement('p');
+    ask.textContent=diagonal
+      ? 'Znajdź te teksty w pliku CSV: czy naprawdę zawierają słowa typowe dla tej klasy?'
+      : 'Porównaj z komórką na przekątnej lub przełącz zadanie. Sprawdź, której klasy dotyczą pomyłki.';
+    info.append(ask);
+    if(!diagonal){
+      if(location.protocol==='file:'){
+        info.append(line('Teksty pomyłek: ','uruchom py app.py i otwórz stronę przez http://127.0.0.1:5008/, a tutaj pojawią się teksty z pola errors raportu /api/metrics.'));
+      } else if(metrics){
+        showErrors(task,cell.dataset.row,cell.dataset.col);
+      } else {
+        var pending=line('Teksty pomyłek: ','pobieram raport /api/metrics...');
+        info.append(pending);
+        fetch('api/metrics').then(function(r){if(!r.ok)throw Error('Błąd raportu');return r.json();}).then(function(j){
+          metrics=j;pending.remove();
+          if(selected===cell&&currentTask()===task)showErrors(task,cell.dataset.row,cell.dataset.col);
+        })['catch'](function(){
+          pending.remove();
+          if(selected!==cell||currentTask()!==task)return;
+          info.append(line('Teksty pomyłek: ','nie mogę pobrać /api/metrics. Serwer nie odpowiada.'));
+        });
+      }
+    }
+  }
+  function showErrors(task,trueLabel,predictedLabel){
+    var rows=metrics&&metrics[task];
+    if(!rows) return;
+    var report=rows.filter(function(r){return /logistic/i.test(r.model);})[0]||rows[1];
+    if(!report) return;
+    var hits=(report.errors||[]).filter(function(e){return e.true_label===trueLabel&&e.predicted_label===predictedLabel;});
+    var head=document.createElement('p');
+    if(!hits.length){
+      head.textContent='Teksty pomyłek: w raporcie Logistic Regression nie ma pomyłki '+trueLabel+' → '+predictedLabel+'. Najedź na inną komórkę albo znajdź tekst ręcznie w pliku CSV.';
+      info.append(head);
+      return;
+    }
+    head.textContent='Teksty pomyłek z części testowej ('+hits.length+'):';
+    info.append(head);
+    hits.forEach(function(e){
+      var box=document.createElement('div');
+      box.className='err';
+      var b=document.createElement('b');
+      b.textContent='prawdziwa etykieta: '+e.true_label+' · model: '+e.predicted_label;
+      var p=document.createElement('p');
+      p.textContent=e.text;
+      box.append(b,p);
+      info.append(box);
+    });
+  }
+  markCells();
+  new MutationObserver(markCells).observe(matrix,{childList:true});
+  document.querySelectorAll('.tabs button').forEach(function(b){
+    b.addEventListener('click',function(){
+      if(selected){selected.classList.remove('sel');selected=null;}
+      if(info) info.replaceChildren();
+    });
+  });
+
+  /* ---------- 2. przyklady do formularza ---------- */
+  var text=document.getElementById('text');
+  document.querySelectorAll('.presets button').forEach(function(b){
+    b.addEventListener('click',function(){text.value=b.dataset.fill;text.focus();});
+  });
+
+  /* ---------- 3. koncowki vs strip_cues ---------- */
+  var lab=document.getElementById('cue-lab');
+  if(lab){
+    var num=document.getElementById('cue-num'),
+        cap=document.getElementById('cue-cap'),
+        what=document.getElementById('cue-what'),
+        foot=document.getElementById('cue-foot'),
+        btns=Array.prototype.slice.call(lab.querySelectorAll('.cue-btn'));
+    var CUE={
+      on:{v:0.929,cap:'Accuracy regresji logistycznej na pełnych tekstach z reviews.csv.',
+          what:'Końcówka występuje po obu stronach podziału, więc model może korzystać z powtarzalnej wskazówki.',
+          foot:'Z końcówkami: wszystkie 12 różnych zakończeń obecnych w teście występuje też w treningu (24 zakończenia łącznie). Regresja logistyczna trafia 13 z 14 opinii.'},
+      off:{v:0.286,cap:'Accuracy po strip_cues=true: teksty obcięte do pierwszego zdania jeszcze przed podziałem train/test.',
+          what:'Zostaje pierwsze zdanie, w którym klasy dzielą większość słów. Model trafia cztery na czternaście.',
+          foot:'Bez końcówek: 4/14, czyli poniżej jednej trzeciej. To nie dowód na gorszy model, tylko na zbiór, w którym jedyny sygnał to powtarzalna końcówka.'}
+    };
+    var current=0.929;
+    function countTo(to){
+      var from=current,t0=performance.now(),d=850;
+      function step(now){
+        var p=Math.min(1,(now-t0)/d);
+        var v=from+(to-from)*p;
+        num.textContent=String(Math.round(v*1000)/1000).replace('.',',');
+        if(p<1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+      current=to;
+    }
+    function setCues(on){
+      var c=on?CUE.on:CUE.off;
+      btns.forEach(function(b){b.setAttribute('aria-pressed',b.dataset.cues==='1'?'true':'false');});
+      lab.classList.toggle('stripped',!on);
+      cap.textContent=c.cap;
+      what.textContent=c.what;
+      foot.textContent=c.foot;
+      countTo(c.v);
+      num.style.animation='none';
+      void num.offsetWidth;
+      num.style.animation='';
+      foot.style.animation='none';
+      void foot.offsetWidth;
+      foot.style.animation='';
+    }
+    btns.forEach(function(b){
+      b.addEventListener('click',function(){setCues(b.dataset.cues==='1');});
+    });
+  }
+})();
+</script></body></html>

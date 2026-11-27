@@ -2,6 +2,7 @@
 from html import escape
 from pathlib import Path
 import sys
+#dodajemy sciezke folderu oraz glowna sciezke projektu do sys.path
 lab_dir = str(Path(__file__).resolve().parent)
 root_dir = str(Path(__file__).resolve().parents[2])
 if lab_dir not in sys.path:
@@ -11,7 +12,8 @@ if root_dir not in sys.path:
 
 from flask import Flask, jsonify, request, send_from_directory
 from course import materials, page
-from Rekomendacje.LAB02.recommender import df as movies, recommend as by_content    
+
+from Rekomendacje.LAB02.recommender import df as movies, recommend as by_content
 from Rekomendacje.LAB03.recommender import matrix as ratings, recommend as by_user
 from Wyszukiwanie.LAB06.search_engine import documents, search
 from Klasyfikacja_Integracja.LAB08.classifier import classify
@@ -45,16 +47,19 @@ def project_docs():
 
 @app.get("/api/health")
 def health():
+    #podstawowy status systemu i liczba zaladowanych rekordow
     return jsonify({"status": "ok", "movies": len(movies), "users": len(ratings),
                     "articles": len(documents), "services": ["content", "collaborative", "search", "feedback"]})
 
 
 @app.get("/api/catalog")
 def catalog():
+    #lista dostepnych tytulow filmow i uzytkownikow do formularzy
     return jsonify({"movies": sorted(movies["title"].tolist()), "users": sorted(ratings.index.tolist())})
 
 
 def top_n():
+    #walidacja parametru top_n w zakresie 1-10
     try:
         count = int(request.args.get("top_n", "5"))
     except ValueError:
@@ -64,6 +69,7 @@ def top_n():
 
 @app.get("/api/recommend/content")
 def content_recommend():
+    #rekomendacje na podstawie opisu filmu (LAB02)
     title = request.args.get("title", "").strip()
     count = top_n()
     if not title or count is None:
@@ -75,6 +81,7 @@ def content_recommend():
 
 @app.get("/api/recommend/collaborative")
 def collaborative_recommend():
+    #rekomendacje na podstawie ocen podobnych uzytkownikow (LAB03)
     user = request.args.get("user", "").strip()
     count = top_n()
     if not user or count is None:
@@ -86,6 +93,7 @@ def collaborative_recommend():
 
 @app.get("/api/search")
 def api_search():
+    #wyszukiwanie artykulow algorytmem BM25 (LAB06)
     query = request.args.get("q", "").strip()
     count = top_n()
     if not query or len(query) > 200 or count is None:
@@ -95,6 +103,7 @@ def api_search():
 
 @app.post("/api/feedback")
 def feedback():
+    #klasyfikacja sentymentu opinii (LAB08) z limitem 4000 znakow
     body = request.get_json(silent=True)
     text = body.get("text", "") if isinstance(body, dict) else ""
     if not isinstance(text, str) or not text.strip():

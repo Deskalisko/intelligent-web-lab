@@ -4,7 +4,6 @@ from pathlib import Path
 import re
 import sys
 from time import perf_counter
-
 root_dir = str(Path(__file__).resolve().parents[2])
 if root_dir not in sys.path:
     sys.path.insert(0, root_dir)
@@ -26,6 +25,7 @@ TOKEN_RE = re.compile(r"\w+", re.UNICODE)
 
 
 def batches(texts, vocabulary):
+    #pakowanie tekstow do jednego tensora identyfikatorow i przesuniec dla EmbeddingBag
     ids, offsets = [], []
     for text in texts:
         offsets.append(len(ids))
@@ -36,6 +36,7 @@ def batches(texts, vocabulary):
 
 
 class ReviewNet(torch.nn.Module):
+    #prosta siec: srednia embeddingow tokenow + warstwa ukryta ReLU + wyjscie na 3 klasy
     def __init__(self, vocabulary_size):
         super().__init__()
         self.embedding = torch.nn.EmbeddingBag(vocabulary_size, EMBEDDING_DIM, mode="mean", padding_idx=0)
@@ -47,6 +48,7 @@ class ReviewNet(torch.nn.Module):
 
 
 def report(name, truth, predicted, inference_ms, texts):
+    #zbiorczy slownik metryk i blednych predykcji dla jednego modelu
     return {"model": name, "accuracy": round(float(accuracy_score(truth, predicted)), 3),
             "macro_f1": round(float(f1_score(truth, predicted, average="macro")), 3),
             "confusion": confusion_matrix(truth, predicted, labels=LABELS).tolist(),
@@ -57,18 +59,22 @@ def report(name, truth, predicted, inference_ms, texts):
 
 @lru_cache(maxsize=1)
 def experiment():
+    #wczytanie opinii z ucietymi koncowkami i podzial 75/25 ze stratyfikacja
     texts, labels = load("sentiment", strip_cues=True)
     x_train, x_test, y_train, y_test = train_test_split(
         texts, labels, test_size=.25, random_state=42, stratify=labels)
+    #tfidf dopasowany wylacznie na train (bez wycieku danych)
     vectorizer = TfidfVectorizer(ngram_range=(1, 2))
     a = vectorizer.fit_transform(x_train)
     b = vectorizer.transform(x_test)
 
+    #1. model klasyczny: Multinomial Naive Bayes
     bayes = MultinomialNB().fit(a, y_train)
     started = perf_counter()
     bayes_pred = bayes.predict(b)
     bayes_report = report("Naive Bayes", y_test, bayes_pred, (perf_counter() - started) * 1000, x_test)
 
+    #2. mala siec PyTorch uczona od zera (slownik tylko z train)
     torch.manual_seed(42)
     vocabulary = {token: i + 1 for i, token in enumerate(sorted({
         token for text in x_train for token in TOKEN_RE.findall(text.lower())}))}
@@ -90,6 +96,7 @@ def experiment():
     net_report = report("EmbeddingBag PyTorch", y_test, net_pred,
                         (perf_counter() - started) * 1000, x_test)
 
+    #3. zamrozony transformer MiniLM + glowica Logistic Regression
     encoder, _ = semantic_index()
     train_vectors = encoder.encode_document(x_train, normalize_embeddings=True)
     head = LogisticRegression(max_iter=1000).fit(train_vectors, y_train)
@@ -103,6 +110,7 @@ def experiment():
 
 
 def predict(text):
+    #predykcja jednego tekstu przez wszystkie trzy wytrenowane modele
     vectorizer, bayes, net, vocabulary, encoder, head = experiment()["models"]
     sparse = vectorizer.transform([text])
     with torch.no_grad():
